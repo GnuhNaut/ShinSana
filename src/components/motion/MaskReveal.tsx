@@ -3,6 +3,8 @@ import { useRevealVisibility, type RevealObserverOptions } from './useRevealVisi
 
 export type MaskDirection = 'left' | 'right' | 'up' | 'down'
 
+export type MaskVariant = 'up' | 'scale' | 'fade'
+
 interface MaskRevealProps extends RevealObserverOptions {
   children: ReactNode
   className?: string
@@ -10,6 +12,8 @@ interface MaskRevealProps extends RevealObserverOptions {
   direction?: MaskDirection
   /** Any valid CSS color; defaults to the vermilion token. */
   veilColor?: string
+  /** Optional inner motion variant for the revealed content. */
+  variant?: MaskVariant
 }
 
 type MaskStyle = CSSProperties & {
@@ -23,6 +27,7 @@ export function MaskReveal({
   delay = 0,
   direction = 'left',
   veilColor = 'var(--color-primary)',
+  variant,
   ...observerOptions
 }: MaskRevealProps) {
   const { ref, visible } = useRevealVisibility<HTMLDivElement>(observerOptions)
@@ -31,13 +36,14 @@ export function MaskReveal({
     '--mask-veil': veilColor,
   }
 
+  const contentClass = variant ? `mask-reveal__content--${variant}` : ''
   return (
     <div
       className={`mask-reveal mask-reveal--${direction} ${visible ? 'is-visible' : ''} ${className}`}
       ref={ref}
       style={style}
     >
-      <div className="mask-reveal__content">{children}</div>
+      <div className={`mask-reveal__content ${contentClass}`.trim()}>{children}</div>
     </div>
   )
 }

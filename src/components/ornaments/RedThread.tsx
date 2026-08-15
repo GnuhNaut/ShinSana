@@ -2,7 +2,7 @@ import type { OrnamentProps } from './types'
 import { ornamentClass, ornamentStyle } from './types'
 
 /** A single wandering thread used only for the couple's story. */
-export function RedThread({ className, tone = 'red', size, style, ...props }: OrnamentProps) {
+export function RedThread({ className, tone = 'roseDeep', size, style, ...props }: OrnamentProps) {
   return (
     <svg
       {...props}

@@ -11,7 +11,15 @@ html {
   overflow-x: hidden;
 }
 
-body { margin: 0; min-width: 20rem; min-height: 100vh; overflow-x: hidden; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  min-width: 20rem;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 body.invitation-closed { overflow: hidden; }
 body[data-modal-open='true'] .floating-controls { opacity: 0; pointer-events: none; }
 
@@ -29,25 +37,23 @@ h1, h2, h3 {
 }
 
 p { line-height: 1.72; }
-::selection { background: var(--color-primary); color: var(--color-on-primary); }
+::selection { background: var(--color-rose); color: var(--color-on-rose); }
 
 :focus-visible {
-  outline: .1875rem solid var(--color-primary);
+  outline: .1875rem solid var(--color-rose);
   outline-offset: .1875rem;
-}
-
-:where(.hero, .date-suite, .rsvp, .final, .footer, .lightbox) :focus-visible {
-  outline-color: var(--color-on-primary);
 }
 
 .site { background: var(--color-bg); }
 .site[aria-hidden='true'] { user-select: none; }
 .container { width: min(100%, calc(var(--content-max) + 2 * var(--page-gutter))); margin-inline: auto; padding-inline: var(--page-gutter); }
+.container--narrow { width: min(100%, calc(var(--content-narrow) + 2 * var(--page-gutter))); margin-inline: auto; padding-inline: var(--page-gutter); }
 .section { padding-block: var(--section-space); position: relative; }
-.eyebrow { color: var(--color-primary); font-size: .75rem; font-weight: 700; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
+.eyebrow { color: var(--color-rose); font-size: .72rem; font-weight: 700; letter-spacing: .18em; line-height: 1.4; text-transform: uppercase; }
+.eyebrow--gold { color: var(--color-gold-deep); }
 .sr-only { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
 
-.skip-link { background: var(--color-surface); color: var(--color-primary); font-size: .875rem; font-weight: 700; left: 1rem; padding: .75rem 1rem; position: fixed; top: -5rem; z-index: 3000; }
+.skip-link { background: var(--color-ivory); color: var(--color-rose); font-size: .875rem; font-weight: 700; left: 1rem; padding: .75rem 1rem; position: fixed; top: -5rem; z-index: 3000; }
 .skip-link:focus { top: 1rem; }
 
 .reveal { opacity: 0; transform: translateY(1.125rem); transition: opacity .65s var(--ease-editorial), transform .65s var(--ease-editorial); }

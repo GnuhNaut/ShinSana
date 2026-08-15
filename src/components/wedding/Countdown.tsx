@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCountdownParts } from '../../utils/countdown'
 
-interface CountdownProps { target: string }
+interface CountdownProps {
+  target: string
+  /** When true, render a single line of remaining time meant for inline display. */
+  compact?: boolean
+}
 
-export function Countdown({ target }: CountdownProps) {
+export function Countdown({ target, compact = false }: CountdownProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [countdown, setCountdown] = useState(() => getCountdownParts(target))
 
@@ -51,8 +55,20 @@ export function Countdown({ target }: CountdownProps) {
   if (countdown.isComplete) {
     return (
       <div className="countdown countdown--complete" aria-live="polite" ref={rootRef} role="status">
-        <strong>Mình đã về chung một nhà</strong>
-        <span lang="en">Forever starts here.</span>
+        <strong>Chúng mình đã về chung một nhà</strong>
+      </div>
+    )
+  }
+
+  if (compact) {
+    return (
+      <div className="countdown countdown--inline" aria-label="Thời gian còn lại đến ngày cưới" ref={rootRef} role="timer">
+        <span className="countdown__inline-value">{String(countdown.days).padStart(2, '0')}</span>
+        <span className="countdown__inline-label">ngày</span>
+        <span className="countdown__inline-value">{String(countdown.hours).padStart(2, '0')}</span>
+        <span className="countdown__inline-label">giờ</span>
+        <span className="countdown__inline-value">{String(countdown.minutes).padStart(2, '0')}</span>
+        <span className="countdown__inline-label">phút</span>
       </div>
     )
   }

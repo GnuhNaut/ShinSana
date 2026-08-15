@@ -12,10 +12,10 @@ function monitorRuntimeErrors(page: Page) {
 }
 
 async function openInvitation(page: Page) {
-  await page.getByRole('button', { name: 'MỞ THIỆP' }).click()
-  await expect(page.locator('.opening')).toBeHidden()
+  await page.getByRole('button', { name: /Mở thiệp/i }).click()
+  await expect(page.locator('.cover')).toBeHidden()
   await expect(page.locator('.site')).toHaveAttribute('aria-hidden', 'false')
-  await expect(page.locator('.hero h1')).toBeVisible()
+  await expect(page.locator('.invite__eyebrow').first()).toContainText('Lễ thành hôn')
 }
 
 test.beforeEach(async ({ page }) => {
@@ -36,20 +36,48 @@ test('loads, personalizes the invitation, and exposes the correct date details',
   })
 
   await page.goto('/?guest=Nguyen%20Van%20An')
-  await expect(page.locator('.opening')).toBeVisible()
-  await expect(page.locator('.opening__names')).toContainText('Tuấn Hùng')
-  await expect(page.locator('.opening__names')).toContainText('Sao Mai')
+  await expect(page.locator('.cover')).toBeVisible()
+  await expect(page.locator('.cover__names')).toContainText('Tuấn Hùng')
+  await expect(page.locator('.cover__names')).toContainText('Sao Mai')
   await openInvitation(page)
 
-  await expect(page.locator('#invitation')).toContainText('Nguyen Van An')
-  await page.locator('#wedding-details').scrollIntoViewIfNeeded()
-  await expect(page.locator('#wedding-details')).toContainText('19 tháng 10 năm 2026')
-  await expect(page.locator('#wedding-details')).toContainText('10/09 âm lịch')
-  await expect(page.locator('.calendar__day--wedding')).toContainText('19')
+  await expect(page.locator('.invite__eyebrow').first()).toContainText('Lễ thành hôn')
+  await expect(page.locator('.invite__kicker--guest')).toContainText('Nguyen Van An')
+  await page.locator('#ceremony').scrollIntoViewIfNeeded()
+  await expect(page.locator('#ceremony')).toContainText('19 tháng 10 năm 2026')
+  await expect(page.locator('#ceremony')).toContainText('10/09 âm lịch')
   expect(criticalFailures, criticalFailures.join('\n')).toEqual([])
 })
 
-test('validates and submits an RSVP through the local V1 adapter', async ({ page }) => {
+test('orders ceremony cards so the matching guest side appears first', async ({ page }) => {
+  await page.goto('/?guest=Nguyen%20Van%20An&side=groom')
+  await openInvitation(page)
+  const cards = page.locator('.event-card article')
+  await expect(cards).toHaveCount(2)
+  await expect(cards.first().locator('h3')).toContainText(/Nhà Trai|thành hôn/i)
+  await expect(cards.nth(1).locator('h3')).toContainText(/Nhà Gái|vu quy/i)
+
+  await page.goto('/?guest=Nguyen%20Van%20An&side=bride')
+  await openInvitation(page)
+  const orderedCards = page.locator('.event-card article')
+  await expect(orderedCards.first().locator('h3')).toContainText(/Nhà Gái|vu quy/i)
+
+  await page.goto('/?guest=Nguyen%20Van%20An&side=both')
+  await openInvitation(page)
+  const equalCards = page.locator('.event-card article')
+  await expect(equalCards.first().locator('h3')).toContainText(/Nhà Trai|thành hôn/i)
+})
+
+test('prefills the RSVP attendance from the side query', async ({ page }) => {
+  await page.goto('/?guest=Nguyen%20Van%20An&side=groom')
+  await openInvitation(page)
+  const form = page.locator('#rsvp form')
+  await form.scrollIntoViewIfNeeded()
+  await expect(form.getByRole('radio', { name: /Nhà Trai/ })).toBeChecked()
+  await expect(form.locator('#rsvp-name')).toHaveValue('Nguyen Van An')
+})
+
+test('validates and submits an RSVP through the local V2 adapter', async ({ page }) => {
   await page.goto('/')
   await openInvitation(page)
   const form = page.locator('#rsvp form')
@@ -60,39 +88,16 @@ test('validates and submits an RSVP through the local V1 adapter', async ({ page
   await expect(form.locator('#rsvp-attendance-error')).toBeVisible()
 
   await form.locator('#rsvp-name').fill('Nguyễn Văn An')
-  await form.getByRole('radio', { name: /Có, tôi sẽ tham dự/ }).check()
+  await form.getByRole('radio', { name: /Cả Hai/ }).check()
   await form.locator('#rsvp-party-size').selectOption('2')
   await form.locator('#rsvp-message').fill('Hẹn gặp hai bạn!')
   await form.getByRole('button', { name: 'Gửi xác nhận' }).click()
 
-  await expect(page.locator('#rsvp [role="status"]')).toContainText('Cảm ơn, Nguyễn Văn An.')
+  await expect(page.locator('#rsvp [role="status"]')).toContainText('Cảm ơn bạn đã xác nhận')
   const storedRSVP = await page.evaluate(() => JSON.parse(localStorage.getItem('wedding_v1_rsvp') ?? '{}'))
   expect(storedRSVP.version).toBe(1)
   expect(storedRSVP.data).toEqual([
-    expect.objectContaining({ name: 'Nguyễn Văn An', attendance: 'yes', partySize: 2, message: 'Hẹn gặp hai bạn!' }),
-  ])
-})
-
-test('validates and stores a guestbook wish through the local V1 adapter', async ({ page }) => {
-  await page.goto('/')
-  await openInvitation(page)
-  const form = page.locator('#wishes form')
-  await form.scrollIntoViewIfNeeded()
-
-  await form.getByRole('button', { name: 'Gửi lời chúc' }).click()
-  await expect(form.getByRole('alert')).toContainText('Vui lòng kiểm tra')
-  await expect(form.locator('#wish-name')).toBeFocused()
-
-  await form.locator('#wish-name').fill('Nguyễn Văn An')
-  await form.locator('#wish-message').fill('Chúc hai bạn luôn hạnh phúc!')
-  await form.getByRole('button', { name: 'Gửi lời chúc' }).click()
-
-  await expect(form.getByRole('status')).toContainText('Lời chúc của bạn đã được lưu')
-  await expect(page.locator('.wish-card').first()).toContainText('Chúc hai bạn luôn hạnh phúc!')
-  const storedWishes = await page.evaluate(() => JSON.parse(localStorage.getItem('wedding_v1_wishes') ?? '{}'))
-  expect(storedWishes.version).toBe(1)
-  expect(storedWishes.data).toEqual([
-    expect.objectContaining({ name: 'Nguyễn Văn An', message: 'Chúc hai bạn luôn hạnh phúc!' }),
+    expect.objectContaining({ name: 'Nguyễn Văn An', attendance: 'both', partySize: 2, message: 'Hẹn gặp hai bạn!' }),
   ])
 })
 
@@ -100,17 +105,17 @@ test('operates the gift modal and gallery lightbox by keyboard', async ({ page }
   await page.goto('/')
   await openInvitation(page)
 
-  const giftButton = page.getByRole('button', { name: 'Gửi quà mừng' })
+  const giftButton = page.getByRole('button', { name: /Gửi quà mừng/i })
   await giftButton.scrollIntoViewIfNeeded()
   await giftButton.click()
-  const giftDialog = page.getByRole('dialog', { name: 'quà mừng' })
+  const giftDialog = page.getByRole('dialog', { name: 'gửi quà mừng' })
   await expect(giftDialog).toBeVisible()
 
-  const closeGiftButton = giftDialog.getByRole('button', { name: 'Đóng quà mừng' })
+  const closeGiftButton = giftDialog.getByRole('button', { name: 'Đóng gửi quà mừng' })
   await expect(closeGiftButton).toBeFocused()
   await page.keyboard.press('Tab')
-  const groomTab = giftDialog.getByRole('tab', { name: 'Chú rể' })
-  const brideTab = giftDialog.getByRole('tab', { name: 'Cô dâu' })
+  const groomTab = giftDialog.getByRole('tab', { name: 'Nhà Trai' })
+  const brideTab = giftDialog.getByRole('tab', { name: 'Nhà Gái' })
   await expect(groomTab).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(brideTab).toBeFocused()
@@ -119,8 +124,6 @@ test('operates the gift modal and gallery lightbox by keyboard', async ({ page }
   await closeGiftButton.click()
   await expect(giftDialog).toBeHidden()
 
-  // Use keyboard activation for the focus-restoration assertion. Safari/WebKit
-  // intentionally does not focus a button activated by a pointer click.
   await giftButton.focus()
   await page.keyboard.press('Enter')
   await expect(giftDialog).toBeVisible()
@@ -133,7 +136,7 @@ test('operates the gift modal and gallery lightbox by keyboard', async ({ page }
   await firstGalleryImage.click()
   const lightbox = page.getByRole('dialog', { name: 'thư viện ảnh' })
   await expect(lightbox).toBeVisible()
-  await expect(lightbox).toContainText('Ảnh 1 trên 6')
+  await expect(lightbox).toContainText(`Ảnh 1 trên ${6}`)
   await page.keyboard.press('ArrowRight')
   await expect(lightbox).toContainText('Ảnh 2 trên 6')
   await page.keyboard.press('Escape')
@@ -155,7 +158,7 @@ test('has no horizontal overflow at the required responsive viewports', async ({
 
   for (const viewport of requiredViewports) {
     await page.setViewportSize(viewport)
-    await page.locator('footer').scrollIntoViewIfNeeded()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))))
 
     const overflow = await page.evaluate(() => ({

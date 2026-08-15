@@ -1,13 +1,14 @@
 import type { OrnamentProps } from './types'
 import { ornamentClass, ornamentStyle } from './types'
 
-/** A geometric Song Hy mark assembled from simple ceremonial seal strokes. */
-export function DoubleHappiness({ className, tone = 'gold', size, style, ...props }: OrnamentProps) {
+/** Small refined Song Hỷ mark for headers and seals. */
+export function DoubleHappiness({ className, tone = 'rose', size, style, ...props }: OrnamentProps) {
+  const toneClass = tone === 'gold' ? 'rose' : tone
   return (
     <svg
       {...props}
       aria-hidden="true"
-      className={ornamentClass('double-happiness', tone, className)}
+      className={ornamentClass('double-happiness', toneClass, className)}
       focusable="false"
       style={ornamentStyle(size, style)}
       viewBox="0 0 160 128"

@@ -76,3 +76,7 @@ export function generateCalendarIcs(event: CalendarEventInput, generatedAt = new
 export function calendarDataUri(event: CalendarEventInput, generatedAt = new Date()): string {
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(generateCalendarIcs(event, generatedAt))}`
 }
+
+export function calendarHref(event: CalendarEventInput, fileName: string): { href: string; download: string } {
+  return { href: calendarDataUri(event), download: fileName }
+}

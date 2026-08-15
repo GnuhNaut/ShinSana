@@ -38,6 +38,33 @@ export interface GiftRecipient {
   qrImage: string
 }
 
+export interface CeremonyCalendar {
+  /** ISO 8601 with offset, e.g. 2026-10-19T10:00:00+07:00. Empty = all-day. */
+  eventStartIso: string
+  /** ISO 8601 with offset. Required when eventStartIso is set. */
+  eventEndIso: string
+}
+
+export interface CeremonyEvent {
+  enabled: boolean
+  label: string
+  /** Free-form title such as "Lễ vu quy" / "Lễ thành hôn". Empty until family confirms. */
+  eventTitle: string
+  /** ISO date YYYY-MM-DD. Empty until family confirms. */
+  date: string
+  /** Lunar date string entered by the family. Empty until family confirms. */
+  lunarDate: string
+  /** Display time such as "09:00". Empty until family confirms. */
+  time: string
+  venueName: string
+  address: string
+  /** HTTPS map navigation URL. Empty until family confirms. */
+  mapNavigationUrl: string
+  /** HTTPS map embed URL. Empty until family confirms. */
+  mapEmbedUrl: string
+  calendar: CeremonyCalendar
+}
+
 export interface WeddingConfig {
   couple: {
     groom: PersonProfile
@@ -57,11 +84,9 @@ export interface WeddingConfig {
     lunarLong: string
     timezone: string
   }
-  venue: {
-    name: string
-    address: string
-    mapEmbedUrl: string
-    mapNavigationUrl: string
+  events: {
+    brideSide: CeremonyEvent
+    groomSide: CeremonyEvent
   }
   hero: ImageAsset
   story: StoryChapter[]
@@ -72,24 +97,32 @@ export interface WeddingConfig {
   features: {
     music: boolean
     rsvp: boolean
-    guestbook: boolean
+    wish: boolean
     gift: boolean
     personalizedGuest: boolean
     gallery: boolean
   }
   copy: {
-    openingEyebrow: string
-    openingHint: string
-    heroLine: string
+    coverEyebrow: string
+    coverHint: string
+    invitationTitle: string
     invitationGeneric: string
     invitationPersonalized: string
     invitationBody: string
     storyIntro: string
-    galleryQuote: string
+    storyQuote: string
+    ceremonyIntro: string
+    ceremonyTitle: string
     detailsNote: string
+    finalTitle: string
     finalMessage: string
+    rsvpTitle: string
     rsvpIntro: string
-    guestbookIntro: string
+    rsvpThanks: string
+    giftLabel: string
+    giftIntro: string
   }
   sampleWishes: Array<{ id: string; name: string; message: string }>
 }
+
+export type GuestSide = 'bride' | 'groom' | 'both'

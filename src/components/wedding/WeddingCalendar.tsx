@@ -1,4 +1,4 @@
-import { DongSonDivider, Lotus } from '../ornaments'
+import { HairlineDivider, Lotus } from '../ornaments'
 import { generateMonthCalendar } from '../../utils/calendar'
 import { parseIsoDateParts } from '../../utils/dateFormat'
 
@@ -14,12 +14,12 @@ export function WeddingCalendar({ isoDate }: { isoDate: string }) {
     <div className="calendar calendar--oriental">
       <div className="calendar__header">
         <div className="calendar__month-lockup">
-          <Lotus className="calendar__lotus" tone="gold" withWater={false} />
+          <Lotus className="calendar__lotus" tone="rose" withWater={false} />
           <span>{monthName}</span>
         </div>
         <strong>{year}</strong>
       </div>
-      <DongSonDivider className="calendar__divider" center="diamond" tone="gold" />
+      <HairlineDivider className="calendar__divider" center="diamond" tone="rose" />
       <table className="calendar__table">
         <caption className="sr-only">Lịch tháng {monthIndex + 1} năm {year}; ngày {weddingDay} là ngày cưới</caption>
         <thead><tr>{WEEKDAYS.map((weekday) => <th scope="col" className="calendar__weekday" key={weekday}>{weekday}</th>)}</tr></thead>

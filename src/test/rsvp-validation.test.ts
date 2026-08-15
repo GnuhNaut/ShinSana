@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { validateRSVP, type RSVPFormValues } from '../utils/rsvpValidation'
+import { ATTENDANCE_OPTIONS, validateRSVP, type RSVPFormValues } from '../utils/rsvpValidation'
 
 const validValues: RSVPFormValues = {
   name: 'Nguyễn Văn An',
-  attendance: 'yes',
+  attendance: 'bride',
   partySize: 2,
   message: 'Hẹn gặp hai bạn!',
 }
@@ -25,7 +25,7 @@ describe('RSVP validation', () => {
   })
 
   it('does not require a party size when the guest cannot attend', () => {
-    expect(validateRSVP({ ...validValues, attendance: 'no', partySize: 0 })).toEqual({})
+    expect(validateRSVP({ ...validValues, attendance: 'none', partySize: 0 })).toEqual({})
   })
 
   it('enforces the name and optional-message limits', () => {
@@ -33,5 +33,9 @@ describe('RSVP validation', () => {
 
     expect(errors.name).toBeDefined()
     expect(errors.message).toBeDefined()
+  })
+
+  it('exposes the four ceremonial attendance options', () => {
+    expect(ATTENDANCE_OPTIONS.map(({ value }) => value)).toEqual(['bride', 'groom', 'both', 'none'])
   })
 })

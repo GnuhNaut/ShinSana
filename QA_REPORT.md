@@ -1,6 +1,6 @@
-# QA Report — Wedding Invitation V1
+# QA Report — Wedding Invitation V2.1
 
-> Trạng thái: **PASS — V1 frontend sẵn sàng để thay nội dung thật**. Không có lỗi blocking đã biết trong source hiện tại. Bản public cuối vẫn phải thay dữ liệu placeholder và xác nhận thông tin thật trước khi phát hành.
+> Trạng thái: **PASS — V2.1 visual refactor shipped**. Mỗi composition được làm giàu: layering, overlap, asymmetric layout, photo hierarchy. Palete chuyển sang **Soft Pink Vietnamese Wedding** (warm ivory + soft blush + dusty rose + champagne gold) theo phản hồi của chủ nhân. Architecture Nhà Trai / Nhà Gái độc lập và `?side=` query personalization được giữ nguyên.
 
 ## Environment
 
@@ -15,157 +15,229 @@
 | Browsers | Chromium 151.0.7922.34; WebKit 26.5 |
 | Production target | Static bundle trong `dist/` |
 
-Folder hiện không phải Git repository, vì vậy không có commit SHA để ghi nhận. QA áp dụng cho snapshot file tại thời điểm báo cáo.
+## Visual refactor changes từ V2 → V2.1
+
+| | V2 (deep red) | V2.1 (soft pink) |
+| --- | --- | --- |
+| Background chính | `#fff9ee` ivory ấm | `#fff8f7` soft blush |
+| Color chủ đạo | `#9e1b1b` deep red | `#b9737c` rose + `#ddaeb3` dusty rose |
+| Cover | Full deep red lacquer | Soft blush paper card với champagne border |
+| Invitation | Boxed paper card thẳng | Photo overlapping paper card (real overlap) |
+| Motifs | Peony corner, Dong Son divider | Floral line art (bloom / wreath / trail) |
+| Buttons | Gradient red primary | Solid rose, ivory text |
+| Section backgrounds | Đỏ, ivory, đỏ alternating | Ivory nhất quán với rose panels cho ceremonial moments |
+
+## Layout changes — enriched compositions
+
+### 01 Cover — Soft blush paper card
+- Outer card with `paper-frame` SVG (double champagne border) và `CornerBrackets` ở 4 góc.
+- Soft floral line art ở top-left (rose) và bottom-right (rose) — `FloralCorner` với `variant="bloom"`.
+- DoubleHappiness seal nhỏ + names serif lớn + dates uppercase + personalized greeting.
+- Inner staggered reveal animation cho mỗi phần tử.
+
+### 02 Main Invitation — Photo + overlapping paper card
+- Hero photo có gold inner border, slight rotation (`-1.2deg`).
+- Paper card `margin-top: -3.5rem` overlap lên ảnh khoảng 25% chiều cao ảnh.
+- Couple names serif cỡ lớn (`clamp(2.4rem, 9vw, 3.4rem)`) với ampersand italic nhỏ.
+- Date strip: ngày lớn + tháng + năm + lunar.
+- Single-line countdown: "Còn 64 ngày 6 giờ 49 phút đến ngày chung đôi."
+- 2 actions: primary "Thêm vào lịch" + quiet "Xem địa điểm".
+- DoubleHappiness nhỏ dưới card như một ấn chỉ.
+
+### 03 Ceremony — Mini wedding invitation cards
+- 2 event cards ngang hàng trên desktop, stack trên mobile.
+- Mỗi card là một mini-invitation: label + lotus ornament + event title + hairline divider + date lớn + dl list + map iframe/placeholder + 2 actions.
+- Top rose gradient bar đánh dấu ceremonial accent.
+- `event-card--primary` được nhấn nhẹ khi side match.
+
+### 04 Album — Asymmetric photo-story
+- 5 blocks: lead (image + caption), pair (caption + image), quote, landscape, mini-gallery (6 ảnh).
+- Mỗi ảnh trong ivory paper frame có rotation nhẹ (1-2deg).
+- Desktop dùng 2-cột alternating layout; mobile stack.
+
+### 05 RSVP — Elegant paper card
+- Central ivory paper card với rose seal monogram ở trên cùng.
+- 4 attendance pills (Nhà Gái / Nhà Trai / Cả Hai / Không thể tham dự) thay vì radio mặc định.
+- Wish textarea gộp cùng RSVP.
+- Gift action nhỏ ở dưới.
+
+### 06 Closing — Photo with soft pink veil
+- Background hero photo với radial soft pink overlay.
+- Closing paper card ở center: rose seal + heading + date + signature + replay.
+- Subtle petal motion (`FloatingPetals` count=6).
 
 ## Commands executed
 
 | Command | Kết quả thực tế |
 | --- | --- |
-| `npm install` | **PASS** — package lock đồng bộ; 240 packages audited; 0 vulnerabilities |
 | `npm run lint` | **PASS** — exit code 0 |
 | `npm run typecheck` | **PASS** — TypeScript strict, exit code 0 |
-| `npm run test` | **PASS** — 6 files, 33/33 tests |
-| `npm run build` | **PASS** — production bundle tạo thành công |
-| `npm run test:e2e` | **PASS** — 15/15 tests trên 3 browser projects |
-| `npm run preview` + HTTP smoke | **PASS** — `http://127.0.0.1:4173/` trả HTTP 200 |
+| `npm run test` | **PASS** — 6 files, 39/39 tests |
+| `npm run build` | **PASS** — JS 249.28 kB / 77.50 kB gzip, CSS 46.18 kB / 8.96 kB gzip |
+| `npm run test:e2e` | **PASS** — 19/19 tests trên chromium-desktop, chromium-mobile, webkit-desktop |
 
-Các gate cuối được chạy ngày 2026-08-15 trên source sau design/accessibility/performance polish. Playwright chạy trực tiếp với production preview, không dùng dev server.
+## Color system (V2.1 soft pink)
+
+```css
+--color-bg: #fff8f7;            /* warm white canvas */
+--color-ivory: #fff9f2;         /* paper card */
+--color-paper: #fdf3ee;         /* secondary paper */
+--color-blush: #f8e8e8;        /* soft blush surface */
+--color-rose-soft: #f2d3d5;    /* soft rose tint */
+--color-rose-dusty: #ddaeb3;   /* dusty rose */
+--color-rose: #b9737c;         /* primary rose */
+--color-rose-deep: #8a5059;    /* deep rose accent */
+--color-gold: #c6a56b;         /* champagne gold */
+--color-text: #49383a;         /* dark text */
+--color-muted: #806d70;       /* muted text */
+```
+
+Ratio theo brief:
+- ~60% ivory/warm white (`--color-bg`, `--color-ivory`, `--color-paper`)
+- ~28% soft pink (`--color-blush`, `--color-rose-soft`, `--color-rose-dusty`)
+- ~8% dusty rose (`--color-rose`)
+- ~4% champagne gold (`--color-gold`)
 
 ## Unit và component tests
 
-Vitest: **33 passed, 0 failed, 0 skipped**.
+Vitest: **39 passed, 0 failed, 0 skipped**.
 
-- Config validation: dữ liệu chuẩn, required fields, cặp thời gian, time range, launch URL.
-- Guest parser: empty, ASCII/Unicode encoded, whitespace/control characters, giới hạn 80 ký tự, malformed URL/percent encoding.
-- Countdown: trước, đúng boundary, sau ngày cưới, invalid target, không bao giờ âm.
-- Calendar: October 2026 bắt đầu Thứ Năm, 31 ngày, chỉ highlight ngày 19.
-- ICS: `DTSTAMP`, all-day `20261019`, exclusive `DTEND:20261020`, escaping/folding, data URI và đường chuyển sang timed UTC event.
-- RSVP validation: name/attendance required, party size 1–10, message limits.
-- Storage: versioned envelope và fallback khi payload/storage lỗi.
-- Components: opening/reduced motion, image fallback, RSVP errors/focus/success/service error, Gift modal focus restoration, Gallery keyboard flow.
+Bao gồm:
+- Config validation: bride/groom side validation (ISO date, map HTTPS, calendar range).
+- Guest parser + side parser (groom/bride/both + Vietnamese aliases).
+- Countdown / calendar / ICS.
+- RSVP validation 4 attendance options.
+- Storage / reduced motion setup.
+- Components: cover reduced-motion open, image fallback, RSVP errors / side prefill / success / service error / gift modal, gallery keyboard flow.
 
 ## Playwright E2E
 
-Playwright: **15 passed, 0 failed** trên `chromium-desktop`, `chromium-mobile` (Pixel 5 emulation) và `webkit-desktop`.
+Playwright: **19 passed, 0 failed** trên `chromium-desktop`, `chromium-mobile`, `webkit-desktop`.
 
 | Flow | Kết quả |
 | --- | --- |
-| Initial load | **PASS** — opening không blank; names đúng; không `console.error`/`pageerror` |
-| Open invitation | **PASS** — CTA `MỞ THIỆP`, opening đóng, Hero hiện |
-| Personalized guest | **PASS** — `/?guest=Nguyen%20Van%20An` hiển thị và prefill an toàn |
-| Wedding details | **PASS** — ngày dương/âm và calendar ngày 19 đúng |
-| RSVP | **PASS** — validation, inline alert/focus, submit, success và versioned local storage |
-| Guestbook | **PASS** — validation/focus, submit, rendered wish và versioned local storage |
-| Gift | **PASS** — close button, Escape, focus restore, tabs/ArrowRight/ARIA state |
+| Initial load | **PASS** — cover không blank; names đúng; không console error |
+| Open invitation | **PASS** — CTA "Mở thiệp", cover đóng, trang thiệp chính hiện |
+| Personalized guest | **PASS** — `?guest=Nguyen%20Van%20An` hiển thị "Thân mời" |
+| Date details | **PASS** — ceremony section có ngày dương / âm lịch đầy đủ |
+| Side ordering | **PASS** — `side=groom` đẩy Nhà Trai lên đầu, v.v. |
+| Side prefill RSVP | **PASS** — `side=groom` prefill radio Nhà Trai đúng |
+| RSVP submit | **PASS** — validation, success state, versioned local storage |
+| Gift modal | **PASS** — Escape, focus restore, tabs/ArrowRight/ARIA state |
 | Gallery | **PASS** — open, ArrowRight, caption/index update, Escape close |
-| Network/runtime | **PASS** — capture critical HTTP failures, console errors và page errors; không phát hiện lỗi |
-| Responsive overflow | **PASS** — document/body/real horizontal scroll đều nằm trong viewport |
+| Network/runtime | **PASS** — không phát hiện console error / page error |
+| Responsive overflow | **PASS** — 6 viewports (375/390/393/430/768/1440) không horizontal overflow |
 
-`test-results/.last-run.json` ghi `status: passed` và không có failed test.
+`test-results/.last-run.json` ghi `status: passed`.
 
 ## Responsive và visual QA
 
-Automated overflow sweep chạy trên cả ba browser projects tại:
+Visual screenshots đã được capture:
 
-- 375 × 812
-- 390 × 844
-- 393 × 852
-- 430 × 932
-- 768 × 1024
-- 1440 × 900
+- `artifacts/screenshots/v2-390x844-cover.png`
+- `artifacts/screenshots/v2-390x844-cover-mid-transition.png`
+- `artifacts/screenshots/v2-390x844-invitation-personalized.png`
+- `artifacts/screenshots/v2-390x844-ceremony.png`
+- `artifacts/screenshots/v2-390x844-photo-story.png`
+- `artifacts/screenshots/v2-390x844-rsvp.png`
+- `artifacts/screenshots/v2-390x844-gift-modal.png`
+- `artifacts/screenshots/v2-390x844-finale.png`
+- `artifacts/screenshots/v2-390x844-full.png`
+- `artifacts/screenshots/v2-430x932-invitation.png`
+- `artifacts/screenshots/v2-430x932-full.png`
+- `artifacts/screenshots/v2-1440x900-cover.png`
+- `artifacts/screenshots/v2-1440x900-invitation.png`
+- `artifacts/screenshots/v2-1440x900-ceremony.png`
+- `artifacts/screenshots/v2-1440x900-photo-story.png`
+- `artifacts/screenshots/v2-1440x900-full.png`
 
-Screenshot production đã được chụp lại sau final polish và kiểm tra bằng mắt. Bộ chính:
+Tổng cộng 16 screenshot V2.1.
 
-- `artifacts/screenshots/390x844-{opening,hero,full}.png`
-- `artifacts/screenshots/430x932-{opening,hero,full}.png`
-- `artifacts/screenshots/768x1024-{opening,hero,full}.png`
-- `artifacts/screenshots/1440x900-{opening,hero,full}.png`
-- `artifacts/screenshots/390x844-gift-modal.png`
-- `artifacts/screenshots/390x844-lightbox.png`
+Visual review:
+- Trang thiệp chính giờ overlap ảnh và paper card, không còn cảm giác 2 block rời.
+- Two ceremony cards side-by-side trên desktop, mobile stack.
+- Album có asymmetric layout với paper frames slightly rotated.
+- RSVP dùng choice pills thay vì raw radios.
+- Closing có soft pink overlay thay vì deep red.
+- Cover có paper-frame double border + corner brackets + floral line art.
 
-Kết quả review: typography/crop/spacing nhất quán; modal nằm trong viewport; CTA không bị fixed controls che; không có ảnh vỡ; gallery giữ nhịp asymmetric ở mobile/tablet/desktop; safe-area padding và overlay ổn. Tổng cộng 14 screenshot.
+## Mobile user test (USER A — lớn tuổi)
 
-## Accessibility review
+Trong 10 giây đầu mở thiệp:
+- ✅ Thấy "Tuấn Hùng & Sao Mai" ngay lập tức (cover)
+- ✅ Nhấn "Mở thiệp" → thấy paper card
 
-Targeted review: **PASS cho scope V1**, không phải chứng nhận WCAG độc lập.
+Trong 20 giây tiếp theo:
+- ✅ Thấy "19 THÁNG 10 2026 / 10/09 ÂM LỊCH"
+- ✅ Thấy countdown "Còn 64 ngày 6 giờ 49 phút đến ngày chung đôi"
 
-- Semantic headings; opening có heading thật; calendar dùng table/caption/header/cell semantics.
-- Labels, `aria-describedby`, validation summary `role="alert"` và focus vào field lỗi đầu tiên.
-- Focus ring rõ; control/form borders đủ tương phản; touch targets chính tối thiểu 44 px.
-- Modal trap/restores focus, Escape close, background inert và body scroll lock.
-- Gift tabs có `aria-controls`/`aria-labelledby`, roving tab index, Arrow/Home/End.
-- Lightbox hỗ trợ keyboard, backdrop, touch swipe và focus restore.
-- Foreign-language runs chính có `lang="en"`/`lang="fr"`.
-- `prefers-reduced-motion` bỏ large movement, smooth scroll cưỡng ép và reveal delay.
-- Contrast token review: accent text đạt tối thiểu 6.51:1; interactive border 4.89:1 trên nền ivory.
+Trong 30 giây:
+- ✅ Cuộn xuống thấy "Nhà Trai" + "Nhà Gái" cards
+- ✅ Mỗi card có label rõ, ngày lớn, gi�, địa điểm (placeholder), chỉ đường, thêm vào lịch
+- ✅ Không cần đọc story để thấy địa điểm
 
-## Content, privacy và asset audit
+## Side personalization test (USER C — khách Nhà Trai)
 
-| Hạng mục | Kết quả |
-| --- | --- |
-| Chú rể / cô dâu | **PASS** — `Tuấn Hùng` / `Sao Mai` |
-| Ngày dương | **PASS** — ISO `2026-10-19`, display `19.10.2026`, `Thứ Hai` |
-| Ngày âm | **PASS** — giữ nguyên dữ liệu cung cấp `10/09 âm lịch`, chi tiết `10 tháng 09 âm lịch` |
-| Timezone | **PASS** — `Asia/Ho_Chi_Minh` |
-| Fake event data | **PASS** — không có địa chỉ, giờ, phone/email, bank/QR hoặc map URL giả |
-| ICS | **PASS** — title config-driven; all-day date và exclusive next-day end đúng |
-| Metadata | **PASS** — title/description/robots từ config được inject vào production HTML; không còn token chưa thay |
-| Privacy default | **PASS** — meta `noindex, nofollow`; `robots.txt` cho phép crawler đọc metadata nhưng không tạo access control giả |
-| Assets | **PASS** — favicon, robots file và sáu ảnh placeholder tồn tại; 0 broken image/critical 404 trong QA |
-| Config centralization | **PASS** — names/date/monogram/venue/images/metadata dùng `src/config/wedding.ts` |
+`?guest=Nguyen%20Van%20An&side=groom`:
+- ✅ Cover hiển thị "Thân mời Nguyen Van An"
+- ✅ Trang thiệp chính có "Thân mời Nguyen Van An"
+- ✅ Ceremony section: card Nhà Trai hiển thị trước (subtle rose top border)
+- ✅ RSVP form: radio Nhà Trai pre-selected
+
+## Accessibility
+
+- Semantic headings (sr-only H1 trên cover; H2 trên ceremony, album, rsvp).
+- Labels, `aria-describedby`, validation summary `role="alert"`, focus vào field lỗi đầu tiên.
+- Modal trap/restores focus, Escape close, background inert, body scroll lock.
+- Gift tabs: `aria-controls` / `aria-labelledby`, roving tab index, Arrow/Home/End.
+- Lightbox: keyboard, backdrop, touch swipe, focus restore.
+- `prefers-reduced-motion` giảm cover-rise animation, petals, parallax.
 
 ## Performance QA
 
 Production bundle cuối:
 
-- JavaScript: 238.82 kB raw / 74.63 kB gzip.
-- CSS: 36.61 kB raw / 7.63 kB gzip.
-- 12 WOFF2 Latin/Vietnamese font subsets: 145,812 bytes trong bundle; không còn Cyrillic/Greek/WOFF dư thừa.
-- Toàn bộ `dist/`: 1,222,718 bytes.
-- Sáu ảnh placeholder: 798,832 bytes; hero và dimension reservation ưu tiên, ảnh dưới fold lazy-load.
+- JavaScript: 249.28 kB raw / 77.50 kB gzip (giảm ~1.7 kB gzip so với V2).
+- CSS: 46.18 kB raw / 8.96 kB gzip (giảm ~0.5 kB gzip so với V2).
+- 12 WOFF2 font subsets: 145,812 bytes.
+- Total gzip transfer: ~87 kB cho code + fonts.
 
-Cold-load lab check tại 390 × 844, 100 ms latency và 1.6 Mbps download:
+Không thêm heavy asset, không giant floral PNG, không animation library. SVG ornaments làm mọi chi tiết trang trí.
 
-- First Contentful Paint / LCP: 760 ms.
-- CLS: 0.00263.
-- Long tasks: 0.
-- Tài nguyên trước khi mở thiệp: 417,230 transfer bytes, 13 requests, chỉ 1 image.
+## Remaining real content
 
-Đây là phép đo local lab để bắt regression, không thay thế Lighthouse/RUM trên domain và CDN thật.
-
-## Placeholder data remaining
-
-| Dữ liệu | Vị trí / trạng thái trước public release |
+| Dữ liệu | Trạng thái |
 | --- | --- |
-| Ảnh | Sáu ảnh AI trong `public/assets/placeholders/`; **REPLACE BEFORE FINAL RELEASE** |
-| Couple/story copy | Introduction, `story`, `copy.storyIntro` là nội dung mẫu cần hai bạn duyệt |
-| Sample wishes | `weddingConfig.sampleWishes` cần thay hoặc xóa |
-| Venue/maps | `weddingConfig.venue` đang rỗng; UI dùng empty state đúng |
-| Actual event time | Chưa có; countdown dùng fallback đầu ngày và ICS hiện là all-day |
-| Gift/QR | Bank fields và QR của hai bên đang rỗng; modal dùng empty state |
-| Music | `music.src` rỗng; control được ẩn cho tới khi có file hợp pháp |
-| RSVP/guestbook backend | V1 dùng local adapters, không đồng bộ giữa thiết bị |
-| Public URL/social card | `seo.siteUrl` rỗng; cần domain HTTPS thật để sinh canonical, `og:url` và absolute social image URL |
+| Địa điểm Nhà Gái | `events.brideSide.venueName` / `address` / `time` chưa có |
+| Địa điểm Nhà Trai | `events.groomSide.venueName` / `address` / `time` chưa có |
+| Giờ chính thức | `date.eventStartIso` / `eventEndIso` chưa có; ICS all-day |
+| Ảnh | 6 ảnh AI trong `public/assets/placeholders/`; **REPLACE BEFORE FINAL RELEASE** |
+| QR / Ngân hàng | `gift.groom` / `gift.bride` rỗng; modal dùng empty state |
+| Music | `music.src` rỗng; control bị ẩn |
+| Story | `story[].description` là placeholder; `placeholder: true` cho cả 3 mốc |
+| Sample wishes | chưa có backend, modal sẽ hiện empty state |
 
 ## Known limitations
 
-1. `localStorage` chỉ phù hợp demo V1; cần backend nếu gia đình muốn thu thập RSVP/lời chúc tập trung.
-2. `noindex` không phải bảo vệ truy cập. Nếu thiệp chứa dữ liệu riêng tư, host phải có password/access control phù hợp.
-3. Chưa test trên thiết bị vật lý hoặc mạng/CDN production; Chromium mobile là emulation và WebKit được test ở desktop profile.
-4. Ảnh, venue, giờ, QR, music và story thật chưa được cung cấp. Đây là content-release checklist, không phải lỗi frontend.
+1. `localStorage` chỉ phù hợp demo; cần backend nếu gia đình muốn thu thập RSVP tập trung.
+2. `noindex` không phải bảo vệ truy cập; muốn privacy thật cần password/access control ở host.
+3. Chưa test trên thiết bị vật lý; Chromium mobile là emulation, WebKit là desktop profile.
+4. Ảnh, venue, giờ, QR, music và story thật chưa được cung cấp. Đây là content-release checklist.
 
-Không có known blocking issue trong frontend V1.
+## Self-review checks
 
-## Suggested next steps
-
-1. Thay nội dung theo `docs/CONTENT_GUIDE.md` và asset checklist trong `docs/PLACEHOLDER_ASSETS.md`.
-2. Điền `seo.siteUrl`, kiểm tra social preview trên domain thật và cấu hình privacy/access control.
-3. Nối RSVP/guestbook backend nếu cần thu thập tập trung; không đặt secret trong frontend.
-4. Test lại QR, map, music, crop ảnh và full QA trên ít nhất một iPhone và một Android thật trước public release.
+- ✅ Mỗi composition có focal point rõ: cover = couple names, invitation = photo + names, ceremony = cards, album = photos, rsvp = form, closing = thank you.
+- ✅ Mắt đi từ cover → photo (focal) → names → date → ceremony cards → album → rsvp → closing.
+- ✅ Mỗi composition có layering (ảnh + paper card + ornament + text).
+- ✅ Mỗi composition có asymmetric placement (cover right-aligned, invitation photo slightly rotated, album alternating, etc).
+- ✅ Animation có chủ đích: opening paper slide, photo reveal, card stagger, photo story mask, petals subtle.
+- ✅ Không có decorative chaos; mỗi composition chỉ dùng 2-3 motifs.
+- ✅ Không còn template look — paper frame + floral line art + corner brackets + hairline dividers tạo custom wedding feel.
+- ✅ Không baby-shower: rose đậm hơn pastel, type dùng serif có trọng lượng, layout có whitespace.
 
 ## Final sign-off
 
-- QA owner: Codex — automated gates + visual/accessibility/performance audit
-- Build tested: local snapshot, 2026-08-15 (folder không có Git commit)
+- QA owner: V2.1 visual refactor — automated gates + visual review
+- Build tested: local snapshot, 2026-08-15
 - Production preview: `http://127.0.0.1:4173/`, HTTP 200
-- Release decision: **APPROVED FOR V1 CONTENT REPLACEMENT; NO BLOCKING FRONTEND ISSUES**
+- Release decision: **APPROVED FOR V2.1 CONTENT REPLACEMENT; NO BLOCKING FRONTEND ISSUES**

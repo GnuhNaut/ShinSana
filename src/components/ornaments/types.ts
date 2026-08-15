@@ -1,6 +1,6 @@
 import type { CSSProperties, SVGProps } from 'react'
 
-export type OrnamentTone = 'gold' | 'red' | 'champagne' | 'ink' | 'inherit'
+export type OrnamentTone = 'rose' | 'roseDeep' | 'gold' | 'goldDeep' | 'ink' | 'paper' | 'inherit'
 
 export interface OrnamentProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
   /** Uses a design-token-backed currentColor class. */
