@@ -1,0 +1,78 @@
+.oriental-ornament {
+  color: inherit;
+  display: block;
+  flex: none;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.oriental-ornament--gold { color: var(--color-accent, #c9a45c); }
+.oriental-ornament--red { color: var(--color-primary, #9e1b1b); }
+.oriental-ornament--champagne { color: var(--color-accent-on-dark, #e5cf9a); }
+.oriental-ornament--ink { color: var(--color-text, #231a16); }
+.oriental-ornament--inherit { color: inherit; }
+
+.oriental-ornament--double-happiness { aspect-ratio: 5 / 4; }
+.oriental-ornament--lotus { aspect-ratio: 110 / 63; }
+.oriental-ornament--peony-corner { aspect-ratio: 1; transform-origin: center; }
+.oriental-ornament--top-right { transform: scaleX(-1); }
+.oriental-ornament--bottom-left { transform: scaleY(-1); }
+.oriental-ornament--bottom-right { transform: scale(-1); }
+.oriental-ornament--eastern-cloud { aspect-ratio: 35 / 11; }
+.oriental-ornament--cloud-left { transform: scaleX(-1); }
+.oriental-ornament--dong-son-divider { aspect-ratio: 160 / 13; width: 100%; }
+.oriental-ornament--phoenix-line { aspect-ratio: 42 / 23; }
+.oriental-ornament--phoenix-left { transform: scaleX(-1); }
+
+.ornament-foil {
+  filter: drop-shadow(0 1px 0 rgb(255 249 238 / 16%)) drop-shadow(0 5px 12px rgb(35 12 12 / 14%));
+}
+
+.floating-petals {
+  contain: strict;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.floating-petals__petal {
+  animation: oriental-petal-fall var(--petal-duration) linear var(--petal-delay) infinite;
+  color: var(--color-primary, #9e1b1b);
+  left: var(--petal-x);
+  opacity: 0;
+  position: absolute;
+  top: -2.5rem;
+  width: clamp(.45rem, 1.25vw, .8rem);
+  will-change: transform;
+}
+
+.floating-petals--champagne .floating-petals__petal { color: var(--color-accent-on-dark, #e5cf9a); }
+.floating-petals--mixed .floating-petals__petal:nth-child(3n) { color: var(--color-accent-on-dark, #e5cf9a); }
+.floating-petals--mixed .floating-petals__petal:nth-child(3n + 2) { color: var(--color-on-primary, #fff9ee); }
+.floating-petals.is-paused .floating-petals__petal { animation-play-state: paused; }
+
+@keyframes oriental-petal-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -4vh, 0) rotate(0) scale(var(--petal-scale));
+  }
+  10% { opacity: var(--petal-opacity); }
+  78% { opacity: var(--petal-opacity); }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--petal-drift), 108vh, 0) rotate(var(--petal-rotate)) scale(var(--petal-scale));
+  }
+}
+
+@media (max-width: 44.99rem) {
+  .floating-petals__petal:nth-child(n + 11) { display: none; }
+  .oriental-ornament--peony-corner { opacity: .72; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-petals { display: none; }
+  .ornament-foil { filter: none; }
+}

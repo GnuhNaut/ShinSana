@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# V1 remains noindex through its HTML meta tag; privacy must be enforced at the host.

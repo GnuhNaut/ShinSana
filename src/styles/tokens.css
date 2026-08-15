@@ -1,0 +1,34 @@
+:root {
+  --color-bg: #f6ead6;
+  --color-surface: #fff9ee;
+  --color-text: #231a16;
+  --color-muted: #6b584f;
+  --color-primary: #9e1b1b;
+  --color-primary-dark: #651417;
+  --color-lacquer: #7b1518;
+  --color-wine-deep: #410b0f;
+  --color-accent: #c9a45c;
+  --color-accent-text: #7b5a22;
+  --color-accent-on-dark: #e5cf9a;
+  --color-border: rgb(101 20 23 / 24%);
+  --color-interactive-border: #7a5147;
+  --color-on-primary: #fff9ee;
+  --color-on-primary-muted: #eedcc4;
+  --color-error: #9d2637;
+  --color-jade: #5c6b56;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --page-gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --section-space: clamp(5.5rem, 12vw, 11rem);
+  --content-max: 81rem;
+  --text-measure: 58ch;
+  --ease-editorial: cubic-bezier(.22, 1, .36, 1);
+  --ease-silk: cubic-bezier(.22, 1, .36, 1);
+  --duration-reveal: 720ms;
+  --duration-special: 1200ms;
+  --gradient-gold-foil: linear-gradient(105deg, #8d672a, #e5cf9a 42%, #b2863e 68%, #f0dda9);
+  --shadow-paper: 0 1.25rem 3rem rgb(65 11 15 / 12%);
+  --shadow-lacquer: inset 0 1px rgb(255 249 238 / 10%), 0 1.5rem 4rem rgb(45 7 10 / 24%);
+  --shadow-modal: 0 2rem 6rem rgb(24 10 12 / 40%);
+  --control-size: 3rem;
+}

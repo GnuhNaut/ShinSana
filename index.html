@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#681f2b" />
+    <meta name="robots" content="{{WEDDING_ROBOTS}}" />
+    <meta name="description" content="{{WEDDING_DESCRIPTION}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:title" content="{{WEDDING_TITLE}}" />
+    <meta property="og:description" content="{{WEDDING_DESCRIPTION}}" />
+    <meta property="og:image" content="{{WEDDING_IMAGE}}" />
+    {{WEDDING_OG_URL}}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{WEDDING_TITLE}}" />
+    <meta name="twitter:description" content="{{WEDDING_DESCRIPTION}}" />
+    <meta name="twitter:image" content="{{WEDDING_IMAGE}}" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{{WEDDING_TITLE}}</title>
+  </head>
+  <body>
+    <noscript>
+      <main style="max-width:42rem;margin:12vh auto;padding:2rem;font-family:Georgia,serif;color:#1e1a17;text-align:center">
+        <p style="font:700 .75rem/1.5 system-ui;letter-spacing:.14em;text-transform:uppercase;color:#681f2b">Thiệp cưới</p>
+        <h1 style="font-size:clamp(2.75rem,10vw,5rem);line-height:.9;font-weight:500">{{WEDDING_NAMES}}</h1>
+        <p style="font:600 1rem/1.7 system-ui">{{WEDDING_DATE}} · {{WEDDING_LUNAR}}</p>
+        <p style="font:400 .875rem/1.7 system-ui">Vui lòng bật JavaScript hoặc mở thiệp bằng một trình duyệt hiện đại để xem đầy đủ lời mời.</p>
+      </main>
+    </noscript>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
