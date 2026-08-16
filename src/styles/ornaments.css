@@ -7,13 +7,15 @@
   pointer-events: none;
 }
 
-.oriental-ornament--rose      { color: var(--color-rose); }
-.oriental-ornament--roseDeep  { color: var(--color-rose-deep); }
+.oriental-ornament--rose      { color: var(--color-border); }
+.oriental-ornament--roseDeep  { color: var(--color-deep-rose); }
 .oriental-ornament--gold      { color: var(--color-gold); }
 .oriental-ornament--goldDeep  { color: var(--color-gold-deep); }
 .oriental-ornament--ink       { color: var(--color-text); }
-.oriental-ornament--paper     { color: var(--color-ivory); }
+.oriental-ornament--paper     { color: var(--color-paper); }
 .oriental-ornament--inherit   { color: inherit; }
+.oriental-ornament--primary   { color: var(--color-primary); }
+.oriental-ornament--deep      { color: var(--color-deep-rose); }
 
 .oriental-ornament--double-happiness    { aspect-ratio: 5 / 4; }
 .oriental-ornament--lotus              { aspect-ratio: 110 / 63; }

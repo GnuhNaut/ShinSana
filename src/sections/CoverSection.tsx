@@ -44,7 +44,7 @@ export function CoverSection({ onOpened }: CoverSectionProps) {
           <h1 className="sr-only">Thiệp cưới {config.couple.groom.fullName} và {config.couple.bride.fullName}</h1>
           <p className="cover__kicker cover__reveal">TRÂN TRỌNG KÍNH MỜI</p>
           <div className="cover__seal cover__reveal--seal">
-            <DoubleHappiness tone="rose" size="100%" />
+            <DoubleHappiness tone="primary" size="100%" />
           </div>
           <div className="cover__names" aria-hidden="true">
             <span className="cover__reveal">{config.couple.groom.fullName}</span>
