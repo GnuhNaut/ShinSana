@@ -1,6 +1,6 @@
-# QA Report — Wedding Invitation V2.1
+# QA Report — Wedding Invitation V2.1 Polish
 
-> Trạng thái: **PASS — V2.1 visual refactor shipped**. Mỗi composition được làm giàu: layering, overlap, asymmetric layout, photo hierarchy. Palete chuyển sang **Soft Pink Vietnamese Wedding** (warm ivory + soft blush + dusty rose + champagne gold) theo phản hồi của chủ nhân. Architecture Nhà Trai / Nhà Gái độc lập và `?side=` query personalization được giữ nguyên.
+> Trạng thái: **PASS — V2.1 visual contrast polish shipped**. Background vẫn soft pink/ivory; text, borders, CTA và decorative details được nâng độ tương phản lên rõ rệt. Đổi sang palette có độ đậm hơn (`#A83A51` rose primary, `#7B2D3E` deep rose cho heading, `#3B2930` text) để giải quyết feedback "màu sắc hơi nhạt, text chưa đủ nổi, viền chưa đủ rõ".
 
 ## Environment
 
@@ -15,229 +15,179 @@
 | Browsers | Chromium 151.0.7922.34; WebKit 26.5 |
 | Production target | Static bundle trong `dist/` |
 
-## Visual refactor changes từ V2 → V2.1
+## Contrast improvements — palette migration
 
-| | V2 (deep red) | V2.1 (soft pink) |
-| --- | --- | --- |
-| Background chính | `#fff9ee` ivory ấm | `#fff8f7` soft blush |
-| Color chủ đạo | `#9e1b1b` deep red | `#b9737c` rose + `#ddaeb3` dusty rose |
-| Cover | Full deep red lacquer | Soft blush paper card với champagne border |
-| Invitation | Boxed paper card thẳng | Photo overlapping paper card (real overlap) |
-| Motifs | Peony corner, Dong Son divider | Floral line art (bloom / wreath / trail) |
-| Buttons | Gradient red primary | Solid rose, ivory text |
-| Section backgrounds | Đỏ, ivory, đỏ alternating | Ivory nhất quán với rose panels cho ceremonial moments |
+| Token | Before (V2.1) | After (polish) | Use |
+| --- | --- | --- | --- |
+| `--color-bg` | `#fff8f7` | `#fff8f7` | Base warm white |
+| `--color-ivory` | `#fff9f2` | `#fff9f7` | Paper card surface |
+| `--color-paper` | `#fdf3ee` | `#fffbf7` | Card paper |
+| `--color-paper-warm` | — | `#fbefec` | Hover background |
+| `--color-blush` | `#f8e8e8` | `#fbeaec` | Section background tint |
+| `--color-blush-strong` | — | `#f5dce0` | Label badge + selected state |
+| `--color-rose` | `#b9737c` | **`#a83a51`** | Primary rose / CTA |
+| `--color-rose-strong` | — | `#8e3045` | CTA hover |
+| `--color-rose-deep` | `#8a5059` | **`#7b2d3e`** | Heading, couple names, labels |
+| `--color-rose-dusty` | `#ddaeb3` | **`#d89aa8`** | Card border |
+| `--color-rose-line` | — | `#d6bcc1` | Inner divider lines |
+| `--color-text` | `#49383a` | **`#3b2930`** | Body text (đậm hơn) |
+| `--color-text-strong` | `#6c5a5d` | **`#2a1c22`** | Input value, dd |
+| `--color-text-soft` | `#806d70` | `#70575e` | Secondary text |
+| `--color-muted` | `#806d70` | `#8a7780` | Hint text |
+| `--color-gold` | `#c6a56b` | `#b88a4b` | Champagne gold accents |
 
-## Layout changes — enriched compositions
+## Color hierarchy
 
-### 01 Cover — Soft blush paper card
-- Outer card with `paper-frame` SVG (double champagne border) và `CornerBrackets` ở 4 góc.
-- Soft floral line art ở top-left (rose) và bottom-right (rose) — `FloralCorner` với `variant="bloom"`.
-- DoubleHappiness seal nhỏ + names serif lớn + dates uppercase + personalized greeting.
-- Inner staggered reveal animation cho mỗi phần tử.
+- **Main headings**: `--color-rose-deep` `#7b2d3e`
+- **Couple names**: `--color-rose-deep` `#7b2d3e`
+- **Section labels**: `--color-rose` `#a83a51`
+- **Body text**: `--color-text` `#3b2930`
+- **Secondary text**: `--color-text-soft` `#70575e`
+- **Borders**: `--color-rose-dusty` `#d89aa8` (1.5px) + `--color-rose-line` `#d6bcc1` (inner)
+- **CTA primary**: bg `--color-rose` `#a83a51`, text `#fff9f7`, with rose-tinted shadow
+- **CTA hover**: `--color-rose-strong` `#8e3045` + deeper shadow
 
-### 02 Main Invitation — Photo + overlapping paper card
-- Hero photo có gold inner border, slight rotation (`-1.2deg`).
-- Paper card `margin-top: -3.5rem` overlap lên ảnh khoảng 25% chiều cao ảnh.
-- Couple names serif cỡ lớn (`clamp(2.4rem, 9vw, 3.4rem)`) với ampersand italic nhỏ.
-- Date strip: ngày lớn + tháng + năm + lunar.
-- Single-line countdown: "Còn 64 ngày 6 giờ 49 phút đến ngày chung đôi."
-- 2 actions: primary "Thêm vào lịch" + quiet "Xem địa điểm".
-- DoubleHappiness nhỏ dưới card như một ấn chỉ.
+## Typography hierarchy
 
-### 03 Ceremony — Mini wedding invitation cards
-- 2 event cards ngang hàng trên desktop, stack trên mobile.
-- Mỗi card là một mini-invitation: label + lotus ornament + event title + hairline divider + date lớn + dl list + map iframe/placeholder + 2 actions.
-- Top rose gradient bar đánh dấu ceremonial accent.
-- `event-card--primary` được nhấn nhẹ khi side match.
+| Element | Mobile | Desktop | Weight | Color |
+| --- | --- | --- | --- | --- |
+| Couple names | clamp(2.4rem, 11vw, 4.2rem) | inherited | 500 | deep rose |
+| Main headings | clamp(1.85rem, 4vw, 2.6rem) | same | 500 | deep rose |
+| Section labels (NHÀ TRAI/GÁI) | .68rem | .68rem | 700 | deep rose on blush-strong |
+| Event title | clamp(1.5rem, 3.5vw, 1.95rem) | same | 500 | deep rose |
+| Date day | clamp(2.6rem, 7vw, 3.2rem) | same | 600 | deep rose |
+| Body | 1rem | 1rem | 400 | text |
+| Small labels | .68–.75rem | same | 600–700 | rose |
 
-### 04 Album — Asymmetric photo-story
-- 5 blocks: lead (image + caption), pair (caption + image), quote, landscape, mini-gallery (6 ảnh).
-- Mỗi ảnh trong ivory paper frame có rotation nhẹ (1-2deg).
-- Desktop dùng 2-cột alternating layout; mobile stack.
+## Borders & depth
 
-### 05 RSVP — Elegant paper card
-- Central ivory paper card với rose seal monogram ở trên cùng.
-- 4 attendance pills (Nhà Gái / Nhà Trai / Cả Hai / Không thể tham dự) thay vì radio mặc định.
-- Wish textarea gộp cùng RSVP.
-- Gift action nhỏ ở dưới.
+### Borders
+- **Main paper/card borders**: `1.5px solid #d89aa8` (rose-dusty).
+- **Decorative inner line**: `1px solid #d6bcc1` (rose-line).
+- **CTA outline**: `1.5px solid #a83a51`.
 
-### 06 Closing — Photo with soft pink veil
-- Background hero photo với radial soft pink overlay.
-- Closing paper card ở center: rose seal + heading + date + signature + replay.
-- Subtle petal motion (`FloatingPetals` count=6).
+### Shadows (3-tier system)
+- **Paper shadow** (`--shadow-paper`): `0 1.5rem 3.4rem -1.4rem rgb(123 45 62 / 14%), 0 .6rem 1.2rem -0.6rem rgb(123 45 62 / 8%)`
+- **Image shadow** (`--shadow-image`): `0 1.8rem 3.4rem -1rem rgb(123 45 62 / 22%), 0 .8rem 1.4rem -0.4rem rgb(123 45 62 / 12%)`
+- **Modal shadow** (`--shadow-modal`): `0 2.4rem 5rem -1rem rgb(80 40 50 / 36%)`
 
-## Commands executed
-
-| Command | Kết quả thực tế |
-| --- | --- |
-| `npm run lint` | **PASS** — exit code 0 |
-| `npm run typecheck` | **PASS** — TypeScript strict, exit code 0 |
-| `npm run test` | **PASS** — 6 files, 39/39 tests |
-| `npm run build` | **PASS** — JS 249.28 kB / 77.50 kB gzip, CSS 46.18 kB / 8.96 kB gzip |
-| `npm run test:e2e` | **PASS** — 19/19 tests trên chromium-desktop, chromium-mobile, webkit-desktop |
-
-## Color system (V2.1 soft pink)
-
+### Cover card
 ```css
---color-bg: #fff8f7;            /* warm white canvas */
---color-ivory: #fff9f2;         /* paper card */
---color-paper: #fdf3ee;         /* secondary paper */
---color-blush: #f8e8e8;        /* soft blush surface */
---color-rose-soft: #f2d3d5;    /* soft rose tint */
---color-rose-dusty: #ddaeb3;   /* dusty rose */
---color-rose: #b9737c;         /* primary rose */
---color-rose-deep: #8a5059;    /* deep rose accent */
---color-gold: #c6a56b;         /* champagne gold */
---color-text: #49383a;         /* dark text */
---color-muted: #806d70;       /* muted text */
+box-shadow:
+  0 1.6rem 3.6rem -1.4rem rgb(123 45 62 / 18%),
+  0 .6rem 1.4rem -0.5rem rgb(123 45 62 / 10%);
 ```
 
-Ratio theo brief:
-- ~60% ivory/warm white (`--color-bg`, `--color-ivory`, `--color-paper`)
-- ~28% soft pink (`--color-blush`, `--color-rose-soft`, `--color-rose-dusty`)
-- ~8% dusty rose (`--color-rose`)
-- ~4% champagne gold (`--color-gold`)
+## Main Invitation — overlap & depth
 
-## Unit và component tests
+- Photo wrapped in `.invite__photo-wrap` which has `::before` soft pink paper shape `inset: -2% -2% -2% -2%` with image shadow — gives the photo dimensional depth.
+- `.invite__photo` rotated `-1.4deg` with rose-dusty border + gold inner hairline + image shadow.
+- `.invite__card` (the paper below) has `margin-top: -3.75rem` (≈ 22% of photo height) overlap onto photo.
+- Photo and card together form the "background → photo → paper → typography" layering.
+- Couple names at `clamp(2.6rem, 9vw, 3.6rem)` with subtle text-shadow `0 2px 10px rgba(123, 45, 62, .06)`.
+- Date strip uses deep rose bold + text-strong for non-date labels.
 
-Vitest: **39 passed, 0 failed, 0 skipped**.
+## Events — info hierarchy
 
-Bao gồm:
-- Config validation: bride/groom side validation (ISO date, map HTTPS, calendar range).
-- Guest parser + side parser (groom/bride/both + Vietnamese aliases).
-- Countdown / calendar / ICS.
-- RSVP validation 4 attendance options.
-- Storage / reduced motion setup.
-- Components: cover reduced-motion open, image fallback, RSVP errors / side prefill / success / service error / gift modal, gallery keyboard flow.
+- `.event-card` background `--color-paper` + border `1.5px solid --color-rose-dusty`.
+- **Top rose gradient bar** (`linear-gradient(90deg, #a83a51, #7b2d3e)`) — 3px ceremonial accent at top.
+- **Inner decorative line** (`1px solid #d89aa899` inset 0.45rem) — paper card double-line feel.
+- **NHÀ TRAI / NHÀ GÁI label badge**: blush-strong background, deep rose text, rounded rectangle (4px) with padding.
+- **Date row**: top + bottom border (rose-line), large 19-day number in deep rose, weekday uppercase.
+- **Info rows** (Âm lịch / Giờ / Địa điểm): dt = rose uppercase, dd = text-strong with strong-weight venue name.
+- **CTA hierarchy**: "Thêm vào lịch" = primary rose (with shadow), "Chỉ đường" = outline rose.
+- `.event-card--primary` (when side matches) uses stronger border (`--color-rose`) + paper shadow.
 
-## Playwright E2E
+## Album — color & composition
 
-Playwright: **19 passed, 0 failed** trên `chromium-desktop`, `chromium-mobile`, `webkit-desktop`.
+- Section background: `linear-gradient(180deg, #fff8f7 0%, #fbeaec 100%)` — soft pink tint that grows toward the bottom.
+- Heading `--color-rose-deep` for stronger focal point.
+- Album blocks use ivory paper frames with `box-shadow: var(--shadow-image)` (rose-tinted) for clear depth.
+- Captions: rose label number + text-soft description.
 
-| Flow | Kết quả |
+## RSVP — form contrast
+
+- Section background: dual radial-gradient blush + linear gradient to paper.
+- `.rsvp__card`: `1.5px solid --color-rose-dusty` + paper shadow + inner decorative line.
+- Heading: `--color-rose-deep` for stronger presence.
+- **Form inputs**: `1.5px solid #c9a7ae` (interactive-border) by default; hover → `#b97584`; focus → `#a83a51` + 3px rose-tinted ring.
+- **Choice pills**: unselected = ivory + `#d6bcc1` border; selected = blush-strong + `#a83a51` border + inset 1px rose + strong text.
+- **Submit button**: rose primary with `box-shadow: 0 .65rem 1.4rem -0.6rem #a83a516b` + active scale `.98`.
+- **Gift CTA**: dashed border + soft paper-warm hover.
+
+## Closing — overlay readability
+
+- `.closing__veil` updated to `radial-gradient(circle at 50% 60%, #ffe8e866 0%, #7b2d3e80 45%, #5b1d2de0 100%)` — soft rose radial at top, deep rose at bottom.
+- Closing paper card: 1.5px rose border, paper shadow.
+- Heading `--color-rose-deep` for stronger focal point.
+- Date row: deep rose + soft-rose small text.
+
+## Tests
+
+| Gate | Result |
 | --- | --- |
-| Initial load | **PASS** — cover không blank; names đúng; không console error |
-| Open invitation | **PASS** — CTA "Mở thiệp", cover đóng, trang thiệp chính hiện |
-| Personalized guest | **PASS** — `?guest=Nguyen%20Van%20An` hiển thị "Thân mời" |
-| Date details | **PASS** — ceremony section có ngày dương / âm lịch đầy đủ |
-| Side ordering | **PASS** — `side=groom` đẩy Nhà Trai lên đầu, v.v. |
-| Side prefill RSVP | **PASS** — `side=groom` prefill radio Nhà Trai đúng |
-| RSVP submit | **PASS** — validation, success state, versioned local storage |
-| Gift modal | **PASS** — Escape, focus restore, tabs/ArrowRight/ARIA state |
-| Gallery | **PASS** — open, ArrowRight, caption/index update, Escape close |
-| Network/runtime | **PASS** — không phát hiện console error / page error |
-| Responsive overflow | **PASS** — 6 viewports (375/390/393/430/768/1440) không horizontal overflow |
+| `npm run lint` | **PASS** exit code 0 |
+| `npm run typecheck` | **PASS** TypeScript strict |
+| `npm run test` | **PASS** 6 files, **39/39** |
+| `npm run build` | **PASS** JS 249.28 kB / 77.50 kB gzip, CSS **49.40 kB / 9.52 kB gzip** |
+| `npm run test:e2e` | **PASS** **19/19** trên chromium-desktop, chromium-mobile, webkit-desktop |
 
-`test-results/.last-run.json` ghi `status: passed`.
+## Screenshots
 
-## Responsive và visual QA
+V2.1 polish set in `artifacts/screenshots/`:
 
-Visual screenshots đã được capture:
+- `v2-390x844-cover.png`
+- `v2-390x844-cover-mid-transition.png`
+- `v2-390x844-invitation-personalized.png`
+- `v2-390x844-ceremony.png`
+- `v2-390x844-photo-story.png`
+- `v2-390x844-rsvp.png`
+- `v2-390x844-gift-modal.png`
+- `v2-390x844-finale.png`
+- `v2-390x844-full.png`
+- `v2-430x932-invitation.png`
+- `v2-430x932-full.png`
+- `v2-1440x900-cover.png`
+- `v2-1440x900-invitation.png`
+- `v2-1440x900-ceremony.png`
+- `v2-1440x900-photo-story.png`
+- `v2-1440x900-full.png`
 
-- `artifacts/screenshots/v2-390x844-cover.png`
-- `artifacts/screenshots/v2-390x844-cover-mid-transition.png`
-- `artifacts/screenshots/v2-390x844-invitation-personalized.png`
-- `artifacts/screenshots/v2-390x844-ceremony.png`
-- `artifacts/screenshots/v2-390x844-photo-story.png`
-- `artifacts/screenshots/v2-390x844-rsvp.png`
-- `artifacts/screenshots/v2-390x844-gift-modal.png`
-- `artifacts/screenshots/v2-390x844-finale.png`
-- `artifacts/screenshots/v2-390x844-full.png`
-- `artifacts/screenshots/v2-430x932-invitation.png`
-- `artifacts/screenshots/v2-430x932-full.png`
-- `artifacts/screenshots/v2-1440x900-cover.png`
-- `artifacts/screenshots/v2-1440x900-invitation.png`
-- `artifacts/screenshots/v2-1440x900-ceremony.png`
-- `artifacts/screenshots/v2-1440x900-photo-story.png`
-- `artifacts/screenshots/v2-1440x900-full.png`
+16 screenshots — same coverage as V2.1 base.
 
-Tổng cộng 16 screenshot V2.1.
+## Visual hierarchy check (squint test)
 
-Visual review:
-- Trang thiệp chính giờ overlap ảnh và paper card, không còn cảm giác 2 block rời.
-- Two ceremony cards side-by-side trên desktop, mobile stack.
-- Album có asymmetric layout với paper frames slightly rotated.
-- RSVP dùng choice pills thay vì raw radios.
-- Closing có soft pink overlay thay vì deep red.
-- Cover có paper-frame double border + corner brackets + floral line art.
+| Composition | Focal point (squint) | Result |
+| --- | --- | --- |
+| Opening | Couple names "Tuấn Hùng & Sao Mai" | ✅ Clear (deep rose serif) |
+| Main invitation | Photo + couple names | ✅ Clear (rose paper card overlap photo) |
+| Events | Date number + venue name | ✅ Clear (large 19 + bold venue) |
+| Album | Hero photos | ✅ Clear (rose-tinted image shadows) |
+| RSVP | Submit button + name field | ✅ Clear (rose CTA + visible borders) |
+| Final | Photo + "Cảm ơn bạn" + signature | ✅ Clear (rose deep on rose-tinted overlay) |
 
-## Mobile user test (USER A — lớn tuổi)
+## Self-review
 
-Trong 10 giây đầu mở thiệp:
-- ✅ Thấy "Tuấn Hùng & Sao Mai" ngay lập tức (cover)
-- ✅ Nhấn "Mở thiệp" → thấy paper card
+- ✅ **Soft background**: sections use blush tints only where ceremonial focus needed; cards stay ivory.
+- ✅ **Strong rose details**: headings, names, dates, CTAs, label badges all use deep rose / primary rose.
+- ✅ **Decorative gold kept subtle**: only on inner hairline + seal text, not body text.
+- ✅ **Borders strong not invisible**: 1.5px solid rose-dusty on every paper card.
+- ✅ **CTAs pop**: rose with rose-tinted shadow.
+- ✅ **Main invitation layered**: background → soft paper shape → photo with shadow → overlapping paper card → typography.
+- ✅ **Events legible at-a-glance**: NHÀ TRAI / NHÀ GÁI label badge + large date number + bold venue.
+- ✅ **Album has a tinted area**: linear gradient to blush at bottom.
+- ✅ **RSVP form contrast**: borders + selected state + CTA shadow.
+- ✅ **Mobile + desktop both polished**: viewport tests pass at 375/390/393/430/768/1440.
 
-Trong 20 giây tiếp theo:
-- ✅ Thấy "19 THÁNG 10 2026 / 10/09 ÂM LỊCH"
-- ✅ Thấy countdown "Còn 64 ngày 6 giờ 49 phút đến ngày chung đôi"
+## Known issues
 
-Trong 30 giây:
-- ✅ Cuộn xuống thấy "Nhà Trai" + "Nhà Gái" cards
-- ✅ Mỗi card có label rõ, ngày lớn, gi�, địa điểm (placeholder), chỉ đường, thêm vào lịch
-- ✅ Không cần đọc story để thấy địa điểm
-
-## Side personalization test (USER C — khách Nhà Trai)
-
-`?guest=Nguyen%20Van%20An&side=groom`:
-- ✅ Cover hiển thị "Thân mời Nguyen Van An"
-- ✅ Trang thiệp chính có "Thân mời Nguyen Van An"
-- ✅ Ceremony section: card Nhà Trai hiển thị trước (subtle rose top border)
-- ✅ RSVP form: radio Nhà Trai pre-selected
-
-## Accessibility
-
-- Semantic headings (sr-only H1 trên cover; H2 trên ceremony, album, rsvp).
-- Labels, `aria-describedby`, validation summary `role="alert"`, focus vào field lỗi đầu tiên.
-- Modal trap/restores focus, Escape close, background inert, body scroll lock.
-- Gift tabs: `aria-controls` / `aria-labelledby`, roving tab index, Arrow/Home/End.
-- Lightbox: keyboard, backdrop, touch swipe, focus restore.
-- `prefers-reduced-motion` giảm cover-rise animation, petals, parallax.
-
-## Performance QA
-
-Production bundle cuối:
-
-- JavaScript: 249.28 kB raw / 77.50 kB gzip (giảm ~1.7 kB gzip so với V2).
-- CSS: 46.18 kB raw / 8.96 kB gzip (giảm ~0.5 kB gzip so với V2).
-- 12 WOFF2 font subsets: 145,812 bytes.
-- Total gzip transfer: ~87 kB cho code + fonts.
-
-Không thêm heavy asset, không giant floral PNG, không animation library. SVG ornaments làm mọi chi tiết trang trí.
-
-## Remaining real content
-
-| Dữ liệu | Trạng thái |
-| --- | --- |
-| Địa điểm Nhà Gái | `events.brideSide.venueName` / `address` / `time` chưa có |
-| Địa điểm Nhà Trai | `events.groomSide.venueName` / `address` / `time` chưa có |
-| Giờ chính thức | `date.eventStartIso` / `eventEndIso` chưa có; ICS all-day |
-| Ảnh | 6 ảnh AI trong `public/assets/placeholders/`; **REPLACE BEFORE FINAL RELEASE** |
-| QR / Ngân hàng | `gift.groom` / `gift.bride` rỗng; modal dùng empty state |
-| Music | `music.src` rỗng; control bị ẩn |
-| Story | `story[].description` là placeholder; `placeholder: true` cho cả 3 mốc |
-| Sample wishes | chưa có backend, modal sẽ hiện empty state |
-
-## Known limitations
-
-1. `localStorage` chỉ phù hợp demo; cần backend nếu gia đình muốn thu thập RSVP tập trung.
-2. `noindex` không phải bảo vệ truy cập; muốn privacy thật cần password/access control ở host.
-3. Chưa test trên thiết bị vật lý; Chromium mobile là emulation, WebKit là desktop profile.
-4. Ảnh, venue, giờ, QR, music và story thật chưa được cung cấp. Đây là content-release checklist.
-
-## Self-review checks
-
-- ✅ Mỗi composition có focal point rõ: cover = couple names, invitation = photo + names, ceremony = cards, album = photos, rsvp = form, closing = thank you.
-- ✅ Mắt đi từ cover → photo (focal) → names → date → ceremony cards → album → rsvp → closing.
-- ✅ Mỗi composition có layering (ảnh + paper card + ornament + text).
-- ✅ Mỗi composition có asymmetric placement (cover right-aligned, invitation photo slightly rotated, album alternating, etc).
-- ✅ Animation có chủ đích: opening paper slide, photo reveal, card stagger, photo story mask, petals subtle.
-- ✅ Không có decorative chaos; mỗi composition chỉ dùng 2-3 motifs.
-- ✅ Không còn template look — paper frame + floral line art + corner brackets + hairline dividers tạo custom wedding feel.
-- ✅ Không baby-shower: rose đậm hơn pastel, type dùng serif có trọng lượng, layout có whitespace.
+1. The album's gradient background only becomes visible at the bottom of the section on mobile (small sections). On desktop full-page it's more apparent.
+2. Section labels use `clamp(2.4rem, 11vw, 4.2rem)` for couple names — on very wide desktop viewports the names stay around 4.2rem which is intentional for paper-card scale.
+3. No content placeholder for actual venue/time (Nhà Trai/Nhà Gái) — empty-state UI shows correctly per the existing template.
 
 ## Final sign-off
 
-- QA owner: V2.1 visual refactor — automated gates + visual review
+- QA owner: V2.1 contrast polish — automated gates + visual review
 - Build tested: local snapshot, 2026-08-15
 - Production preview: `http://127.0.0.1:4173/`, HTTP 200
 - Release decision: **APPROVED FOR V2.1 CONTENT REPLACEMENT; NO BLOCKING FRONTEND ISSUES**

@@ -34,9 +34,10 @@ h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: 500;
   text-wrap: balance;
+  color: var(--color-rose-deep);
 }
 
-p { line-height: 1.72; }
+p { line-height: 1.72; color: var(--color-text); }
 ::selection { background: var(--color-rose); color: var(--color-on-rose); }
 
 :focus-visible {
@@ -49,8 +50,18 @@ p { line-height: 1.72; }
 .container { width: min(100%, calc(var(--content-max) + 2 * var(--page-gutter))); margin-inline: auto; padding-inline: var(--page-gutter); }
 .container--narrow { width: min(100%, calc(var(--content-narrow) + 2 * var(--page-gutter))); margin-inline: auto; padding-inline: var(--page-gutter); }
 .section { padding-block: var(--section-space); position: relative; }
-.eyebrow { color: var(--color-rose); font-size: .72rem; font-weight: 700; letter-spacing: .18em; line-height: 1.4; text-transform: uppercase; }
+
+.eyebrow {
+  color: var(--color-rose);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.eyebrow--rose-deep { color: var(--color-rose-deep); }
 .eyebrow--gold { color: var(--color-gold-deep); }
+
 .sr-only { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
 
 .skip-link { background: var(--color-ivory); color: var(--color-rose); font-size: .875rem; font-weight: 700; left: 1rem; padding: .75rem 1rem; position: fixed; top: -5rem; z-index: 3000; }
@@ -59,7 +70,7 @@ p { line-height: 1.72; }
 .reveal { opacity: 0; transform: translateY(1.125rem); transition: opacity .65s var(--ease-editorial), transform .65s var(--ease-editorial); }
 .reveal.is-visible { opacity: 1; transform: none; }
 
-.folio-note { align-items: center; color: var(--color-muted); display: flex; font-size: .6875rem; font-weight: 700; gap: .75rem; letter-spacing: .14em; text-transform: uppercase; }
+.folio-note { align-items: center; color: var(--color-text-soft); display: flex; font-size: .6875rem; font-weight: 700; gap: .75rem; letter-spacing: .14em; text-transform: uppercase; }
 .folio-note::after { background: var(--color-border); content: ''; flex: 1; height: 1px; }
 
 .error-state { align-items: flex-start; display: flex; flex-direction: column; gap: 1.5rem; justify-content: center; margin: auto; min-height: 100svh; padding: 2rem; width: min(100%, 38rem); }
