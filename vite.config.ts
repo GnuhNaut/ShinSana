@@ -8,7 +8,7 @@ function escapeHtml(value: string): string {
 }
 
 function weddingMetadata(siteUrlOverride = '') {
-  const { seo, couple, date } = weddingConfig
+  const { seo, couple, date, hero } = weddingConfig
   const siteUrl = siteUrlOverride.trim() || seo.siteUrl.trim()
   let socialImage = seo.image
   let urlTag = ''
@@ -26,7 +26,11 @@ function weddingMetadata(siteUrlOverride = '') {
     '{{WEDDING_DESCRIPTION}}': escapeHtml(seo.description),
     '{{WEDDING_ROBOTS}}': escapeHtml(seo.robots),
     '{{WEDDING_IMAGE}}': escapeHtml(socialImage),
+    '{{WEDDING_IMAGE_WIDTH}}': String(seo.imageWidth),
+    '{{WEDDING_IMAGE_HEIGHT}}': String(seo.imageHeight),
+    '{{WEDDING_IMAGE_ALT}}': escapeHtml(`Thiệp cưới ${couple.groom.fullName} và ${couple.bride.fullName}, ngày ${date.display}`),
     '{{WEDDING_OG_URL}}': urlTag,
+    '{{WEDDING_HERO_PRELOAD}}': `<link rel="preload" as="image" href="${escapeHtml(hero.src)}"${hero.srcSet ? ` imagesrcset="${escapeHtml(hero.srcSet)}"` : ''}${hero.sizes ? ` imagesizes="${escapeHtml(hero.sizes)}"` : ''} fetchpriority="high" />`,
     '{{WEDDING_NAMES}}': escapeHtml(`${couple.groom.fullName} & ${couple.bride.fullName}`),
     '{{WEDDING_DATE}}': escapeHtml(date.display),
     '{{WEDDING_LUNAR}}': escapeHtml(date.lunar),

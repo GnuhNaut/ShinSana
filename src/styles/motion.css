@@ -33,7 +33,7 @@
 
 .mask-reveal__content {
   clip-path: inset(0 100% 0 0);
-  transition: clip-path 900ms var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--mask-delay, 0ms);
+  transition: clip-path 720ms var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--mask-delay, 0ms);
 }
 
 .mask-reveal::after {
@@ -54,13 +54,13 @@
 .mask-reveal--down::after { transform: translate3d(0, -101%, 0); }
 
 .mask-reveal.is-visible .mask-reveal__content { clip-path: inset(0); }
-.mask-reveal__content--up    { transform: translate3d(0, 1rem, 0); opacity: 0; transition: opacity .55s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 200ms), transform .7s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 200ms); }
-.mask-reveal__content--scale { transform: scale(.985); opacity: 0; transition: opacity .55s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 200ms), transform .7s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 200ms); }
-.mask-reveal__content--fade  { opacity: 0; transition: opacity .55s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 200ms); }
+.mask-reveal__content--up    { transform: translate3d(0, .75rem, 0); opacity: 0; transition: opacity .48s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 120ms), transform .62s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 120ms); }
+.mask-reveal__content--scale { transform: scale(.99); opacity: 0; transition: opacity .48s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 120ms), transform .62s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 120ms); }
+.mask-reveal__content--fade  { opacity: 0; transition: opacity .48s var(--ease-editorial) calc(var(--mask-delay, 0ms) + 120ms); }
 .mask-reveal.is-visible .mask-reveal__content--up,
 .mask-reveal.is-visible .mask-reveal__content--scale,
 .mask-reveal.is-visible .mask-reveal__content--fade { opacity: 1; transform: none; }
-.mask-reveal.is-visible::after { animation: oriental-mask-left 1.05s var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--mask-delay, 0ms) both; }
+.mask-reveal.is-visible::after { animation: oriental-mask-left .72s var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--mask-delay, 0ms) both; }
 .mask-reveal--right.is-visible::after { animation-name: oriental-mask-right; }
 .mask-reveal--up.is-visible::after { animation-name: oriental-mask-up; }
 .mask-reveal--down.is-visible::after { animation-name: oriental-mask-down; }
@@ -79,7 +79,7 @@
 .gold-reveal__content {
   opacity: 0;
   transform: scale(.92);
-  transition: opacity .65s var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--gold-delay, 0ms), transform .85s var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--gold-delay, 0ms);
+  transition: opacity .5s var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--gold-delay, 0ms), transform .7s var(--ease-editorial, cubic-bezier(.22, 1, .36, 1)) var(--gold-delay, 0ms);
 }
 
 .gold-reveal::after {
@@ -93,7 +93,7 @@
 }
 
 .gold-reveal.is-visible .gold-reveal__content { opacity: 1; transform: none; }
-.gold-reveal.is-visible::after { animation: oriental-gold-sweep 1.2s ease-out calc(var(--gold-delay, 0ms) + 260ms) 1 both; }
+.gold-reveal.is-visible::after { animation: oriental-gold-sweep .75s ease-out calc(var(--gold-delay, 0ms) + 160ms) 1 both; }
 
 .parallax-layer {
   --parallax-y: 0px;

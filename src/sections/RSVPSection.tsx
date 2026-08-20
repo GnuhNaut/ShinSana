@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useCallback, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Gift, Send } from 'lucide-react'
 import { GoldReveal, OrientalReveal } from '../components/motion'
 import { FloralCorner, HairlineDivider, Lotus, RoseSeal } from '../components/ornaments'
@@ -6,6 +6,7 @@ import { Modal } from '../components/ui/Modal'
 import { WeddingImage } from '../components/ui/WeddingImage'
 import { weddingConfig as config } from '../config/wedding'
 import { rsvpService } from '../services/rsvp'
+import type { GiftRecipient } from '../types/wedding'
 import {
   ATTENDANCE_OPTIONS,
   attendanceIsAttending,
@@ -14,56 +15,94 @@ import {
   type RSVPFormErrors,
   type RSVPFormValues,
 } from '../utils/rsvpValidation'
-import { type GuestSide } from '../types/wedding'
 
 interface RSVPSectionProps {
   guestName: string | null
-  side: GuestSide
 }
 
-function defaultAttendance(side: GuestSide): Attendance | '' {
-  if (side === 'groom') return 'groom'
-  if (side === 'bride') return 'bride'
-  return ''
+type GiftRecipientKey = 'groom' | 'bride'
+
+interface AvailableGiftRecipient {
+  key: GiftRecipientKey
+  recipient: GiftRecipient
 }
 
-export function RSVPSection({ guestName, side }: RSVPSectionProps) {
+function hasCompleteBankDetails(recipient: GiftRecipient): boolean {
+  return Boolean(
+    recipient.bankName.trim()
+    && recipient.accountName.trim()
+    && recipient.accountNumber.trim(),
+  )
+}
+
+function hasGiftDetails(recipient: GiftRecipient): boolean {
+  return hasCompleteBankDetails(recipient) || Boolean(recipient.qrImage.trim())
+}
+
+export function RSVPSection({ guestName }: RSVPSectionProps) {
   const initialValues = useMemo<RSVPFormValues>(() => ({
     name: guestName ?? '',
-    attendance: defaultAttendance(side),
+    attendance: '',
     partySize: 1,
     message: '',
-  }), [guestName, side])
+  }), [guestName])
+
+  const availableGiftRecipients = useMemo<AvailableGiftRecipient[]>(() => (
+    (['groom', 'bride'] as const)
+      .map((key) => ({ key, recipient: config.gift[key] }))
+      .filter(({ recipient }) => hasGiftDetails(recipient))
+  ), [])
+  const giftAvailable = config.features.gift
+    && config.gift.enabled
+    && availableGiftRecipients.length > 0
 
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState<RSVPFormErrors>({})
   const [submitting, setSubmitting] = useState(false)
-  const [submittedName, setSubmittedName] = useState('')
+  const submittingRef = useRef(false)
+  const [submittedResponse, setSubmittedResponse] = useState<{
+    name: string
+    attendance: Attendance
+  } | null>(null)
   const [submitError, setSubmitError] = useState('')
   const [giftOpen, setGiftOpen] = useState(false)
-  const [giftTab, setGiftTab] = useState<'groom' | 'bride'>('groom')
+  const [giftTab, setGiftTab] = useState<GiftRecipientKey>(
+    () => availableGiftRecipients[0]?.key ?? 'groom',
+  )
   const closeGift = useCallback(() => setGiftOpen(false), [])
-  const giftTabs = useMemo(() => ['groom', 'bride'] as const, [])
+  const clearError = (field: keyof RSVPFormErrors) => {
+    setErrors((current) => {
+      if (!current[field]) return current
+      const next = { ...current }
+      delete next[field]
+      return next
+    })
+  }
 
-  const onGiftTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, current: 'groom' | 'bride') => {
-    const currentIndex = giftTabs.indexOf(current)
+  const onGiftTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, current: GiftRecipientKey) => {
+    const currentIndex = availableGiftRecipients.findIndex(({ key }) => key === current)
     let nextIndex: number | null = null
-    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % giftTabs.length
-    if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + giftTabs.length) % giftTabs.length
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % availableGiftRecipients.length
+    if (event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + availableGiftRecipients.length) % availableGiftRecipients.length
+    }
     if (event.key === 'Home') nextIndex = 0
-    if (event.key === 'End') nextIndex = giftTabs.length - 1
+    if (event.key === 'End') nextIndex = availableGiftRecipients.length - 1
     if (nextIndex === null) return
+
     event.preventDefault()
-    const nextRecipient = giftTabs[nextIndex]!
-    setGiftTab(nextRecipient)
-    document.getElementById(`gift-tab-${nextRecipient}`)?.focus()
+    const nextRecipient = availableGiftRecipients[nextIndex]
+    if (!nextRecipient) return
+    setGiftTab(nextRecipient.key)
+    document.getElementById(`gift-tab-${nextRecipient.key}`)?.focus()
   }
 
   if (!config.features.rsvp) return null
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (submitting) return
+    if (submittingRef.current) return
+
     const form = event.currentTarget
     const nextErrors = validateRSVP(values)
     setErrors(nextErrors)
@@ -72,31 +111,41 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
       return
     }
 
+    submittingRef.current = true
     setSubmitting(true)
     setSubmitError('')
     try {
+      const name = values.name.trim()
+      const message = values.message.trim()
       const result = await rsvpService.submit({
-        ...values,
-        name: values.name.trim(),
-        message: values.message.trim(),
+        name,
         attendance: values.attendance,
-        partySize: attendanceIsAttending(values.attendance) ? values.partySize : 0,
         submittedAt: new Date().toISOString(),
+        ...(attendanceIsAttending(values.attendance) ? { partySize: values.partySize } : {}),
+        ...(message ? { message } : {}),
       })
-      if (result.ok) setSubmittedName(values.name.trim())
-      else setSubmitError('Chưa thể lưu hồi âm. Vui lòng thử lại.')
+      if (result.ok) {
+        setSubmittedResponse({ name, attendance: values.attendance })
+      } else {
+        setSubmitError('Chưa thể lưu hồi âm. Vui lòng thử lại.')
+      }
     } catch {
       setSubmitError('Kết nối chưa sẵn sàng. Vui lòng thử lại sau ít phút.')
     } finally {
+      submittingRef.current = false
       setSubmitting(false)
     }
   }
 
   const resetForm = () => {
     setValues(initialValues)
-    setSubmittedName('')
+    setSubmittedResponse(null)
     setErrors({})
+    setSubmitError('')
   }
+
+  const selectedGiftRecipient = availableGiftRecipients.find(({ key }) => key === giftTab)
+    ?? availableGiftRecipients[0]
 
   return (
     <section className="rsvp" id="rsvp" aria-labelledby="rsvp-title">
@@ -114,16 +163,28 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
               <HairlineDivider className="rsvp__divider" center="diamond" tone="rose" />
             </OrientalReveal>
 
-            {submittedName ? (
+            {submittedResponse ? (
               <div className="rsvp__success" role="status">
                 <OrientalReveal variant="scale">
                   <Lotus className="rsvp__success-icon" tone="rose" withWater={false} size="3rem" />
                 </OrientalReveal>
                 <p className="rsvp__success-eyebrow">Đã nhận hồi âm</p>
-                <p className="rsvp__success-title">{config.copy.rsvpThanks}</p>
-                <p className="rsvp__success-detail">
-                  Chúng mình rất vui vì <strong>{submittedName}</strong> sẽ đến chung vui.
-                </p>
+                {submittedResponse.attendance === 'yes' ? (
+                  <>
+                    <p className="rsvp__success-title">Cảm ơn bạn đã xác nhận</p>
+                    <p className="rsvp__success-detail">
+                      Chúng mình rất vui vì <strong>{submittedResponse.name}</strong> sẽ đến chung vui.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="rsvp__success-title">Cảm ơn bạn đã hồi âm</p>
+                    <p className="rsvp__success-detail">
+                      Chúng mình rất tiếc khi <strong>{submittedResponse.name}</strong> không thể có mặt,
+                      nhưng luôn trân trọng tình cảm bạn gửi tới.
+                    </p>
+                  </>
+                )}
                 <button type="button" className="text-button" onClick={resetForm}>Gửi một hồi âm khác</button>
               </div>
             ) : (
@@ -143,7 +204,10 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
                     required
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={errors.name ? 'rsvp-name-error' : undefined}
-                    onChange={(event) => setValues({ ...values, name: event.target.value })}
+                    onChange={(event) => {
+                      setValues({ ...values, name: event.target.value })
+                      clearError('name')
+                    }}
                   />
                   {errors.name && <span className="field__error" id="rsvp-name-error">{errors.name}</span>}
                 </div>
@@ -154,7 +218,7 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
                   aria-describedby={errors.attendance ? 'rsvp-attendance-error' : undefined}
                   tabIndex={errors.attendance ? -1 : undefined}
                 >
-                  <legend>Bạn sẽ tham dự chứ? <span aria-hidden="true">*</span></legend>
+                  <legend>Bạn sẽ đến chung vui cùng chúng mình chứ? <span aria-hidden="true">*</span></legend>
                   {ATTENDANCE_OPTIONS.map((option) => (
                     <label className={`choice${values.attendance === option.value ? ' choice--active' : ''}`} key={option.value}>
                       <input
@@ -163,7 +227,11 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
                         value={option.value}
                         required
                         checked={values.attendance === option.value}
-                        onChange={() => setValues({ ...values, attendance: option.value })}
+                        onChange={() => {
+                          setValues({ ...values, attendance: option.value })
+                          clearError('attendance')
+                          clearError('partySize')
+                        }}
                       />
                       <span>
                         <strong>{option.label}</strong>
@@ -180,14 +248,21 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
                     <select
                       id="rsvp-party-size"
                       value={values.partySize}
+                      required
                       aria-invalid={Boolean(errors.partySize)}
-                      onChange={(event) => setValues({ ...values, partySize: Number(event.target.value) })}
+                      aria-describedby={errors.partySize ? 'rsvp-party-size-error' : undefined}
+                      onChange={(event) => {
+                        setValues({ ...values, partySize: Number(event.target.value) })
+                        clearError('partySize')
+                      }}
                     >
                       {Array.from({ length: 10 }, (_, index) => index + 1).map((number) => (
                         <option key={number} value={number}>{number} người</option>
                       ))}
                     </select>
-                    {errors.partySize && <span className="field__error">{errors.partySize}</span>}
+                    {errors.partySize && (
+                      <span className="field__error" id="rsvp-party-size-error">{errors.partySize}</span>
+                    )}
                   </div>
                 )}
 
@@ -195,12 +270,16 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
                   <label htmlFor="rsvp-message">Gửi đôi lời tới Hùng &amp; Mai <small>Không bắt buộc</small></label>
                   <textarea
                     id="rsvp-message"
+                    name="message"
                     rows={4}
                     value={values.message}
                     maxLength={501}
                     aria-invalid={Boolean(errors.message)}
                     aria-describedby={errors.message ? 'rsvp-message-error' : undefined}
-                    onChange={(event) => setValues({ ...values, message: event.target.value })}
+                    onChange={(event) => {
+                      setValues({ ...values, message: event.target.value })
+                      clearError('message')
+                    }}
                   />
                   <div className="field__meta">
                     {errors.message ? <span className="field__error" id="rsvp-message-error">{errors.message}</span> : <span />}
@@ -209,15 +288,20 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
                 </div>
 
                 <button className="button button--primary button--full" type="submit" disabled={submitting}>
-                  <Send aria-hidden="true" /> {submitting ? 'Đang gửi…' : 'Gửi xác nhận'}
+                  <Send aria-hidden="true" /> {submitting ? 'Đang gửi…' : 'Gửi lời xác nhận'}
                 </button>
                 {submitError && <p className="form-error" role="alert">{submitError}</p>}
-                <p className="rsvp__note">Bản thử nghiệm chỉ lưu hồi âm trên thiết bị này; gia đình chưa nhận được dữ liệu.</p>
+                {rsvpService.mode === 'local-demo' && (
+                  <p className="rsvp__note">
+                    <strong>Chế độ demo cục bộ:</strong> hồi âm chỉ được lưu trên thiết bị này;
+                    gia đình chưa nhận được dữ liệu.
+                  </p>
+                )}
               </form>
             )}
           </article>
 
-          {config.features.gift && config.gift.enabled && (
+          {giftAvailable && (
             <OrientalReveal className="rsvp__gift" variant="up" delay={200}>
               <h3 className="rsvp__gift-title">{config.copy.giftLabel}</h3>
               <p>{config.copy.giftIntro}</p>
@@ -229,49 +313,71 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
         </div>
       </div>
 
-      <GoldReveal block>
-        <Modal open={giftOpen} onClose={closeGift} title="gửi quà mừng" className="gift-modal">
-          <div className="gift-modal__frame">
-            <FloralCorner className="gift-modal__peony" tone="rose" variant="bloom" />
-            <div className="gift-modal__header">
-              <Lotus className="gift-modal__lotus" tone="rose" withWater={false} size="2.5rem" />
-              <p className="eyebrow">Tấm lòng trân quý</p>
-              <h2>{config.copy.giftLabel}</h2>
-              <p>Chọn Nhà Trai hoặc Nhà Gái để xem thông tin chuyển khoản.</p>
-            </div>
-            <div className="gift-tabs" role="tablist" aria-label="Người nhận quà">
-              {giftTabs.map((value) => (
-                <button
-                  type="button"
-                  role="tab"
-                  id={`gift-tab-${value}`}
-                  aria-controls="gift-panel"
-                  aria-selected={giftTab === value}
-                  tabIndex={giftTab === value ? 0 : -1}
-                  className={giftTab === value ? 'is-active' : ''}
-                  onClick={() => setGiftTab(value)}
-                  onKeyDown={(event) => onGiftTabKeyDown(event, value)}
-                  key={value}
+      {giftAvailable && selectedGiftRecipient && (
+        <GoldReveal block>
+          <Modal open={giftOpen} onClose={closeGift} title="gửi quà mừng" className="gift-modal">
+            <div className="gift-modal__frame">
+              <FloralCorner className="gift-modal__peony" tone="rose" variant="bloom" />
+              <div className="gift-modal__header">
+                <Lotus className="gift-modal__lotus" tone="rose" withWater={false} size="2.5rem" />
+                <p className="eyebrow">Tấm lòng trân quý</p>
+                <h2>{config.copy.giftLabel}</h2>
+                <p>
+                  {availableGiftRecipients.length === 1
+                    ? `Thông tin gửi quà mừng tới ${selectedGiftRecipient.recipient.label}.`
+                    : 'Chọn Nhà Trai hoặc Nhà Gái để xem thông tin chuyển khoản.'}
+                </p>
+              </div>
+
+              {availableGiftRecipients.length === 2 && (
+                <div className="gift-tabs" role="tablist" aria-label="Người nhận quà">
+                  {availableGiftRecipients.map(({ key, recipient }) => (
+                    <button
+                      type="button"
+                      role="tab"
+                      id={`gift-tab-${key}`}
+                      aria-controls="gift-panel"
+                      aria-selected={giftTab === key}
+                      tabIndex={giftTab === key ? 0 : -1}
+                      className={giftTab === key ? 'is-active' : ''}
+                      onClick={() => setGiftTab(key)}
+                      onKeyDown={(event) => onGiftTabKeyDown(event, key)}
+                      key={key}
+                    >
+                      {recipient.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {availableGiftRecipients.length === 2 ? (
+                <div
+                  className="gift-modal__body"
+                  role="tabpanel"
+                  id="gift-panel"
+                  aria-labelledby={`gift-tab-${selectedGiftRecipient.key}`}
                 >
-                  {config.gift[value].label}
-                </button>
-              ))}
+                  <GiftPanel recipient={selectedGiftRecipient.recipient} />
+                </div>
+              ) : (
+                <div className="gift-modal__body">
+                  <GiftPanel recipient={selectedGiftRecipient.recipient} />
+                </div>
+              )}
             </div>
-            <div className="gift-modal__body" role="tabpanel" id="gift-panel" aria-labelledby={`gift-tab-${giftTab}`}>
-              <GiftPanel recipient={config.gift[giftTab]} />
-            </div>
-          </div>
-        </Modal>
-      </GoldReveal>
+          </Modal>
+        </GoldReveal>
+      )}
     </section>
   )
 }
 
-function GiftPanel({ recipient }: { recipient: typeof config.gift.groom }) {
-  const hasBankDetails = Boolean(recipient.bankName && recipient.accountName && recipient.accountNumber)
-  return hasBankDetails ? (
+function GiftPanel({ recipient }: { recipient: GiftRecipient }) {
+  const showBankDetails = hasCompleteBankDetails(recipient)
+
+  return (
     <>
-      {recipient.qrImage && (
+      {recipient.qrImage.trim() && (
         <WeddingImage
           wrapperClassName="gift-modal__qr"
           src={recipient.qrImage}
@@ -279,17 +385,13 @@ function GiftPanel({ recipient }: { recipient: typeof config.gift.groom }) {
           aspectRatio="1 / 1"
         />
       )}
-      <dl>
-        <div><dt>Ngân hàng</dt><dd>{recipient.bankName}</dd></div>
-        <div><dt>Chủ tài khoản</dt><dd>{recipient.accountName}</dd></div>
-        <div><dt>Số tài khoản</dt><dd>{recipient.accountNumber}</dd></div>
-      </dl>
+      {showBankDetails && (
+        <dl>
+          <div><dt>Ngân hàng</dt><dd>{recipient.bankName}</dd></div>
+          <div><dt>Chủ tài khoản</dt><dd>{recipient.accountName}</dd></div>
+          <div><dt>Số tài khoản</dt><dd>{recipient.accountNumber}</dd></div>
+        </dl>
+      )}
     </>
-  ) : (
-    <div className="gift-empty">
-      <div className="gift-empty__qr" aria-hidden="true"><span>{config.couple.monogram}</span></div>
-      <h3>Thông tin sẽ được cập nhật</h3>
-      <p>Chúng mình chưa đăng thông tin ngân hàng hoặc mã QR thật cho {recipient.label}.</p>
-    </div>
   )
 }

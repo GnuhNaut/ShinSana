@@ -38,6 +38,11 @@ export interface GiftRecipient {
   qrImage: string
 }
 
+export interface FamilyParents {
+  father: string
+  mother: string
+}
+
 export interface CeremonyCalendar {
   /** ISO 8601 with offset, e.g. 2026-10-19T10:00:00+07:00. Empty = all-day. */
   eventStartIso: string
@@ -45,19 +50,28 @@ export interface CeremonyCalendar {
   eventEndIso: string
 }
 
+export type CeremonySide = 'bride' | 'groom'
+
 export interface CeremonyEvent {
+  /** Stable key used by React and calendar downloads; it is not guest-facing copy. */
+  id: string
+  /** Optional family affinity used only to personalize event ordering. */
+  side?: CeremonySide
   enabled: boolean
   label: string
-  /** Free-form title such as "Lễ vu quy" / "Lễ thành hôn". Empty until family confirms. */
+  /** Free-form ceremony title. Empty until the family confirms the ceremony type. */
   eventTitle: string
   /** ISO date YYYY-MM-DD. Empty until family confirms. */
   date: string
   /** Lunar date string entered by the family. Empty until family confirms. */
   lunarDate: string
-  /** Display time such as "09:00". Empty until family confirms. */
-  time: string
+  /** Display times such as "09:00". Empty until family confirms. */
+  guestArrivalTime: string
+  ceremonyTime: string
+  banquetTime: string
   venueName: string
   address: string
+  phone: string
   /** HTTPS map navigation URL. Empty until family confirms. */
   mapNavigationUrl: string
   /** HTTPS map embed URL. Empty until family confirms. */
@@ -84,16 +98,25 @@ export interface WeddingConfig {
     lunarLong: string
     timezone: string
   }
-  events: {
-    brideSide: CeremonyEvent
-    groomSide: CeremonyEvent
+  families: {
+    groomParents: FamilyParents
+    brideParents: FamilyParents
   }
+  events: CeremonyEvent[]
   hero: ImageAsset
   story: StoryChapter[]
   gallery: GalleryImage[]
   music: { title: string; artist: string; src: string }
   gift: { enabled: boolean; groom: GiftRecipient; bride: GiftRecipient }
-  seo: { title: string; description: string; image: string; robots: string; siteUrl: string }
+  seo: {
+    title: string
+    description: string
+    image: string
+    imageWidth: number
+    imageHeight: number
+    robots: string
+    siteUrl: string
+  }
   features: {
     music: boolean
     rsvp: boolean

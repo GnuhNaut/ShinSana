@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUp, Music, Volume2, VolumeX } from 'lucide-react'
+import { ArrowUp, Volume2, VolumeX } from 'lucide-react'
 import { weddingConfig as config } from '../../config/wedding'
 
 export function FloatingControls() {
@@ -33,8 +33,8 @@ export function FloatingControls() {
       <div className="scroll-progress" aria-hidden="true"><span style={{ transform: `scaleX(${progress})` }} /></div>
       <div className="floating-controls">
         {config.features.music && config.music.src && (
-          <><audio ref={audioRef} src={config.music.src} loop preload="none" onEnded={() => setPlaying(false)} />
-          <button className="icon-button" type="button" onClick={toggleMusic} aria-label={playing ? 'Tắt nhạc' : 'Bật nhạc'} title={config.music.title || 'Nhạc nền'}>{playing ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}<span className="sr-only"><Music />{playing ? 'Đang phát' : 'Đang tắt'}</span></button></>
+          <><audio ref={audioRef} src={config.music.src} loop preload="none" onEnded={() => setPlaying(false)} onPause={() => setPlaying(false)} />
+          <button className="icon-button" type="button" onClick={toggleMusic} aria-label={playing ? 'Tắt nhạc' : 'Bật nhạc'} aria-pressed={playing} title={config.music.title || 'Nhạc nền'}>{playing ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}</button></>
         )}
         {showTop && <button className="icon-button" type="button" aria-label="Về đầu trang" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })}><ArrowUp aria-hidden="true" /></button>}
       </div>

@@ -17,6 +17,16 @@ describe('countdown calculation', () => {
     })
   })
 
+  it('compares a UTC device clock with the Vietnam-offset target as absolute instants', () => {
+    expect(getCountdownParts(target, new Date('2026-10-16T13:55:54Z'))).toEqual({
+      days: 2,
+      hours: 3,
+      minutes: 4,
+      seconds: 6,
+      isComplete: false,
+    })
+  })
+
   it.each([
     ['at the wedding instant', '2026-10-19T00:00:00+07:00'],
     ['after the wedding', '2026-10-20T12:00:00+07:00'],

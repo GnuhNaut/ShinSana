@@ -28,7 +28,7 @@ export function Countdown({ target, compact = false }: CountdownProps) {
     const sync = () => {
       if (inViewport && !document.hidden) {
         update()
-        if (interval === null) interval = window.setInterval(update, 1_000)
+        if (interval === null) interval = window.setInterval(update, compact ? 60_000 : 1_000)
       } else stop()
     }
 
@@ -50,12 +50,12 @@ export function Countdown({ target, compact = false }: CountdownProps) {
       document.removeEventListener('visibilitychange', sync)
       stop()
     }
-  }, [target])
+  }, [compact, target])
 
   if (countdown.isComplete) {
     return (
       <div className="countdown countdown--complete" aria-live="polite" ref={rootRef} role="status">
-        <strong>Chúng mình đã về chung một nhà</strong>
+        <strong>Ngày hạnh phúc của chúng mình đã đến</strong>
       </div>
     )
   }

@@ -3,7 +3,7 @@ import { ATTENDANCE_OPTIONS, validateRSVP, type RSVPFormValues } from '../utils/
 
 const validValues: RSVPFormValues = {
   name: 'Nguyễn Văn An',
-  attendance: 'bride',
+  attendance: 'yes',
   partySize: 2,
   message: 'Hẹn gặp hai bạn!',
 }
@@ -25,7 +25,7 @@ describe('RSVP validation', () => {
   })
 
   it('does not require a party size when the guest cannot attend', () => {
-    expect(validateRSVP({ ...validValues, attendance: 'none', partySize: 0 })).toEqual({})
+    expect(validateRSVP({ ...validValues, attendance: 'no', partySize: 0 })).toEqual({})
   })
 
   it('enforces the name and optional-message limits', () => {
@@ -35,7 +35,10 @@ describe('RSVP validation', () => {
     expect(errors.message).toBeDefined()
   })
 
-  it('exposes the four ceremonial attendance options', () => {
-    expect(ATTENDANCE_OPTIONS.map(({ value }) => value)).toEqual(['bride', 'groom', 'both', 'none'])
+  it('exposes only the explicit yes/no attendance choices', () => {
+    expect(ATTENDANCE_OPTIONS).toEqual([
+      expect.objectContaining({ value: 'yes', label: 'Có, tôi sẽ tham dự' }),
+      expect.objectContaining({ value: 'no', label: 'Rất tiếc, tôi không thể tham dự' }),
+    ])
   })
 })

@@ -1,329 +1,111 @@
-# Hướng dẫn thay nội dung thiệp cưới — V2
+# Hướng dẫn thay nội dung thiệp cưới
 
-Tài liệu này dành cho người cập nhật nội dung, kể cả khi không chuyên React. Phần lớn thay đổi chỉ cần chỉnh một file:
-
-```text
-src/config/wedding.ts
-```
-
-Giữ nguyên dấu phẩy, dấu nháy và tên trường. Sau khi sửa, luôn chạy:
+Toàn bộ nội dung thay được nằm trong `src/config/wedding.ts`. Không cần sửa JSX. Sau mỗi lần cập nhật, chạy:
 
 ```bash
 npm run typecheck
+npm run test
 npm run build
 ```
 
-Nếu TypeScript báo lỗi, kiểm tra lại dấu nháy, dấu phẩy, trường bị thiếu và kiểu dữ liệu trước khi phát hành.
+## Dữ liệu đang để trống có chủ đích
 
-## 1. Thay tên cô dâu / chú rể
+Website hiện **không có** tên bố mẹ, giờ đón khách/cử hành/vào tiệc, địa điểm, địa chỉ, map, phone, QR, nhạc và ảnh thật. UI tự ẩn các phần này; không điền chuỗi “chưa cập nhật” để hiển thị ra production.
 
-Tìm nhóm `couple`:
+## 1. Tên, ngày và bố mẹ
 
-```ts
-couple: {
-  groom: {
-    firstName: 'Hùng',
-    fullName: 'Tuấn Hùng',
-    // ...
-  },
-  bride: {
-    firstName: 'Mai',
-    fullName: 'Sao Mai',
-    // ...
-  },
-  signature: 'Hùng & Mai',
-  monogram: 'H × M',
-},
-```
+- Tên/chữ ký/monogram: `couple.groom`, `couple.bride`, `couple.signature`, `couple.monogram`.
+- Ngày chính: `date.iso`, `date.countdownIso`, `date.display*`, `date.lunar*`, `date.timezone`.
+- Bố mẹ: `families.groomParents.{father,mother}` và `families.brideParents.{father,mother}`. Trường rỗng không render.
+- `countdownIso` và mọi giờ ISO phải kèm offset Việt Nam `+07:00`. Ngày âm lịch phải do gia đình xác nhận.
 
-Thay đồng thời `firstName`, `fullName`, `signature` và `monogram`. Nếu title hoặc description đang chứa tên hai bạn, cập nhật thêm nhóm `seo`; Vite sẽ đưa metadata từ config vào `<head>` khi dev/build.
+## 2. Thêm một hoặc hai buổi lễ
 
-## 2. Thay ngày cưới (trang thiệp chính)
-
-Nhóm `date` chỉ dùng cho **TRANG THIỆP CHÍNH** (cover, lời mời, calendar mini, countdown, kết thiệp). Ngày buổi lễ riêng nằm ở `events.brideSide` / `events.groomSide`.
+`events` là mảng linh hoạt. Hai object rỗng đang có chỉ là template. Điền dữ liệu đã xác nhận rồi đổi `enabled: true`:
 
 ```ts
-date: {
-  iso: '2026-10-19',
-  countdownIso: '2026-10-19T00:00:00+07:00',
-  eventStartIso: '',
-  eventEndIso: '',
-  display: '19.10.2026',
-  displayLong: '19 tháng 10 năm 2026',
-  weekday: 'Thứ Hai',
-  lunar: '10/09 âm lịch',
-  lunarLong: '10 tháng 09 âm lịch',
-  timezone: 'Asia/Ho_Chi_Minh',
-},
-```
-
-- `iso` dùng định dạng `YYYY-MM-DD`. Khi `eventStartIso` và `eventEndIso` cùng để rỗng, file `.ics` tạo sự kiện cả ngày.
-- `countdownIso` cần cả giờ và UTC offset. Khi có giờ cưới thật, nhập chính xác; không tự đổi timezone.
-- Muốn file `.ics` có giờ bắt đầu/kết thúc, điền **cả hai** `eventStartIso` và `eventEndIso` theo ISO 8601 kèm UTC offset, ví dụ `2026-10-19T18:00:00+07:00` và `2026-10-19T21:00:00+07:00`. Không chỉ điền một trường.
-- Ngày âm lịch phải do gia đình xác nhận. Website không tự tính.
-
-## 3. Thay ngày, giờ, địa điểm cho Nhà Trai và Nhà Gái
-
-V2 tách hẳn hai sự kiện độc lập. Mỗi bên có đầy đủ ngày, giờ, địa điểm, địa chỉ, map, calendar riêng:
-
-```ts
-events: {
-  brideSide: {
-    enabled: true,
-    label: 'Nhà Gái',
-    eventTitle: 'Lễ vu quy',
-    date: '2026-10-19',
-    lunarDate: '10/09 âm lịch',
-    time: '09:00',
-    venueName: 'Tư gia Nhà Gái',
-    address: 'Số 12, Ngõ 3, ..., Hà Nội',
-    mapNavigationUrl: 'https://maps.google.com/...',
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=...',
-    calendar: {
-      eventStartIso: '2026-10-19T09:00:00+07:00',
-      eventEndIso:   '2026-10-19T11:00:00+07:00',
-    },
-  },
-  groomSide: {
-    enabled: true,
-    label: 'Nhà Trai',
-    eventTitle: 'Lễ thành hôn',
-    date: '2026-10-19',
-    lunarDate: '10/09 âm lịch',
-    time: '15:00',
-    venueName: 'Tư gia Nhà Trai',
-    address: 'Số 8, ..., Hà Nội',
-    mapNavigationUrl: 'https://maps.google.com/...',
-    mapEmbedUrl: '',
-    calendar: {
-      eventStartIso: '2026-10-19T15:00:00+07:00',
-      eventEndIso:   '2026-10-19T17:00:00+07:00',
-    },
-  },
-},
-```
-
-Quy tắc:
-
-- `enabled` bật/tắt tấm thiệp con; vẫn giữ dữ liệu trong config.
-- `eventTitle` có thể để rỗng; hệ thống sẽ dùng `Lễ vu quy · Sao Mai` (Nhà Gái) hoặc `Lễ thành hôn · Tuấn Hùng` (Nhà Trai).
-- `date` ở dạng `YYYY-MM-DD`. Nếu rỗng, hệ thống dùng `date.iso` làm fallback; **không tự suy diễn**.
-- `lunarDate` nên do gia đình xác nhận. Nếu rỗng, hệ thống dùng `date.lunar` làm fallback.
-- `time` hiển thị tự do, ví dụ `09:00`, `09:00 - 11:00`, `Sáng`. Nếu rỗng, hiển thị `—`.
-- `mapNavigationUrl` mở nút "Chỉ đường" sang ứng dụng bản đồ. **HTTPS** bắt buộc.
-- `mapEmbedUrl` render iframe bản đồ lazy-load. **HTTPS** bắt buộc; nếu rỗng, hiển thị placeholder.
-- `calendar.eventStartIso` / `eventEndIso` tuỳ chọn. Nếu cả hai rỗng, file `.ics` là sự kiện cả ngày. Nếu có, **điền cả hai** và `eventEndIso` phải sau `eventStartIso`.
-- Hai bên hoàn toàn độc lập: có thể trùng ngày hoặc khác ngày đều được.
-
-## 4. Thay ảnh cưới ở đâu?
-
-### Cách đơn giản nhất: giữ nguyên tên file
-
-Thay sáu file trong `public/assets/placeholders/` bằng ảnh WebP thật cùng tên:
-
-```text
-hero.webp
-couple-groom.webp
-couple-bride.webp
-story-01.webp
-story-02.webp
-gallery-detail.webp
-```
-
-Cách này không cần sửa đường dẫn, nhưng vẫn cần cập nhật `alt`, `aspectRatio` và `objectPosition` trong config cho đúng ảnh thật.
-
-### Cách khuyến nghị: tách ảnh thật khỏi placeholder
-
-1. Tạo thư mục `public/assets/images/`.
-2. Chép ảnh đã tối ưu vào đó, ví dụ `public/assets/images/hero.webp`.
-3. Trong config, đổi `src` thành `/assets/images/hero.webp`.
-4. Viết `alt` mô tả nội dung ảnh; không dùng tên file làm alt.
-5. Chỉnh `aspectRatio` (ví dụ `'4 / 5'`, `'3 / 2'`, `'16 / 10'`) và `objectPosition` (ví dụ `'50% 40%'`) để crop đúng chủ thể.
-
-Các điểm ảnh chính:
-
-| Vị trí | Trường config |
-| --- | --- |
-| Trang thiệp chính (hero) | `hero` |
-| Chân dung chú rể | `couple.groom.portrait` |
-| Chân dung cô dâu | `couple.bride.portrait` |
-| Ảnh câu chuyện | `story[n].image` |
-| Gallery nhỏ | `gallery[n]` |
-| Ảnh social | `seo.image` — Vite dùng trường này cho `og:image` và `twitter:image` |
-
-## 5. Thay QR và thông tin quà mừng ở đâu?
-
-Gift giờ là modal nhỏ mở từ khu vực RSVP. Hai bên có thông tin riêng:
-
-```ts
-gift: {
+{
+  id: 'groom-ceremony',
+  side: 'groom', // 'groom' | 'bride' | bỏ trống
   enabled: true,
-  groom: {
-    label: 'Nhà Trai',
-    bankName: 'Tên ngân hàng',
-    accountName: 'TÊN CHỦ TÀI KHOẢN',
-    accountNumber: 'Số tài khoản',
-    qrImage: '/assets/images/qr-groom.webp',
+  label: 'Nhà Trai',
+  eventTitle: 'Lễ Thành Hôn', // hoặc Lễ Vu Quy / Tiệc Cưới theo xác nhận
+  date: '2026-10-19',
+  lunarDate: '10/09 âm lịch',
+  guestArrivalTime: '17:30',
+  ceremonyTime: '18:00',
+  banquetTime: '18:30',
+  venueName: 'Tên địa điểm thật',
+  address: 'Địa chỉ thật',
+  phone: 'Số điện thoại thật',
+  mapNavigationUrl: 'https://...',
+  mapEmbedUrl: 'https://...',
+  calendar: {
+    eventStartIso: '2026-10-19T18:00:00+07:00',
+    eventEndIso: '2026-10-19T21:00:00+07:00',
   },
-  bride: {
-    label: 'Nhà Gái',
-    bankName: 'Tên ngân hàng',
-    accountName: 'TÊN CHỦ TÀI KHOẢN',
-    accountNumber: 'Số tài khoản',
-    qrImage: '/assets/images/qr-bride.webp',
-  },
-},
-```
-
-`features.gift: true` + `gift.enabled: true` mới hiện nút mở modal. Khi cả ba trường ngân hàng rỗng, modal hiển thị empty state chờ cập nhật.
-
-Đối chiếu từng ký tự với gia đình và quét thử QR bằng ít nhất hai thiết bị. Dữ liệu này được đóng gói công khai trong static JavaScript; modal không phải lớp bảo mật.
-
-## 6. Thay câu chuyện ở đâu?
-
-Tìm mảng `story`. Mỗi phần tử có cấu trúc:
-
-```ts
-{
-  chapter: 'Mốc 01',
-  year: 'Khởi đầu',
-  title: 'Tiêu đề thật',
-  description: 'Câu chuyện đã được hai bạn duyệt.',
-  image: {
-    src: '/assets/images/story-01.webp',
-    alt: 'Mô tả ảnh',
-    aspectRatio: '4 / 5',
-    objectPosition: '50% 50%',
-  },
-  placeholder: false,
-},
-```
-
-Tối đa 3 mốc theo mặc định. Có thể thêm/bớt nhưng **không bịa** ngày gặp nhau / cầu hôn. Đặt `placeholder: false` sau khi nội dung thật đã được hai bạn duyệt để bỏ nhãn nội dung mẫu.
-
-`copy.storyIntro` là lời dẫn đầu section.
-
-## 7. Thay gallery ở đâu?
-
-```ts
-{
-  id: 'unique-photo-id',
-  src: '/assets/images/gallery-07.webp',
-  alt: 'Mô tả ngắn, cụ thể về ảnh',
-  aspectRatio: '4 / 5',
-  objectPosition: '50% 45%',
-  layout: 'portrait',
-  caption: 'Caption ngắn',
 }
 ```
 
-- `id` phải duy nhất.
-- `layout` chỉ nhận `portrait`, `landscape`, `feature` hoặc `detail`.
-- V2 hiển thị tối đa 6 ảnh gallery. Xen kẽ tỷ lệ để giữ bố cục trên 390px và 1440px.
-- `features.gallery: false` để ẩn cụm gallery trong section câu chuyện.
+- Không có fallback tự đoán loại lễ/ngày/giờ/địa điểm.
+- Map chỉ nhận HTTPS; iframe chỉ render khi có `mapEmbedUrl` thật.
+- Calendar cần cả start và end, end phải sau start.
+- Một event bật thì render một card; hai event bật thì render hai card. `?side=groom|bride` chỉ đổi thứ tự ưu tiên.
 
-## 8. Thêm nhạc
+## 3. Ảnh thật và crop
 
-```ts
-music: {
-  title: 'Tên bài',
-  artist: 'Nghệ sĩ',
-  src: '/assets/audio/wedding-theme.mp3',
-},
-```
+Xem provenance/checklist tại `docs/PLACEHOLDER_ASSETS.md`. Cách nhanh nhất là thay đúng tên file và tạo đủ biến thể responsive; cách sạch hơn là đặt ảnh thật trong `public/assets/images/` rồi đổi `src`, `srcSet`, `sizes`, `alt`, `aspectRatio`, `objectPosition` trong config.
 
-`features.music: true` và `music.src` có giá trị. Trình duyệt không phát âm thanh trước tương tác người dùng; khách chủ động bật / tắt bằng floating control.
+Các nhóm chính: `hero`, `couple.*.portrait`, `story[]`, `gallery[]`. Gallery giới hạn 4 ảnh để thiệp không quá dài. Ảnh dưới fold lazy-load; hero eager/high-priority.
 
-## 9. Sửa lời dẫn và copy
+Social preview dùng `public/assets/social-preview.jpg` (1200×630) qua `seo.image`. Phải thay bằng ảnh được cặp đôi duyệt trước khi phát hành.
 
-Các câu dùng xuyên trang nằm trong `copy`:
+## 4. Câu chuyện
 
-- `coverEyebrow`, `coverHint` — viền trên cover và gợi ý chạm.
-- `invitationTitle`, `invitationGeneric`, `invitationPersonalized`, `invitationBody` — lời mời trong trang thiệp chính.
-- `ceremonyTitle`, `ceremonyIntro` — heading section hôn lễ.
-- `detailsNote` — copy khi địa điểm chưa có.
-- `storyIntro` — lời dẫn chuyện chúng mình.
-- `rsvpTitle`, `rsvpIntro`, `rsvpThanks` — heading + intro + cảm ơn.
-- `giftLabel`, `giftIntro` — heading + intro modal quà.
-- `finalTitle`, `finalMessage` — kết thiệp.
+`story` hiện rỗng vì chưa có dữ liệu thật. Có thể thêm tối đa 3 `StoryChapter`; không bịa ngày gặp/cầu hôn. Khi rỗng, website chỉ hiện `copy.storyIntro` trung tính và gallery.
 
-Giữ tiếng Việt là chính. Có thể giữ một vài subtitle tiếng Anh ngắn ở eyebrow, nhưng trải nghiệm chính phải Việt Nam.
+## 5. RSVP
 
-## 10. Bật / tắt tính năng
+Form hiện lưu qua `RSVPService` ở `src/services/rsvp/`. Adapter mặc định là `local-demo`: dữ liệu chỉ nằm trong `localStorage` của đúng browser, **không tới gia đình**. Muốn dùng production, tạo adapter `mode: 'remote'` triển khai cùng interface; backend phải có validation, rate-limit, chống spam và chính sách dữ liệu.
+
+## 6. Quà mừng
+
+Để bật, cần `features.gift: true`, `gift.enabled: true` và ít nhất một bên có QR hoặc đủ ba trường ngân hàng:
 
 ```ts
-features: {
-  music: true,
-  rsvp: true,
-  wish: true,           // legacy — không render section
-  gift: true,
-  personalizedGuest: true,
-  gallery: true,
-}
+bankName: '...'
+accountName: '...'
+accountNumber: '...'
+qrImage: '/assets/images/qr-groom.webp'
 ```
 
-Sau khi đổi flag, xem lại section transition trên cả mobile / desktop.
+Không có dữ liệu thật thì CTA/modal không render. QR và số tài khoản là dữ liệu công khai trong JavaScript; kiểm tra bằng ít nhất hai thiết bị.
 
-## 11. Nối RSVP backend
+## 7. Nhạc
 
-UI chỉ phụ thuộc interface `src/services/rsvp/types.ts`. Adapter local và điểm export hiện tại:
+Điền `music.{title,artist,src}` và bật `features.music`. Website không hack autoplay; khách chủ động bật/tắt bằng nút nổi.
+
+## 8. Link cá nhân hóa
 
 ```text
-src/services/rsvp/localRSVPService.ts
-src/services/rsvp/index.ts
+/?guest=Nguy%E1%BB%85n%20V%C4%83n%20A
+/?guest=Nguy%E1%BB%85n%20V%C4%83n%20A&side=groom
 ```
 
-Tạo `apiRSVPService.ts` triển khai `RSVPService`, rồi đổi export trong `index.ts`. Không cần sửa form nếu contract được giữ nguyên.
+Tên được loại control characters, chuẩn hóa khoảng trắng, giới hạn 80 ký tự và React render như text. Query không phải cơ chế bảo mật.
 
-Backend production cần:
+## 9. SEO / Zalo / Facebook
 
-- validation phía server, rate limiting và chống spam;
-- TLS, xử lý lỗi mạng, timeout và duplicate submissions;
-- chính sách lưu giữ / xoá dữ liệu khách;
-- không đặt secret trong code hoặc biến `VITE_*`.
+Cập nhật `seo.title`, `seo.description`, `seo.image`, `seo.imageWidth`, `seo.imageHeight`. Khi có domain HTTPS thật, đặt `VITE_SITE_URL` trong môi trường deploy hoặc `seo.siteUrl`; build sẽ tạo canonical, `og:url` và URL ảnh social tuyệt đối. Không bịa domain trong source.
 
-## 12. Guest URL
+## Checklist trước phát hành
 
-Mẫu generic:
-
-```text
-https://domain-cua-ban.vn/
-```
-
-Mẫu cá nhân hoá + phía:
-
-```text
-https://domain-cua-ban.vn/?guest=Nguyen%20Van%20An
-https://domain-cua-ban.vn/?guest=Nguy%E1%BB%85n%20V%C4%83n%20An
-https://domain-cua-ban.vn/?guest=Nguyen%20Van%20An&side=groom
-https://domain-cua-ban.vn/?guest=Nguyen%20Van%20An&side=bride
-https://domain-cua-ban.vn/?guest=Nguyen%20Van%20An&side=both
-```
-
-Tên bị giới hạn 80 ký tự, khoảng trắng được chuẩn hoá. Side chỉ nhận `groom`, `bride`, `both` (mặc định `both`); alias tiếng Việt `nhà trai`, `nhà gái`, `cả hai` cũng được chấp nhận. Không dùng query parameter làm quyền truy cập.
-
-## 13. Checklist nội dung trước khi phát hành
-
-### Nhà Gái cần cung cấp
-
-- [ ] `events.brideSide.date` (YYYY-MM-DD)
-- [ ] `events.brideSide.lunarDate`
-- [ ] `events.brideSide.time`
-- [ ] `events.brideSide.venueName` + `address`
-- [ ] `events.brideSide.mapNavigationUrl` (HTTPS)
-- [ ] `events.brideSide.mapEmbedUrl` (HTTPS, tuỳ chọn)
-- [ ] `events.brideSide.calendar.eventStartIso` / `eventEndIso`
-- [ ] Ảnh QR Nhà Gái nếu dùng tính năng Gift
-
-### Nhà Trai cần cung cấp
-
-- [ ] `events.groomSide.*` (tương tự Nhà Gái)
-- [ ] Ảnh QR Nhà Trai nếu dùng tính năng Gift
-
-### Hai bạn cần cung cấp
-
-- [ ] Ảnh hero, ảnh chân dung, ảnh story, ảnh gallery
-- [ ] Câu chuyện 3 mốc đã được duyệt
-- [ ] Bài nhạc (file + tên + nghệ sĩ)
-- [ ] Lời chúc mẫu (`sampleWishes`) — nếu muốn hiển thị khi chưa có backend
-- [ ] `seo.title`, `seo.description`, `seo.image`, `seo.siteUrl`
+- [ ] Ảnh thật + consent/quyền sử dụng + crop mobile/desktop.
+- [ ] Tên bố mẹ (nếu muốn hiển thị).
+- [ ] Loại lễ, ngày, 3 mốc giờ, địa điểm, địa chỉ, map, phone.
+- [ ] QR/tài khoản đã đối chiếu, hoặc tiếp tục tắt Gift.
+- [ ] Nhạc có quyền sử dụng, hoặc tiếp tục để trống.
+- [ ] Câu chuyện thật đã được cặp đôi duyệt, hoặc giữ story rỗng.
+- [ ] RSVP đã nối backend nếu cần thu thập tập trung.
+- [ ] Domain, social preview, privacy/indexing được xác nhận.
+- [ ] Chạy full QA và visual QA lại ở mọi viewport bắt buộc.

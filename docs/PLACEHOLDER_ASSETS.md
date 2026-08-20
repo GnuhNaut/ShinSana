@@ -4,9 +4,10 @@
 
 **REPLACE BEFORE FINAL RELEASE — phải thay toàn bộ tài sản trong tài liệu này trước khi phát hành bản cuối.**
 
-Sáu ảnh WebP gốc dưới đây là hình ảnh AI được tạo riêng cho prototype bằng công cụ **OpenAI built-in imagegen** (chế độ tạo ảnh mới, không dùng ảnh tham chiếu). Chúng không được lấy từ CineLove, Unsplash, Pexels hay một website bên thứ ba. Vì là nội dung AI tạm thời và không phải ảnh thật của Tuấn Hùng/Sao Mai, chúng chỉ dùng để dựng layout, crop, tải ảnh và visual QA.
+Sáu ảnh WebP gốc dưới đây là hình ảnh AI được tạo riêng cho prototype bằng công cụ **OpenAI built-in imagegen** (chế độ tạo ảnh mới, không dùng ảnh tham chiếu). Social preview JPG là một biến thể imagegen dùng chính `hero.webp` làm edit target. Chúng không được lấy từ CineLove, Unsplash, Pexels hay một website bên thứ ba. Vì là nội dung AI tạm thời và không phải ảnh thật của Tuấn Hùng/Sao Mai, chúng chỉ dùng để dựng layout, crop, tải ảnh và visual QA.
 
 - Nguồn: **OpenAI built-in imagegen**, tạo ngày 15.08.2026.
+- Social preview: **OpenAI built-in imagegen**, tạo ngày 20.08.2026 từ `hero.webp`, sau đó resize cơ học về đúng 1200×630 và xuất JPG 90% (153 KB).
 - PNG nguồn do công cụ sinh được lưu ngoài repository tại `C:\Users\Administrator\.codex\generated_images\01a0011f-9f0c-7f61-bbe1-8a883de82866\`; các bản WebP tối ưu nằm trong repository theo bảng dưới.
 - Source URL: không có; PNG nguồn được lưu local ngoài repository, còn sáu bản WebP tối ưu được lưu trong repository.
 - Trạng thái chung: **REPLACE BEFORE FINAL RELEASE**.
@@ -17,7 +18,8 @@ Mỗi ảnh gốc có thêm các bản WebP responsive được resize cơ học
 
 | Đường dẫn WebP chính xác | PNG nguồn | Mô tả prompt tạo ảnh | Mục đích và nơi tham chiếu | Trạng thái |
 | --- | --- | --- | --- | --- |
-| `public/assets/placeholders/hero.webp` | `exec-db5faa59-e9ae-44f5-ac5e-fa7bd74599f9.png` | Cặp đôi Việt mặc áo dài cưới đỏ bên hiên nhà cổ, ánh sáng điện ảnh, hoa sen; tránh phục trang Trung Hoa, không chữ/logo. | Hero, gallery feature và social preview: `weddingConfig.hero`, `gallery[cinematic-wide]`, `weddingConfig.seo.image`. | **REPLACE BEFORE FINAL RELEASE** |
+| `public/assets/placeholders/hero.webp` | `exec-db5faa59-e9ae-44f5-ac5e-fa7bd74599f9.png` | Cặp đôi Việt mặc áo dài cưới đỏ bên hiên nhà cổ, ánh sáng điện ảnh, hoa sen; tránh phục trang Trung Hoa, không chữ/logo. | Cover hero và gallery feature: `weddingConfig.hero`, `gallery[cinematic-wide]`. | **REPLACE BEFORE FINAL RELEASE** |
+| `public/assets/social-preview.jpg` | `exec-5e8331cd-5b08-4eef-9d3f-d721019120c6.png` | Biến thể 1.91:1 từ hero: cặp đôi bên trái, paper field ngà bên phải; chữ chính xác “Tuấn Hùng & Sao Mai”, “19.10.2026”, “WEDDING INVITATION”; palette blush/rose/burgundy/champagne, không logo/watermark. | Open Graph, Zalo, Facebook và Twitter preview: `weddingConfig.seo.image`. | **REPLACE BEFORE FINAL RELEASE** |
 | `public/assets/placeholders/couple-groom.webp` | `exec-56a6c872-5983-45a5-be84-c0a3e9a0f961.png` | Chân dung chú rể với áo dài đỏ đô thêu họa tiết Đông Sơn, nền kiến trúc Việt màu trầm; không chữ/logo. | Chân dung chú rể và gallery: `weddingConfig.couple.groom.portrait`, `gallery[portrait-two]`. | **REPLACE BEFORE FINAL RELEASE** |
 | `public/assets/placeholders/couple-bride.webp` | `exec-33481de8-46d8-4b91-a8c6-90f3042ae71f.png` | Chân dung cô dâu trong áo dài, khăn vấn đỏ và thêu vàng, cầm sen cùng mẫu đơn; không vương miện kiểu Trung Hoa, không chữ/logo. | Chân dung cô dâu và gallery: `weddingConfig.couple.bride.portrait`, `gallery[portrait-one]`. | **REPLACE BEFORE FINAL RELEASE** |
 | `public/assets/placeholders/story-01.webp` | `exec-9f342538-fbf3-4de7-b637-e2d312b6d73d.png` | Cận cảnh đôi tay trong áo dài cưới được nối bằng sợi chỉ đỏ bên hiên nhà Việt, không lộ mặt, không chữ/logo. | Ảnh Chương 01 và gallery: `weddingConfig.story[0].image`, `gallery[story-hands]`. | **REPLACE BEFORE FINAL RELEASE** |
@@ -61,6 +63,7 @@ Khuyến nghị cho bản bàn giao:
 - [ ] `story-01.webp` đã được thay hoặc mọi tham chiếu đã chuyển sang ảnh thật.
 - [ ] `story-02.webp` đã được thay hoặc mọi tham chiếu đã chuyển sang ảnh thật.
 - [ ] `gallery-detail.webp` đã được thay hoặc mọi tham chiếu đã chuyển sang ảnh thật.
+- [ ] `social-preview.jpg` đã được thay bằng preview 1200×630 được cặp đôi duyệt.
 - [ ] `weddingConfig.seo.image` trỏ tới ảnh phát hành thật và metadata social trong `dist/index.html` đã được kiểm tra sau build.
 - [ ] Quyền sử dụng và consent của tất cả ảnh đã được xác nhận.
 - [ ] Không còn kết quả từ `rg "assets/placeholders" src` (nếu chọn phương án B).
