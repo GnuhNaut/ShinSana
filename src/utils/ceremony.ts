@@ -1,6 +1,12 @@
-import type { CeremonyEvent, GuestSide, WeddingConfig } from '../types/wedding.ts'
+import type {
+  GuestSide,
+  WeddingConfig,
+  WeddingEvent,
+  WeddingFamily,
+} from '../types/wedding.ts'
+import { cleanOptionalText, safeExternalUrl, safePhoneHref } from './contentSafety.ts'
 
-export interface ResolvedCeremony extends Omit<CeremonyEvent, 'calendar'> {
+export interface ResolvedWeddingEvent extends Omit<WeddingEvent, 'calendar'> {
   dateDisplay: string
   dateDisplayLong: string
   weekday: string
@@ -47,39 +53,51 @@ function formatIsoDate(iso: string): { display: string; displayLong: string; wee
   }
 }
 
-/**
- * Tests whether an event contains substantive, guest-facing details. A label by
- * itself is intentionally not enough to turn an empty template into content.
- */
-export function eventHasMeaningfulDetails(event: CeremonyEvent): boolean {
+/** A title is real content; metadata such as id, side, or type is not. */
+export function eventHasMeaningfulDetails(event: WeddingEvent): boolean {
   return [
-    event.eventTitle,
+    event.title,
     event.date,
     event.lunarDate,
     event.guestArrivalTime,
     event.ceremonyTime,
-    event.banquetTime,
+    event.receptionTime,
     event.venueName,
     event.address,
-    event.phone,
-    event.mapNavigationUrl,
+    event.mapUrl,
     event.mapEmbedUrl,
-    event.calendar.eventStartIso,
-    event.calendar.eventEndIso,
-  ].some((value) => value.trim().length > 0)
+    event.parkingNote,
+    event.contactName,
+    event.contactPhone,
+    event.calendar?.eventStartIso,
+    event.calendar?.eventEndIso,
+  ].some((value) => cleanOptionalText(value).length > 0)
 }
 
-export function getEnabledEvents(config: WeddingConfig): CeremonyEvent[] {
-  return config.events.filter((event) => event.enabled)
+/** A family label alone never exposes an otherwise empty production block. */
+export function familyHasMeaningfulDetails(family: WeddingFamily | null | undefined): boolean {
+  if (!family) return false
+  return [family.father, family.mother, family.location]
+    .some((value) => cleanOptionalText(value).length > 0)
+}
+
+export function getDisplayableEvents(config: WeddingConfig): WeddingEvent[] {
+  const ids = new Set<string>()
+  return config.events.filter((event) => {
+    const id = cleanOptionalText(event.id)
+    if (!id || ids.has(id) || !cleanOptionalText(event.title) || !eventHasMeaningfulDetails(event)) return false
+    ids.add(id)
+    return true
+  })
 }
 
 /** Returns a new array, keeping config order stable within each priority group. */
-export function orderEventsForGuest(events: readonly CeremonyEvent[], side: GuestSide): CeremonyEvent[] {
+export function orderEventsForGuest(events: readonly WeddingEvent[], side: GuestSide): WeddingEvent[] {
   if (side === 'both') return [...events]
 
-  const priority = (event: CeremonyEvent): number => {
+  const priority = (event: WeddingEvent): number => {
     if (event.side === side) return 0
-    if (!event.side) return 1
+    if (!event.side || event.side === 'both') return 1
     return 2
   }
 
@@ -89,50 +107,51 @@ export function orderEventsForGuest(events: readonly CeremonyEvent[], side: Gues
     .map(({ event }) => event)
 }
 
-export function resolveCeremony(_config: WeddingConfig, event: CeremonyEvent): ResolvedCeremony {
-  // Kept in the signature so consumers can resolve events against one config API.
-  void _config
-  const formatted = formatIsoDate(event.date)
+export function resolveWeddingEvent(event: WeddingEvent): ResolvedWeddingEvent {
+  const date = cleanOptionalText(event.date)
+  const formatted = formatIsoDate(date)
+  const calendar = safeCalendarRange(
+    event.calendar?.eventStartIso,
+    event.calendar?.eventEndIso,
+  )
 
   return {
     ...event,
+    id: event.id.trim(),
+    title: event.title.trim(),
+    ...(event.eyebrow ? { eyebrow: event.eyebrow.trim() } : {}),
+    ...(date ? { date } : {}),
     dateDisplay: formatted.display,
     dateDisplayLong: formatted.displayLong,
     weekday: formatted.weekday,
     calendar: {
-      startIso: event.calendar.eventStartIso,
-      endIso: event.calendar.eventEndIso,
+      startIso: calendar?.startIso ?? '',
+      endIso: calendar?.endIso ?? '',
     },
-    hasLocation: Boolean(event.venueName.trim() || event.address.trim()),
+    hasLocation: Boolean(cleanOptionalText(event.venueName) || cleanOptionalText(event.address)),
     hasTime: Boolean(
-      event.guestArrivalTime.trim()
-      || event.ceremonyTime.trim()
-      || event.banquetTime.trim()
-      || (event.calendar.eventStartIso.trim() && event.calendar.eventEndIso.trim()),
+      cleanOptionalText(event.guestArrivalTime)
+      || cleanOptionalText(event.ceremonyTime)
+      || cleanOptionalText(event.receptionTime)
+      || calendar,
     ),
   }
 }
 
-/** No ceremony type is inferred when the family has not supplied one. */
-export function ceremonyTitle(event: Pick<CeremonyEvent, 'eventTitle'>): string {
-  return event.eventTitle.trim()
+/** Keeps malformed optional timestamps from reaching the ICS formatter during render. */
+export function safeCalendarRange(
+  startValue: string | null | undefined,
+  endValue: string | null | undefined,
+): { startIso: string; endIso: string } | null {
+  const startIso = cleanOptionalText(startValue)
+  const endIso = cleanOptionalText(endValue)
+  const timestampPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/
+  if (!timestampPattern.test(startIso) || !timestampPattern.test(endIso)) return null
+
+  const start = new Date(startIso)
+  const end = new Date(endIso)
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) return null
+  return { startIso, endIso }
 }
 
-export function ceremonyEnabled(event: Pick<CeremonyEvent, 'enabled'>): boolean {
-  return event.enabled
-}
-
-export function safeExternalUrl(value: string): string | null {
-  const candidate = value.trim()
-  if (!candidate) return null
-
-  try {
-    const url = new URL(candidate)
-    if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) return null
-    return url.toString()
-  } catch {
-    return null
-  }
-}
-
-export type CeremonySummary = CeremonyEvent
+export { safeExternalUrl, safePhoneHref }

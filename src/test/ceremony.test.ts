@@ -1,72 +1,60 @@
 import { describe, expect, it } from 'vitest'
 import { weddingConfig } from '../config/wedding'
-import type { CeremonyEvent, WeddingConfig } from '../types/wedding'
+import type { WeddingConfig, WeddingEvent } from '../types/wedding'
 import {
-  ceremonyTitle,
   eventHasMeaningfulDetails,
-  getEnabledEvents,
+  getDisplayableEvents,
   orderEventsForGuest,
-  resolveCeremony,
+  resolveWeddingEvent,
   safeExternalUrl,
 } from '../utils/ceremony'
 
-function ceremony(overrides: Partial<CeremonyEvent> = {}): CeremonyEvent {
+function event(overrides: Partial<WeddingEvent> = {}): WeddingEvent {
   return {
     id: 'event',
-    enabled: false,
-    label: '',
-    eventTitle: '',
-    date: '',
-    lunarDate: '',
-    guestArrivalTime: '',
-    ceremonyTime: '',
-    banquetTime: '',
-    venueName: '',
-    address: '',
-    phone: '',
-    mapNavigationUrl: '',
-    mapEmbedUrl: '',
-    calendar: { eventStartIso: '', eventEndIso: '' },
+    title: 'Lễ cưới',
     ...overrides,
   }
 }
 
-describe('ceremony content helpers', () => {
-  it('recognizes meaningful event details without treating metadata as content', () => {
-    expect(eventHasMeaningfulDetails(ceremony({ label: 'Nhà gái', side: 'bride' }))).toBe(false)
-    expect(eventHasMeaningfulDetails(ceremony({ eventTitle: 'Tiệc cưới' }))).toBe(true)
-    expect(eventHasMeaningfulDetails(ceremony({ guestArrivalTime: '17:30' }))).toBe(true)
-    expect(eventHasMeaningfulDetails(ceremony({ calendar: {
-      eventStartIso: '2026-10-19T17:30:00+07:00',
-      eventEndIso: '',
-    } }))).toBe(true)
+describe('wedding event content helpers', () => {
+  it('recognizes meaningful optional fields without treating metadata as content', () => {
+    expect(eventHasMeaningfulDetails(event({ title: ' ', side: 'bride', type: 'vu-quy' }))).toBe(false)
+    expect(eventHasMeaningfulDetails(event({ title: 'Tiệc cưới' }))).toBe(true)
+    expect(eventHasMeaningfulDetails(event({ title: '', guestArrivalTime: '17:30' }))).toBe(true)
+    expect(eventHasMeaningfulDetails(event({ title: '', parkingNote: 'Gửi xe phía sau nhà hàng' }))).toBe(true)
   })
 
-  it('returns enabled events and orders a copy for the personalized guest side', () => {
-    const groomOne = ceremony({ id: 'groom-one', side: 'groom', enabled: true, eventTitle: 'A' })
-    const neutral = ceremony({ id: 'neutral', enabled: true, eventTitle: 'B' })
-    const bride = ceremony({ id: 'bride', side: 'bride', enabled: true, eventTitle: 'C' })
-    const groomTwo = ceremony({ id: 'groom-two', side: 'groom', enabled: false, eventTitle: 'D' })
-    const config: WeddingConfig = { ...structuredClone(weddingConfig), events: [groomOne, neutral, bride, groomTwo] }
+  it('returns only titled events and orders a copy for the personalized guest side', () => {
+    const groom = event({ id: 'groom', side: 'groom', title: 'Lễ Thành Hôn' })
+    const shared = event({ id: 'shared', side: 'both', title: 'Tiệc Cưới' })
+    const bride = event({ id: 'bride', side: 'bride', title: 'Lễ Vu Quy' })
+    const untitled = event({ id: 'untitled', title: '', address: 'Địa chỉ không đủ để public event' })
+    const missingId = event({ id: '', title: 'Thiếu id' })
+    const config: WeddingConfig = {
+      ...structuredClone(weddingConfig),
+      events: [groom, shared, bride, untitled, missingId],
+    }
 
-    expect(getEnabledEvents(config).map((event) => event.id)).toEqual(['groom-one', 'neutral', 'bride'])
-
-    const enabled = getEnabledEvents(config)
-    expect(orderEventsForGuest(enabled, 'bride').map((event) => event.id)).toEqual(['bride', 'neutral', 'groom-one'])
-    expect(orderEventsForGuest(enabled, 'groom').map((event) => event.id)).toEqual(['groom-one', 'neutral', 'bride'])
-    expect(orderEventsForGuest(enabled, 'both').map((event) => event.id)).toEqual(['groom-one', 'neutral', 'bride'])
-    expect(enabled.map((event) => event.id)).toEqual(['groom-one', 'neutral', 'bride'])
+    expect(getDisplayableEvents(config).map(({ id }) => id)).toEqual(['groom', 'shared', 'bride'])
+    const displayable = getDisplayableEvents(config)
+    expect(orderEventsForGuest(displayable, 'bride').map(({ id }) => id)).toEqual(['bride', 'shared', 'groom'])
+    expect(orderEventsForGuest(displayable, 'groom').map(({ id }) => id)).toEqual(['groom', 'shared', 'bride'])
+    expect(orderEventsForGuest(displayable, 'both').map(({ id }) => id)).toEqual(['groom', 'shared', 'bride'])
+    expect(displayable.map(({ id }) => id)).toEqual(['groom', 'shared', 'bride'])
   })
 
-  it('resolves only confirmed event fields and never assumes a ceremony title or date', () => {
-    const empty = ceremony({ id: 'empty', side: 'bride', label: 'Nhà gái' })
-    const unresolved = resolveCeremony(weddingConfig, empty)
-    expect(unresolved.date).toBe('')
-    expect(unresolved.dateDisplay).toBe('')
-    expect(unresolved.weekday).toBe('')
-    expect(ceremonyTitle(empty)).toBe('')
+  it('resolves only confirmed fields and never assumes a ceremony title or date', () => {
+    const invalidDate = resolveWeddingEvent(event({
+      id: 'invalid-date',
+      title: '  Lễ Báo Hỷ  ',
+      date: '2026-02-30',
+    }))
+    expect(invalidDate.title).toBe('Lễ Báo Hỷ')
+    expect(invalidDate.dateDisplay).toBe('')
+    expect(invalidDate.weekday).toBe('')
 
-    const confirmed = resolveCeremony(weddingConfig, ceremony({
+    const confirmed = resolveWeddingEvent(event({
       date: '2026-10-19',
       guestArrivalTime: '17:30',
       venueName: 'Địa điểm đã xác nhận',

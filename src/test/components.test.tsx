@@ -43,20 +43,8 @@ describe('WeddingImage', () => {
 })
 
 describe('RSVPSection', () => {
-  const originalGiftFeature = weddingConfig.features.gift
-  const originalGiftEnabled = weddingConfig.gift.enabled
-  const originalGroomGift = { ...weddingConfig.gift.groom }
-  const originalBrideGift = { ...weddingConfig.gift.bride }
-
   beforeEach(() => {
     submitRSVP.mockResolvedValue({ ok: true, id: 'test-rsvp' })
-  })
-
-  afterEach(() => {
-    weddingConfig.features.gift = originalGiftFeature
-    weddingConfig.gift.enabled = originalGiftEnabled
-    Object.assign(weddingConfig.gift.groom, originalGroomGift)
-    Object.assign(weddingConfig.gift.bride, originalBrideGift)
   })
 
   it('shows accessible inline errors for an empty submission', async () => {
@@ -149,53 +137,42 @@ describe('RSVPSection', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Cảm ơn bạn đã xác nhận')
   })
 
-  it('hides the gift CTA when no recipient has real gift details', () => {
-    weddingConfig.features.gift = true
-    weddingConfig.gift.enabled = true
-    render(<RSVPSection guestName={null} />)
+})
 
-    expect(screen.queryByRole('button', { name: /Gửi quà mừng/i })).not.toBeInTheDocument()
+describe('RSVPSection optional rendering', () => {
+  const originalRsvpFeature = weddingConfig.features.rsvp
+  const originalGift = {
+    enabled: weddingConfig.gift.enabled,
+    accounts: weddingConfig.gift.accounts.map((account) => ({ ...account })),
+  }
+
+  afterEach(() => {
+    weddingConfig.features.rsvp = originalRsvpFeature
+    weddingConfig.gift.enabled = originalGift.enabled
+    weddingConfig.gift.accounts.splice(
+      0,
+      weddingConfig.gift.accounts.length,
+      ...originalGift.accounts.map((account) => ({ ...account })),
+    )
   })
 
-  it('renders one complete recipient without unnecessary tabs', async () => {
-    weddingConfig.features.gift = true
+  it('stays out of the document when RSVP is disabled; gifting is a separate section', () => {
+    weddingConfig.features.rsvp = false
     weddingConfig.gift.enabled = true
-    Object.assign(weddingConfig.gift.groom, {
-      bankName: 'Ngân hàng thử nghiệm',
-      accountName: 'TUAN HUNG',
+    weddingConfig.gift.accounts.splice(0, weddingConfig.gift.accounts.length, {
+      id: 'groom-account',
+      side: 'groom',
+      bankName: 'Ngân hàng A',
       accountNumber: '123456789',
+      accountHolder: 'TUAN HUNG',
     })
-    const user = userEvent.setup()
+
     render(<RSVPSection guestName={null} />)
 
-    const giftButton = screen.getByRole('button', { name: /Gửi quà mừng/i })
-    await user.click(giftButton)
-    const dialog = await screen.findByRole('dialog', { name: 'gửi quà mừng' })
-    expect(within(dialog).queryByRole('tablist')).not.toBeInTheDocument()
-    expect(within(dialog).getByText('123456789')).toBeInTheDocument()
-  })
-
-  it('supports keyboard tabs when both gift recipients are complete', async () => {
-    weddingConfig.features.gift = true
-    weddingConfig.gift.enabled = true
-    Object.assign(weddingConfig.gift.groom, { qrImage: '/groom-qr.webp' })
-    Object.assign(weddingConfig.gift.bride, { qrImage: '/bride-qr.webp' })
-    const user = userEvent.setup()
-    render(<RSVPSection guestName={null} />)
-
-    await user.click(screen.getByRole('button', { name: /Gửi quà mừng/i }))
-    const dialog = await screen.findByRole('dialog', { name: 'gửi quà mừng' })
-    const groomTab = within(dialog).getByRole('tab', { name: 'Nhà Trai' })
-    const brideTab = within(dialog).getByRole('tab', { name: 'Nhà Gái' })
-    expect(groomTab).toHaveAttribute('aria-selected', 'true')
-
-    groomTab.focus()
-    await user.keyboard('{ArrowRight}')
-    expect(brideTab).toHaveAttribute('aria-selected', 'true')
-    expect(brideTab).toHaveFocus()
-
-    await user.keyboard('{Escape}')
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(screen.queryByRole('region', { name: weddingConfig.copy.giftLabel })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Mừng cưới online' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('form')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: weddingConfig.copy.rsvpTitle })).not.toBeInTheDocument()
   })
 })
 

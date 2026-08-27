@@ -1,37 +1,51 @@
+import { MapPin } from 'lucide-react'
 import { OrientalReveal } from '../components/motion'
 import { DoubleHappiness, FloralCorner, HairlineDivider } from '../components/ornaments'
-import { weddingConfig as config } from '../config/wedding'
+import { useWeddingConfig } from '../config/WeddingConfigContext'
+import type { WeddingFamily } from '../types/wedding'
+import { familyHasMeaningfulDetails } from '../utils/ceremony'
 
 interface InvitationPageSectionProps {
   guestName: string | null
 }
 
-interface ParentDetails {
-  father: string
-  mother: string
-}
+function FamilyColumn({
+  defaultLabel,
+  family,
+}: {
+  defaultLabel: string
+  family: WeddingFamily
+}) {
+  if (!familyHasMeaningfulDetails(family)) return null
 
-function FamilyColumn({ label, family }: { label: string; family: ParentDetails }) {
-  if (!family.father && !family.mother) return null
+  const label = family.label?.trim() || defaultLabel
+  const hasParents = Boolean(family.father?.trim() || family.mother?.trim())
+
   return (
     <div className="invite__family">
       <p>{label}</p>
-      <dl>
-        {family.father && <div><dt>Ông</dt><dd>{family.father}</dd></div>}
-        {family.mother && <div><dt>Bà</dt><dd>{family.mother}</dd></div>}
-      </dl>
+      {hasParents && (
+        <dl>
+          {family.father?.trim() && <div><dt>Ông</dt><dd>{family.father}</dd></div>}
+          {family.mother?.trim() && <div><dt>Bà</dt><dd>{family.mother}</dd></div>}
+        </dl>
+      )}
+      {family.location?.trim() && (
+        <p className="invite__family-location">
+          <MapPin aria-hidden="true" />
+          <span>{family.location}</span>
+        </p>
+      )}
     </div>
   )
 }
 
 export function InvitationPageSection({ guestName }: InvitationPageSectionProps) {
+  const config = useWeddingConfig()
   const showPersonalized = config.features.personalizedGuest && Boolean(guestName)
-  const hasFamilies = Boolean(
-    config.families.groomParents.father ||
-    config.families.groomParents.mother ||
-    config.families.brideParents.father ||
-    config.families.brideParents.mother,
-  )
+  const groomFamilyVisible = familyHasMeaningfulDetails(config.families.groom)
+  const brideFamilyVisible = familyHasMeaningfulDetails(config.families.bride)
+  const visibleFamilyCount = Number(groomFamilyVisible) + Number(brideFamilyVisible)
 
   return (
     <section className="invite" aria-labelledby="invite-title">
@@ -49,10 +63,14 @@ export function InvitationPageSection({ guestName }: InvitationPageSectionProps)
             <p className="invite__body">{config.copy.invitationBody}</p>
           </OrientalReveal>
 
-          {hasFamilies && (
-            <OrientalReveal className="invite__families" variant="fade" delay={80}>
-              <FamilyColumn label="Nhà Trai" family={config.families.groomParents} />
-              <FamilyColumn label="Nhà Gái" family={config.families.brideParents} />
+          {visibleFamilyCount > 0 && (
+            <OrientalReveal
+              className={`invite__families${visibleFamilyCount === 1 ? ' invite__families--single' : ''}`}
+              variant="fade"
+              delay={80}
+            >
+              <FamilyColumn defaultLabel="Nhà Trai" family={config.families.groom} />
+              <FamilyColumn defaultLabel="Nhà Gái" family={config.families.bride} />
             </OrientalReveal>
           )}
 
@@ -69,7 +87,7 @@ export function InvitationPageSection({ guestName }: InvitationPageSectionProps)
             </p>
           </OrientalReveal>
 
-          <HairlineDivider className="invite__divider" center="diamond" tone="rose" />
+          <HairlineDivider className="invite__divider" center="star" tone="rose" />
 
           <OrientalReveal className="invite__date" variant="up" delay={180}>
             <time dateTime={config.date.iso}>{config.date.display.replaceAll('.', ' · ')}</time>

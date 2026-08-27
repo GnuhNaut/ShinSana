@@ -1,12 +1,9 @@
-import { useCallback, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { Gift, Send } from 'lucide-react'
-import { GoldReveal, OrientalReveal } from '../components/motion'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { Send } from 'lucide-react'
+import { OrientalReveal } from '../components/motion'
 import { FloralCorner, HairlineDivider, Lotus, RoseSeal } from '../components/ornaments'
-import { Modal } from '../components/ui/Modal'
-import { WeddingImage } from '../components/ui/WeddingImage'
-import { weddingConfig as config } from '../config/wedding'
+import { useWeddingConfig } from '../config/WeddingConfigContext'
 import { rsvpService } from '../services/rsvp'
-import type { GiftRecipient } from '../types/wedding'
 import {
   ATTENDANCE_OPTIONS,
   attendanceIsAttending,
@@ -20,41 +17,14 @@ interface RSVPSectionProps {
   guestName: string | null
 }
 
-type GiftRecipientKey = 'groom' | 'bride'
-
-interface AvailableGiftRecipient {
-  key: GiftRecipientKey
-  recipient: GiftRecipient
-}
-
-function hasCompleteBankDetails(recipient: GiftRecipient): boolean {
-  return Boolean(
-    recipient.bankName.trim()
-    && recipient.accountName.trim()
-    && recipient.accountNumber.trim(),
-  )
-}
-
-function hasGiftDetails(recipient: GiftRecipient): boolean {
-  return hasCompleteBankDetails(recipient) || Boolean(recipient.qrImage.trim())
-}
-
 export function RSVPSection({ guestName }: RSVPSectionProps) {
+  const config = useWeddingConfig()
   const initialValues = useMemo<RSVPFormValues>(() => ({
     name: guestName ?? '',
     attendance: '',
     partySize: 1,
     message: '',
   }), [guestName])
-
-  const availableGiftRecipients = useMemo<AvailableGiftRecipient[]>(() => (
-    (['groom', 'bride'] as const)
-      .map((key) => ({ key, recipient: config.gift[key] }))
-      .filter(({ recipient }) => hasGiftDetails(recipient))
-  ), [])
-  const giftAvailable = config.features.gift
-    && config.gift.enabled
-    && availableGiftRecipients.length > 0
 
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState<RSVPFormErrors>({})
@@ -65,11 +35,6 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
     attendance: Attendance
   } | null>(null)
   const [submitError, setSubmitError] = useState('')
-  const [giftOpen, setGiftOpen] = useState(false)
-  const [giftTab, setGiftTab] = useState<GiftRecipientKey>(
-    () => availableGiftRecipients[0]?.key ?? 'groom',
-  )
-  const closeGift = useCallback(() => setGiftOpen(false), [])
   const clearError = (field: keyof RSVPFormErrors) => {
     setErrors((current) => {
       if (!current[field]) return current
@@ -79,25 +44,8 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
     })
   }
 
-  const onGiftTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, current: GiftRecipientKey) => {
-    const currentIndex = availableGiftRecipients.findIndex(({ key }) => key === current)
-    let nextIndex: number | null = null
-    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % availableGiftRecipients.length
-    if (event.key === 'ArrowLeft') {
-      nextIndex = (currentIndex - 1 + availableGiftRecipients.length) % availableGiftRecipients.length
-    }
-    if (event.key === 'Home') nextIndex = 0
-    if (event.key === 'End') nextIndex = availableGiftRecipients.length - 1
-    if (nextIndex === null) return
-
-    event.preventDefault()
-    const nextRecipient = availableGiftRecipients[nextIndex]
-    if (!nextRecipient) return
-    setGiftTab(nextRecipient.key)
-    document.getElementById(`gift-tab-${nextRecipient.key}`)?.focus()
-  }
-
-  if (!config.features.rsvp) return null
+  const rsvpEnabled = config.features.rsvp
+  if (!rsvpEnabled) return null
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -144,11 +92,13 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
     setSubmitError('')
   }
 
-  const selectedGiftRecipient = availableGiftRecipients.find(({ key }) => key === giftTab)
-    ?? availableGiftRecipients[0]
-
   return (
-    <section className="rsvp" id="rsvp" aria-labelledby="rsvp-title">
+    <section
+      className="rsvp"
+      id="rsvp"
+      aria-labelledby={rsvpEnabled ? 'rsvp-title' : undefined}
+      aria-label={rsvpEnabled ? undefined : config.copy.giftLabel}
+    >
       <FloralCorner className="rsvp__floral rsvp__floral--top" corner="top-left" tone="rose" variant="trail" />
       <FloralCorner className="rsvp__floral rsvp__floral--bottom" corner="bottom-right" tone="rose" variant="trail" />
 
@@ -158,9 +108,9 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
             <OrientalReveal className="rsvp__head" variant="up">
               <RoseSeal className="rsvp__seal" tone="rose" monogram={config.couple.monogram} ring="thin" />
               <p className="rsvp__eyebrow">Phiếu hồi âm</p>
-              <h2 id="rsvp-title" className="rsvp__title">Xác nhận tham dự</h2>
+              <h2 id="rsvp-title" className="rsvp__title">{config.copy.rsvpTitle}</h2>
               <p className="rsvp__intro">{config.copy.rsvpIntro}</p>
-              <HairlineDivider className="rsvp__divider" center="diamond" tone="rose" />
+              <HairlineDivider className="rsvp__divider" center="star" tone="rose" />
             </OrientalReveal>
 
             {submittedResponse ? (
@@ -267,7 +217,10 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
                 )}
 
                 <div className="field">
-                  <label htmlFor="rsvp-message">Gửi đôi lời tới Hùng &amp; Mai <small>Không bắt buộc</small></label>
+                  <label htmlFor="rsvp-message">
+                    Gửi đôi lời tới {config.couple.groom.firstName} &amp; {config.couple.bride.firstName}
+                    <small>Không bắt buộc</small>
+                  </label>
                   <textarea
                     id="rsvp-message"
                     name="message"
@@ -300,98 +253,8 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
               </form>
             )}
           </article>
-
-          {giftAvailable && (
-            <OrientalReveal className="rsvp__gift" variant="up" delay={200}>
-              <h3 className="rsvp__gift-title">{config.copy.giftLabel}</h3>
-              <p>{config.copy.giftIntro}</p>
-              <button className="button button--quiet" type="button" onClick={() => setGiftOpen(true)}>
-                <Gift aria-hidden="true" /> {config.copy.giftLabel}
-              </button>
-            </OrientalReveal>
-          )}
         </div>
       </div>
-
-      {giftAvailable && selectedGiftRecipient && (
-        <GoldReveal block>
-          <Modal open={giftOpen} onClose={closeGift} title="gửi quà mừng" className="gift-modal">
-            <div className="gift-modal__frame">
-              <FloralCorner className="gift-modal__peony" tone="rose" variant="bloom" />
-              <div className="gift-modal__header">
-                <Lotus className="gift-modal__lotus" tone="rose" withWater={false} size="2.5rem" />
-                <p className="eyebrow">Tấm lòng trân quý</p>
-                <h2>{config.copy.giftLabel}</h2>
-                <p>
-                  {availableGiftRecipients.length === 1
-                    ? `Thông tin gửi quà mừng tới ${selectedGiftRecipient.recipient.label}.`
-                    : 'Chọn Nhà Trai hoặc Nhà Gái để xem thông tin chuyển khoản.'}
-                </p>
-              </div>
-
-              {availableGiftRecipients.length === 2 && (
-                <div className="gift-tabs" role="tablist" aria-label="Người nhận quà">
-                  {availableGiftRecipients.map(({ key, recipient }) => (
-                    <button
-                      type="button"
-                      role="tab"
-                      id={`gift-tab-${key}`}
-                      aria-controls="gift-panel"
-                      aria-selected={giftTab === key}
-                      tabIndex={giftTab === key ? 0 : -1}
-                      className={giftTab === key ? 'is-active' : ''}
-                      onClick={() => setGiftTab(key)}
-                      onKeyDown={(event) => onGiftTabKeyDown(event, key)}
-                      key={key}
-                    >
-                      {recipient.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {availableGiftRecipients.length === 2 ? (
-                <div
-                  className="gift-modal__body"
-                  role="tabpanel"
-                  id="gift-panel"
-                  aria-labelledby={`gift-tab-${selectedGiftRecipient.key}`}
-                >
-                  <GiftPanel recipient={selectedGiftRecipient.recipient} />
-                </div>
-              ) : (
-                <div className="gift-modal__body">
-                  <GiftPanel recipient={selectedGiftRecipient.recipient} />
-                </div>
-              )}
-            </div>
-          </Modal>
-        </GoldReveal>
-      )}
     </section>
-  )
-}
-
-function GiftPanel({ recipient }: { recipient: GiftRecipient }) {
-  const showBankDetails = hasCompleteBankDetails(recipient)
-
-  return (
-    <>
-      {recipient.qrImage.trim() && (
-        <WeddingImage
-          wrapperClassName="gift-modal__qr"
-          src={recipient.qrImage}
-          alt={`Mã QR quà mừng ${recipient.label}`}
-          aspectRatio="1 / 1"
-        />
-      )}
-      {showBankDetails && (
-        <dl>
-          <div><dt>Ngân hàng</dt><dd>{recipient.bankName}</dd></div>
-          <div><dt>Chủ tài khoản</dt><dd>{recipient.accountName}</dd></div>
-          <div><dt>Số tài khoản</dt><dd>{recipient.accountNumber}</dd></div>
-        </dl>
-      )}
-    </>
   )
 }

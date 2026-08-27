@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { DoubleHappiness, FloralCorner, HairlineDivider } from '../components/ornaments'
 import { WeddingImage } from '../components/ui/WeddingImage'
+import { DecorativeSticker } from '../components/wedding/DecorativeSticker'
+import { useWeddingConfig } from '../config/WeddingConfigContext'
 import { getGuestNameFromUrl } from '../utils/guest'
-import { weddingConfig as config } from '../config/wedding'
 
 interface CoverSectionProps {
   onOpened: () => void
 }
 
 export function CoverSection({ onOpened }: CoverSectionProps) {
+  const config = useWeddingConfig()
   const [leaving, setLeaving] = useState(false)
   const guestName = config.features.personalizedGuest ? getGuestNameFromUrl() : null
 
@@ -33,6 +35,9 @@ export function CoverSection({ onOpened }: CoverSectionProps) {
         <WeddingImage {...config.hero} eager />
       </div>
       <div className="cover__veil" aria-hidden="true" />
+      <span className="cover__sparkle cover__sparkle--one" aria-hidden="true">✦</span>
+      <span className="cover__sparkle cover__sparkle--two" aria-hidden="true">✧</span>
+      <DecorativeSticker placement="hero" className="cover__sticker" eager />
       <div className="cover__layout">
         <article className="cover__paper">
           <FloralCorner className="cover__floral" corner="bottom-right" tone="rose" variant="trail" />
@@ -44,7 +49,7 @@ export function CoverSection({ onOpened }: CoverSectionProps) {
             <i>&amp;</i>
             <span>{config.couple.bride.fullName}</span>
           </h1>
-          <HairlineDivider className="cover__divider" center="diamond" tone="rose" />
+          <HairlineDivider className="cover__divider" center="star" tone="rose" />
           <p className="cover__date">
             <time dateTime={config.date.iso}>{config.date.display.replaceAll('.', ' · ')}</time>
             <span>{config.date.lunar}</span>

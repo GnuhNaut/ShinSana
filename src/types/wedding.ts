@@ -30,53 +30,75 @@ export interface GalleryImage extends ImageAsset {
   caption: string
 }
 
-export interface GiftRecipient {
-  label: string
-  bankName: string
-  accountName: string
-  accountNumber: string
-  qrImage: string
+/** Optional, non-essential cutout imagery used as a playful wedding-paper accent. */
+export interface DecorativeSticker {
+  id: string
+  src: string
+  alt: string
+  placement: 'hero' | 'gift' | 'album'
 }
 
-export interface FamilyParents {
-  father: string
-  mother: string
+export type WeddingGiftSide = 'groom' | 'bride'
+
+export interface WeddingGiftAccount {
+  id: string
+  side?: WeddingGiftSide
+  label?: string
+  bankName: string
+  accountNumber: string
+  accountHolder: string
+  qrImage?: string
+  branch?: string
+}
+
+export interface WeddingFamily {
+  label?: string
+  father?: string
+  mother?: string
+  location?: string
 }
 
 export interface CeremonyCalendar {
-  /** ISO 8601 with offset, e.g. 2026-10-19T10:00:00+07:00. Empty = all-day. */
+  /** ISO 8601 with offset, e.g. 2026-10-19T10:00:00+07:00. */
   eventStartIso: string
-  /** ISO 8601 with offset. Required when eventStartIso is set. */
+  /** ISO 8601 with offset and later than eventStartIso. */
   eventEndIso: string
 }
 
-export type CeremonySide = 'bride' | 'groom'
+export type WeddingEventSide = 'groom' | 'bride' | 'both'
 
-export interface CeremonyEvent {
-  /** Stable key used by React and calendar downloads; it is not guest-facing copy. */
+export type WeddingEventType =
+  | 'vu-quy'
+  | 'thanh-hon'
+  | 'wedding-party'
+  | 'ceremony'
+  | 'other'
+
+export interface WeddingEvent {
+  /** Stable key used by React and calendar downloads. */
   id: string
-  /** Optional family affinity used only to personalize event ordering. */
-  side?: CeremonySide
-  enabled: boolean
-  label: string
-  /** Free-form ceremony title. Empty until the family confirms the ceremony type. */
-  eventTitle: string
-  /** ISO date YYYY-MM-DD. Empty until family confirms. */
-  date: string
-  /** Lunar date string entered by the family. Empty until family confirms. */
-  lunarDate: string
-  /** Display times such as "09:00". Empty until family confirms. */
-  guestArrivalTime: string
-  ceremonyTime: string
-  banquetTime: string
-  venueName: string
-  address: string
-  phone: string
-  /** HTTPS map navigation URL. Empty until family confirms. */
-  mapNavigationUrl: string
-  /** HTTPS map embed URL. Empty until family confirms. */
-  mapEmbedUrl: string
-  calendar: CeremonyCalendar
+  side?: WeddingEventSide
+  type?: WeddingEventType
+  eyebrow?: string
+  /** Free-form guest-facing title; no ceremony title is inferred. */
+  title: string
+  /** ISO date YYYY-MM-DD. */
+  date?: string
+  lunarDate?: string
+  /** Display times such as "09:00". */
+  guestArrivalTime?: string
+  ceremonyTime?: string
+  receptionTime?: string
+  venueName?: string
+  address?: string
+  /** Manually confirmed HTTPS navigation URL. */
+  mapUrl?: string
+  /** Optional manually confirmed HTTPS embed URL. */
+  mapEmbedUrl?: string
+  parkingNote?: string
+  contactName?: string
+  contactPhone?: string
+  calendar?: CeremonyCalendar
 }
 
 export interface WeddingConfig {
@@ -99,15 +121,16 @@ export interface WeddingConfig {
     timezone: string
   }
   families: {
-    groomParents: FamilyParents
-    brideParents: FamilyParents
+    groom: WeddingFamily
+    bride: WeddingFamily
   }
-  events: CeremonyEvent[]
+  events: WeddingEvent[]
   hero: ImageAsset
+  decorativeStickers?: DecorativeSticker[]
   story: StoryChapter[]
   gallery: GalleryImage[]
   music: { title: string; artist: string; src: string }
-  gift: { enabled: boolean; groom: GiftRecipient; bride: GiftRecipient }
+  gift: { enabled: boolean; accounts: WeddingGiftAccount[] }
   seo: {
     title: string
     description: string
@@ -121,7 +144,6 @@ export interface WeddingConfig {
     music: boolean
     rsvp: boolean
     wish: boolean
-    gift: boolean
     personalizedGuest: boolean
     gallery: boolean
   }
@@ -143,9 +165,10 @@ export interface WeddingConfig {
     rsvpIntro: string
     rsvpThanks: string
     giftLabel: string
+    giftCta: string
     giftIntro: string
   }
   sampleWishes: Array<{ id: string; name: string; message: string }>
 }
 
-export type GuestSide = 'bride' | 'groom' | 'both'
+export type GuestSide = WeddingEventSide

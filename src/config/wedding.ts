@@ -1,5 +1,7 @@
 import type { WeddingConfig } from '../types/wedding.ts'
-import { eventHasMeaningfulDetails, safeExternalUrl } from '../utils/ceremony.ts'
+import { warnForInvalidWeddingConfig } from '../utils/weddingValidation.ts'
+
+export { validateWeddingConfig } from '../utils/weddingValidation.ts'
 
 const placeholder = (file: string) => `/assets/placeholders/${file}`
 const responsiveSet = (stem: string, widths: number[], sourceWidth: number) => [
@@ -10,8 +12,6 @@ const responsiveSet = (stem: string, widths: number[], sourceWidth: number) => [
 const heroSizes = '(max-width: 1536px) 100vw, 1536px'
 const portraitSizes = '(max-width: 1023px) calc(100vw - 40px), 470px'
 const gallerySizes = '(max-width: 1023px) calc(100vw - 40px), 720px'
-
-const emptyCalendar = { eventStartIso: '', eventEndIso: '' }
 
 export const weddingConfig: WeddingConfig = {
   couple: {
@@ -33,48 +33,16 @@ export const weddingConfig: WeddingConfig = {
     lunarLong: '10 tháng 09 âm lịch', timezone: 'Asia/Ho_Chi_Minh',
   },
   families: {
-    groomParents: { father: '', mother: '' },
-    brideParents: { father: '', mother: '' },
+    // NHẬP THÔNG TIN NHÀ TRAI TẠI ĐÂY
+    groom: { label: 'Nhà Trai' },
+    // NHẬP THÔNG TIN NHÀ GÁI TẠI ĐÂY
+    bride: { label: 'Nhà Gái' },
   },
-  events: [
-    {
-      id: 'bride-event',
-      side: 'bride',
-      enabled: false,
-      label: '',
-      eventTitle: '',
-      date: '',
-      lunarDate: '',
-      guestArrivalTime: '',
-      ceremonyTime: '',
-      banquetTime: '',
-      venueName: '',
-      address: '',
-      phone: '',
-      mapNavigationUrl: '',
-      mapEmbedUrl: '',
-      calendar: { ...emptyCalendar },
-    },
-    {
-      id: 'groom-event',
-      side: 'groom',
-      enabled: false,
-      label: '',
-      eventTitle: '',
-      date: '',
-      lunarDate: '',
-      guestArrivalTime: '',
-      ceremonyTime: '',
-      banquetTime: '',
-      venueName: '',
-      address: '',
-      phone: '',
-      mapNavigationUrl: '',
-      mapEmbedUrl: '',
-      calendar: { ...emptyCalendar },
-    },
-  ],
+  // THÊM CÁC NGHI LỄ ĐÃ XÁC NHẬN TẠI ĐÂY
+  events: [],
   hero: { src: placeholder('hero.webp'), srcSet: responsiveSet('hero', [640, 960, 1280], 1536), sizes: heroSizes, alt: 'Ảnh minh họa cặp đôi mặc áo dài cưới đỏ bên hiên nhà cổ Việt Nam', aspectRatio: '3 / 2', objectPosition: '50% 48%' },
+  // Chỉ thêm sticker từ ảnh thật đã được cặp đôi đồng ý sử dụng.
+  decorativeStickers: [],
   // Chưa có câu chuyện thật: để trống để UI chỉ hiện lời dẫn trung tính + gallery.
   // Thêm tối đa 3 mốc theo StoryChapter khi cặp đôi cung cấp nội dung đã xác nhận.
   story: [],
@@ -85,10 +53,10 @@ export const weddingConfig: WeddingConfig = {
     { id: 'story-wide', src: placeholder('story-02.webp'), srcSet: responsiveSet('story-02', [640, 960, 1280], 1536), sizes: gallerySizes, alt: 'Ảnh minh họa bàn trà lễ cưới Việt với hoa sen, trầu cau và khăn lụa đỏ', aspectRatio: '3 / 2', objectPosition: '50% 50%', layout: 'landscape', caption: 'Hương trà ngày hỷ' },
   ],
   music: { title: '', artist: '', src: '' },
+  // BẬT MỪNG CƯỚI ONLINE SAU KHI ĐÃ CÓ THÔNG TIN NGÂN HÀNG
   gift: {
     enabled: false,
-    groom: { label: 'Nhà Trai', bankName: '', accountName: '', accountNumber: '', qrImage: '' },
-    bride: { label: 'Nhà Gái', bankName: '', accountName: '', accountNumber: '', qrImage: '' },
+    accounts: [],
   },
   seo: {
     title: 'Tuấn Hùng & Sao Mai | 19.10.2026',
@@ -96,7 +64,7 @@ export const weddingConfig: WeddingConfig = {
     image: '/assets/social-preview.jpg', imageWidth: 1200, imageHeight: 630,
     robots: 'index, follow', siteUrl: '',
   },
-  features: { music: true, rsvp: true, wish: true, gift: false, personalizedGuest: true, gallery: true },
+  features: { music: true, rsvp: true, wish: true, personalizedGuest: true, gallery: true },
   copy: {
     coverEyebrow: 'Trân trọng kính mời',
     coverHint: 'Chạm để mở lời mời',
@@ -114,8 +82,9 @@ export const weddingConfig: WeddingConfig = {
     rsvpTitle: 'Xác nhận tham dự',
     rsvpIntro: 'Sự hiện diện của bạn là niềm vui của chúng mình. Xin vui lòng hồi âm để chúng mình được đón tiếp thật chu đáo.',
     rsvpThanks: 'Cảm ơn bạn đã xác nhận. Hùng & Mai rất mong được gặp bạn trong ngày đặc biệt này.',
-    giftLabel: 'Gửi quà mừng',
-    giftIntro: 'Sự hiện diện của bạn đã là món quà ý nghĩa nhất. Nếu muốn gửi thêm lời chúc theo một cách khác, bạn có thể mở hộp quà bên dưới.',
+    giftLabel: 'Gửi mừng cưới',
+    giftCta: 'Mừng cưới online',
+    giftIntro: 'Sự hiện diện và những lời chúc của bạn đã là món quà quý giá đối với chúng mình.',
   },
   sampleWishes: [
     { id: 'sample-1', name: 'Một người bạn', message: 'Chúc hai bạn luôn tìm thấy bình yên và niềm vui trong từng ngày bên nhau.' },
@@ -123,67 +92,6 @@ export const weddingConfig: WeddingConfig = {
   ],
 }
 
-export function validateWeddingConfig(config: WeddingConfig): string[] {
-  const errors: string[] = []
-  if (!config.couple.groom.fullName.trim()) errors.push('Missing groom name')
-  if (!config.couple.bride.fullName.trim()) errors.push('Missing bride name')
-  if (!isValidIsoDate(config.date.iso)) errors.push('Invalid ISO wedding date')
-  if (!config.date.lunar.trim()) errors.push('Missing lunar date')
-  if (!config.date.timezone.trim()) errors.push('Missing timezone')
-  if (Boolean(config.date.eventStartIso) !== Boolean(config.date.eventEndIso)) errors.push('Wedding event requires both start and end times')
-  if (config.date.eventStartIso && config.date.eventEndIso) {
-    const start = new Date(config.date.eventStartIso)
-    const end = new Date(config.date.eventEndIso)
-    if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) errors.push('Invalid wedding event time range')
-  }
-  const eventIds = new Set<string>()
-  for (const [index, event] of config.events.entries()) {
-    const eventId = event.id.trim()
-    const eventName = event.label.trim() || eventId || `event ${index + 1}`
-
-    if (!eventId) errors.push(`Missing ceremony event id at index ${index}`)
-    else if (eventIds.has(eventId)) errors.push(`Duplicate ceremony event id: ${eventId}`)
-    else eventIds.add(eventId)
-
-    if (event.enabled && !eventHasMeaningfulDetails(event)) errors.push(`${eventName} is enabled without ceremony details`)
-    if (event.date && !isValidIsoDate(event.date)) errors.push(`Invalid ISO date for ${eventName}`)
-
-    const hasCalendarStart = Boolean(event.calendar.eventStartIso.trim())
-    const hasCalendarEnd = Boolean(event.calendar.eventEndIso.trim())
-    if (hasCalendarStart !== hasCalendarEnd) errors.push(`${eventName} event requires both start and end times`)
-    if (hasCalendarStart && hasCalendarEnd) {
-      const start = new Date(event.calendar.eventStartIso)
-      const end = new Date(event.calendar.eventEndIso)
-      if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) errors.push(`Invalid ${eventName} event time range`)
-    }
-
-    if (event.mapNavigationUrl.trim() && !safeExternalUrl(event.mapNavigationUrl)) errors.push(`${eventName} map URL must be a safe HTTPS URL`)
-    if (event.mapEmbedUrl.trim() && !safeExternalUrl(event.mapEmbedUrl)) errors.push(`${eventName} map embed must be a safe HTTPS URL`)
-  }
-  if (config.gallery.length > 4) errors.push('Gallery must contain at most 4 images')
-  if (!config.seo.title.trim() || !config.seo.description.trim()) errors.push('Missing SEO metadata')
-  if (config.seo.siteUrl) {
-    try {
-      const siteUrl = new URL(config.seo.siteUrl)
-      if (!['http:', 'https:'].includes(siteUrl.protocol)) errors.push('Wedding site URL must use HTTP or HTTPS')
-    } catch {
-      errors.push('Invalid wedding site URL')
-    }
-  }
-  return errors
-}
-
-function isValidIsoDate(value: string): boolean {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
-  if (!match) return false
-
-  const [, yearText, monthText, dayText] = match
-  const year = Number(yearText)
-  const month = Number(monthText)
-  const day = Number(dayText)
-  const date = new Date(Date.UTC(year, month - 1, day))
-
-  return date.getUTCFullYear() === year
-    && date.getUTCMonth() === month - 1
-    && date.getUTCDate() === day
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+  warnForInvalidWeddingConfig(weddingConfig)
 }

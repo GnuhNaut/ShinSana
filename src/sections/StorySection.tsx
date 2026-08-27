@@ -4,9 +4,10 @@ import { MaskReveal, OrientalReveal } from '../components/motion'
 import { FloralCorner, HairlineDivider } from '../components/ornaments'
 import { GalleryLightbox } from '../components/wedding/GalleryLightbox'
 import { WeddingImage } from '../components/ui/WeddingImage'
-import { weddingConfig as config } from '../config/wedding'
+import { useWeddingConfig } from '../config/WeddingConfigContext'
 
 export function StorySection() {
+  const config = useWeddingConfig()
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const closeLightbox = useCallback(() => setActiveIndex(null), [])
   const gallery = config.features.gallery ? config.gallery.slice(0, 4) : []
@@ -27,7 +28,7 @@ export function StorySection() {
           <p className="eyebrow">Chuyện chúng mình</p>
           <h2 id="album-title">Một ngày, một đời thương</h2>
           <p>{config.copy.storyIntro}</p>
-          <HairlineDivider className="album__divider" center="diamond" tone="rose" />
+          <HairlineDivider className="album__divider" center="star" tone="rose" />
         </OrientalReveal>
 
         {chapters.length > 0 && (

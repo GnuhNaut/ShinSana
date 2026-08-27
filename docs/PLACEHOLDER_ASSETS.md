@@ -1,5 +1,7 @@
 # Placeholder assets
 
+`public/images/demo/demo-couple-sticker.webp` là cutout minh hoạ chỉ dùng cho `?demo=1`; hãy thay bằng ảnh tách nền đã được cặp đôi cho phép trước khi bật sticker ở production.
+
 ## Cảnh báo phát hành
 
 **REPLACE BEFORE FINAL RELEASE — phải thay toàn bộ tài sản trong tài liệu này trước khi phát hành bản cuối.**
@@ -26,7 +28,7 @@ Mỗi ảnh gốc có thêm các bản WebP responsive được resize cơ học
 | `public/assets/placeholders/story-02.webp` | `exec-50b1872f-5cbf-489b-972a-48977589a182.png` | Tĩnh vật bàn trà lễ cưới Việt với bộ trà sơn mài, lụa đỏ, hoa sen, trầu cau; không yếu tố Tết hay tôn giáo, không chữ/logo. | Ảnh Chương 02 và gallery: `weddingConfig.story[1].image`, `gallery[story-wide]`. | **REPLACE BEFORE FINAL RELEASE** |
 | `public/assets/placeholders/gallery-detail.webp` | `exec-854bc540-77f8-4be6-bfe2-fd6bb4f2f8d8.png` | Flat lay áo dài thêu sen, thiệp ngà để trống, nhẫn vàng, lá trầu và hoa sen; không chữ/logo. | Ảnh Chương 03 và gallery: `weddingConfig.story[2].image`, `gallery[detail-close]`. | **REPLACE BEFORE FINAL RELEASE** |
 
-Không có placeholder QR hoặc placeholder audio trong repository. Các trường `gift.*.qrImage` và `music.src` hiện để rỗng; không được điền tài sản ngẫu nhiên hoặc có bản quyền không rõ ràng.
+Không có placeholder QR hoặc placeholder audio trong repository. `gift.accounts[].qrImage` và `music.src` hiện để rỗng; không được điền tài sản ngẫu nhiên hoặc có bản quyền không rõ ràng.
 
 ## Cách thay an toàn
 

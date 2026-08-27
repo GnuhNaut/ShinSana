@@ -19,7 +19,7 @@ export function WeddingCalendar({ isoDate }: { isoDate: string }) {
         </div>
         <strong>{year}</strong>
       </div>
-      <HairlineDivider className="calendar__divider" center="diamond" tone="rose" />
+      <HairlineDivider className="calendar__divider" center="star" tone="rose" />
       <table className="calendar__table">
         <caption className="sr-only">Lịch tháng {monthIndex + 1} năm {year}; ngày {weddingDay} là ngày cưới</caption>
         <thead><tr>{WEEKDAYS.map((weekday) => <th scope="col" className="calendar__weekday" key={weekday}>{weekday}</th>)}</tr></thead>

@@ -2,8 +2,8 @@ import type { OrnamentProps } from './types'
 import { ornamentClass, ornamentStyle } from './types'
 
 interface DividerProps extends OrnamentProps {
-  /** Center accent: tiny diamond, leaf, or hairline. */
-  center?: 'diamond' | 'leaf' | 'pip' | 'none'
+  /** Center accent: a restrained sparkle, leaf, or hairline. */
+  center?: 'star' | 'diamond' | 'leaf' | 'pip' | 'none'
   /** Show two-tone rule (gold + soft ink). */
   dual?: boolean
   /** Filled track variant (a soft bar). */
@@ -16,7 +16,7 @@ export function HairlineDivider({
   tone = 'rose',
   size,
   style,
-  center = 'diamond',
+  center = 'star',
   dual = false,
   solid = false,
   ...props
@@ -45,6 +45,11 @@ export function HairlineDivider({
         {center === 'diamond' && (
           <g transform={`translate(${width / 2} ${height / 2})`}>
             <path d="M0 -4 L4 0 L0 4 L-4 0 Z" fill="currentColor" stroke="none" />
+          </g>
+        )}
+        {center === 'star' && (
+          <g transform={`translate(${width / 2} ${height / 2})`}>
+            <path d="M0 -5 L1.25 -1.25 L5 0 L1.25 1.25 L0 5 L-1.25 1.25 L-5 0 L-1.25 -1.25 Z" fill="currentColor" stroke="none" />
           </g>
         )}
         {center === 'leaf' && (

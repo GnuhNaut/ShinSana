@@ -1,6 +1,6 @@
 # Hướng dẫn thay nội dung thiệp cưới
 
-Toàn bộ nội dung thay được nằm trong `src/config/wedding.ts`. Không cần sửa JSX. Sau mỗi lần cập nhật, chạy:
+Toàn bộ nội dung thay được nằm trong `src/config/wedding.ts`; không cần sửa JSX. Schema nằm trong `src/types/wedding.ts`. Sau mỗi lần cập nhật, chạy:
 
 ```bash
 npm run typecheck
@@ -8,104 +8,153 @@ npm run test
 npm run build
 ```
 
-## Dữ liệu đang để trống có chủ đích
+Muốn xem trước UI khi đã điền đủ dữ liệu, mở `/?demo=1`. Dữ liệu tại `src/config/wedding.demo.ts` chỉ là fixture minh họa và được tải riêng theo query; không chỉnh file đó để thay dữ liệu production. URL `/` luôn đọc `src/config/wedding.ts`.
 
-Website hiện **không có** tên bố mẹ, giờ đón khách/cử hành/vào tiệc, địa điểm, địa chỉ, map, phone, QR, nhạc và ảnh thật. UI tự ẩn các phần này; không điền chuỗi “chưa cập nhật” để hiển thị ra production.
+## Dữ liệu hiện còn trống
 
-## 1. Tên, ngày và bố mẹ
+Website chưa có tên bố mẹ, giờ nghi lễ/đón khách/khai tiệc, địa điểm, địa chỉ, Maps, phone liên hệ, thông tin gửi xe, tài khoản ngân hàng, QR, nhạc và ảnh thật.
+
+Hiện `events: []` và `gift: { enabled: false, accounts: [] }`. UI tự ẩn dữ liệu thiếu; không điền “Chưa cập nhật”, “TBD” hoặc thông tin đoán vào config.
+
+## 1. Tên, ngày và gia đình
 
 - Tên/chữ ký/monogram: `couple.groom`, `couple.bride`, `couple.signature`, `couple.monogram`.
 - Ngày chính: `date.iso`, `date.countdownIso`, `date.display*`, `date.lunar*`, `date.timezone`.
-- Bố mẹ: `families.groomParents.{father,mother}` và `families.brideParents.{father,mother}`. Trường rỗng không render.
-- `countdownIso` và mọi giờ ISO phải kèm offset Việt Nam `+07:00`. Ngày âm lịch phải do gia đình xác nhận.
+- Giờ ISO phải kèm offset Việt Nam `+07:00`. Ngày âm lịch phải do gia đình xác nhận.
 
-## 2. Thêm một hoặc hai buổi lễ
-
-`events` là mảng linh hoạt. Hai object rỗng đang có chỉ là template. Điền dữ liệu đã xác nhận rồi đổi `enabled: true`:
+Thông tin gia đình dùng `families.groom` và `families.bride`:
 
 ```ts
-{
-  id: 'groom-ceremony',
-  side: 'groom', // 'groom' | 'bride' | bỏ trống
-  enabled: true,
-  label: 'Nhà Trai',
-  eventTitle: 'Lễ Thành Hôn', // hoặc Lễ Vu Quy / Tiệc Cưới theo xác nhận
-  date: '2026-10-19',
-  lunarDate: '10/09 âm lịch',
-  guestArrivalTime: '17:30',
-  ceremonyTime: '18:00',
-  banquetTime: '18:30',
-  venueName: 'Tên địa điểm thật',
-  address: 'Địa chỉ thật',
-  phone: 'Số điện thoại thật',
-  mapNavigationUrl: 'https://...',
-  mapEmbedUrl: 'https://...',
-  calendar: {
-    eventStartIso: '2026-10-19T18:00:00+07:00',
-    eventEndIso: '2026-10-19T21:00:00+07:00',
+families: {
+  // NHẬP THÔNG TIN NHÀ TRAI TẠI ĐÂY
+  groom: {
+    label: 'Nhà Trai',
+    // father: '<TÊN BỐ ĐÃ XÁC NHẬN>',
+    // mother: '<TÊN MẸ ĐÃ XÁC NHẬN>',
+    // location: '<TỈNH/THÀNH PHỐ NẾU MUỐN HIỂN THỊ>',
+  },
+  // NHẬP THÔNG TIN NHÀ GÁI TẠI ĐÂY
+  bride: {
+    label: 'Nhà Gái',
+    // father: '<TÊN BỐ ĐÃ XÁC NHẬN>',
+    // mother: '<TÊN MẸ ĐÃ XÁC NHẬN>',
+    // location: '<TỈNH/THÀNH PHỐ NẾU MUỐN HIỂN THỊ>',
   },
 }
 ```
 
-- Không có fallback tự đoán loại lễ/ngày/giờ/địa điểm.
-- Map chỉ nhận HTTPS; iframe chỉ render khi có `mapEmbedUrl` thật.
-- Calendar cần cả start và end, end phải sau start.
-- Một event bật thì render một card; hai event bật thì render hai card. `?side=groom|bride` chỉ đổi thứ tự ưu tiên.
+`label` một mình không làm block gia đình xuất hiện. Chỉ khi có `father`, `mother` hoặc `location` thật thì block tương ứng mới render; dữ liệu partial vẫn hợp lệ.
 
-## 3. Ảnh thật và crop
+## 2. Thông tin hôn lễ
 
-Xem provenance/checklist tại `docs/PLACEHOLDER_ASSETS.md`. Cách nhanh nhất là thay đúng tên file và tạo đủ biến thể responsive; cách sạch hơn là đặt ảnh thật trong `public/assets/images/` rồi đổi `src`, `srcSet`, `sizes`, `alt`, `aspectRatio`, `objectPosition` trong config.
-
-Các nhóm chính: `hero`, `couple.*.portrait`, `story[]`, `gallery[]`. Gallery giới hạn 4 ảnh để thiệp không quá dài. Ảnh dưới fold lazy-load; hero eager/high-priority.
-
-Social preview dùng `public/assets/social-preview.jpg` (1200×630) qua `seo.image`. Phải thay bằng ảnh được cặp đôi duyệt trước khi phát hành.
-
-## 4. Câu chuyện
-
-`story` hiện rỗng vì chưa có dữ liệu thật. Có thể thêm tối đa 3 `StoryChapter`; không bịa ngày gặp/cầu hôn. Khi rỗng, website chỉ hiện `copy.storyIntro` trung tính và gallery.
-
-## 5. RSVP
-
-Form hiện lưu qua `RSVPService` ở `src/services/rsvp/`. Adapter mặc định là `local-demo`: dữ liệu chỉ nằm trong `localStorage` của đúng browser, **không tới gia đình**. Muốn dùng production, tạo adapter `mode: 'remote'` triển khai cùng interface; backend phải có validation, rate-limit, chống spam và chính sách dữ liệu.
-
-## 6. Quà mừng
-
-Để bật, cần `features.gift: true`, `gift.enabled: true` và ít nhất một bên có QR hoặc đủ ba trường ngân hàng:
+`events` là mảng linh hoạt: có thể để rỗng, có 1, 2, 3 hoặc nhiều event hơn. Không có `enabled` và không giữ object template rỗng. Chỉ thêm object khi đã có ít nhất tên nghi lễ đã xác nhận.
 
 ```ts
-bankName: '...'
-accountName: '...'
-accountNumber: '...'
-qrImage: '/assets/images/qr-groom.webp'
+events: [
+  {
+    id: '<ID-KHÔNG-TRÙNG>',
+    side: 'bride', // 'groom' | 'bride' | 'both'; bỏ nếu không áp dụng
+    type: 'vu-quy', // vu-quy | thanh-hon | wedding-party | ceremony | other
+    eyebrow: 'Nhà Gái',
+    title: '<TÊN NGHI LỄ ĐÃ XÁC NHẬN>',
+
+    date: '<YYYY-MM-DD>',
+    lunarDate: '<NGÀY ÂM LỊCH ĐÃ XÁC NHẬN>',
+    guestArrivalTime: '<HH:mm>',
+    ceremonyTime: '<HH:mm>',
+    receptionTime: '<HH:mm>',
+
+    venueName: '<TÊN ĐỊA ĐIỂM ĐÃ XÁC NHẬN>',
+    address: '<ĐỊA CHỈ ĐẦY ĐỦ ĐÃ XÁC NHẬN>',
+    mapUrl: 'https://<GOOGLE-MAPS-URL-ĐÃ-KIỂM-TRA>',
+    // mapEmbedUrl: 'https://<MAP-EMBED-URL-ĐÃ-KIỂM-TRA>',
+    parkingNote: '<THÔNG TIN GỬI XE ĐÃ XÁC NHẬN>',
+    contactName: '<TÊN NGƯỜI LIÊN HỆ>',
+    contactPhone: '<SỐ ĐIỆN THOẠI ĐÃ XÁC NHẬN>',
+
+    // Chỉ thêm calendar khi đã biết chính xác cả giờ bắt đầu và kết thúc.
+    calendar: {
+      eventStartIso: '<YYYY-MM-DDTHH:mm:ss+07:00>',
+      eventEndIso: '<YYYY-MM-DDTHH:mm:ss+07:00>',
+    },
+  },
+]
 ```
 
-Không có dữ liệu thật thì CTA/modal không render. QR và số tài khoản là dữ liệu công khai trong JavaScript; kiểm tra bằng ít nhất hai thiết bị.
+Xóa mọi field chưa có dữ liệu thật; field thiếu không tạo khoảng trống. `title` và `id` là bắt buộc cho mỗi event.
 
-## 7. Nhạc
+- `mapUrl` phải được nhập thủ công và dùng HTTPS; website không tự suy ra Maps từ address.
+- Có address: hiện “Sao chép địa chỉ”. Có `mapUrl`: hiện CTA chính “Chỉ đường”.
+- Có contact: phone dùng `tel:` trên mobile. `parkingNote` nằm trong event, không tạo section riêng.
+- `mapEmbedUrl` là optional và lazy-load; bỏ field nếu không cần iframe.
+- Không biết chính xác giờ calendar: bỏ toàn bộ `calendar`, không điền giờ giả.
+- Query `?side=groom|bride|both` chỉ ưu tiên event phù hợp; không tự đổi tên Vu Quy/Thành Hôn.
 
-Điền `music.{title,artist,src}` và bật `features.music`. Website không hack autoplay; khách chủ động bật/tắt bằng nút nổi.
+## 3. Mừng cưới online
 
-## 8. Link cá nhân hóa
+Mặc định phải giữ:
+
+```ts
+gift: {
+  enabled: false,
+  accounts: [],
+}
+```
+
+Chỉ bật sau khi đã đối chiếu tài khoản thật:
+
+```ts
+gift: {
+  enabled: true,
+  accounts: [
+    {
+      id: '<ID-TÀI-KHOẢN-KHÔNG-TRÙNG>',
+      side: 'groom', // 'groom' | 'bride'; optional
+      label: 'Nhà Trai', // wording có thể đổi
+      bankName: '<TÊN NGÂN HÀNG>',
+      accountNumber: '<SỐ TÀI KHOẢN>',
+      accountHolder: '<CHỦ TÀI KHOẢN>',
+      // branch: '<CHI NHÁNH NẾU CÓ>',
+      // qrImage: '/assets/images/<QR-THẬT>.webp',
+    },
+  ],
+}
+```
+
+Mỗi account cần `id`, `bankName`, `accountNumber`, `accountHolder`; QR là optional. `enabled: false`, mảng rỗng hoặc account thiếu dữ liệu bắt buộc đều không tạo CTA/modal production. QR lỗi/không an toàn bị ẩn nhưng bank details hợp lệ vẫn dùng được.
+
+QR cần ảnh vuông, không crop, nền trắng và đủ lớn để scan. Nút copy địa chỉ/STK dùng feedback inline “Đã sao chép”, không dùng `alert()`. Đây chỉ là màn hình thông tin chuyển khoản, không phải payment gateway.
+
+## 4. RSVP
+
+Form lưu qua `RSVPService` ở `src/services/rsvp/`. Adapter mặc định có `mode: 'local-demo'`: dữ liệu chỉ nằm trong `localStorage` của đúng browser và **không được gửi tới gia đình**.
+
+Muốn thu RSVP tập trung, thay export trong `src/services/rsvp/index.ts` bằng remote adapter cùng interface; backend cần validation, rate-limit, chống spam và chính sách dữ liệu. RSVP mặc định không yêu cầu khách chọn từng nghi lễ.
+
+## 5. Ảnh, câu chuyện và nhạc
+
+- Ảnh: xem `docs/PLACEHOLDER_ASSETS.md`; cập nhật `hero`, `couple.*.portrait`, `story[]`, `gallery[]` cùng `srcSet`, `alt`, crop.
+- Gallery giới hạn 4 ảnh để thiệp không quá dài. Social preview là `public/assets/social-preview.jpg` 1200×630.
+- `story` hiện rỗng; chỉ thêm tối đa 3 mốc khi có nội dung thật.
+- Nhạc: điền `music.{title,artist,src}` và bật `features.music`; không hack autoplay.
+
+## 6. Cá nhân hóa và SEO
 
 ```text
 /?guest=Nguy%E1%BB%85n%20V%C4%83n%20A
 /?guest=Nguy%E1%BB%85n%20V%C4%83n%20A&side=groom
 ```
 
-Tên được loại control characters, chuẩn hóa khoảng trắng, giới hạn 80 ký tự và React render như text. Query không phải cơ chế bảo mật.
+Tên khách được normalize như text, giới hạn 80 ký tự. Cập nhật `seo.*`; khi có domain thật, đặt `VITE_SITE_URL` để build sinh canonical, `og:url` và social-image URL tuyệt đối.
 
-## 9. SEO / Zalo / Facebook
+## Validation và checklist phát hành
 
-Cập nhật `seo.title`, `seo.description`, `seo.image`, `seo.imageWidth`, `seo.imageHeight`. Khi có domain HTTPS thật, đặt `VITE_SITE_URL` trong môi trường deploy hoặc `seo.siteUrl`; build sẽ tạo canonical, `og:url` và URL ảnh social tuyệt đối. Không bịa domain trong source.
+Development sẽ cảnh báo config sai. Production lọc event/account không hợp lệ và không render Maps, phone hoặc QR URL không an toàn.
 
-## Checklist trước phát hành
-
-- [ ] Ảnh thật + consent/quyền sử dụng + crop mobile/desktop.
-- [ ] Tên bố mẹ (nếu muốn hiển thị).
-- [ ] Loại lễ, ngày, 3 mốc giờ, địa điểm, địa chỉ, map, phone.
-- [ ] QR/tài khoản đã đối chiếu, hoặc tiếp tục tắt Gift.
-- [ ] Nhạc có quyền sử dụng, hoặc tiếp tục để trống.
-- [ ] Câu chuyện thật đã được cặp đôi duyệt, hoặc giữ story rỗng.
-- [ ] RSVP đã nối backend nếu cần thu thập tập trung.
-- [ ] Domain, social preview, privacy/indexing được xác nhận.
-- [ ] Chạy full QA và visual QA lại ở mọi viewport bắt buộc.
+- [ ] Ảnh thật, quyền sử dụng và crop mobile/desktop.
+- [ ] Bố mẹ/location gia đình nếu muốn hiển thị.
+- [ ] Mỗi event đã kiểm tra title, ngày, giờ, venue, address, Maps, contact và parking.
+- [ ] Tài khoản/QR đã đối chiếu trên ít nhất hai thiết bị, hoặc tiếp tục để Gift tắt.
+- [ ] RSVP đã nối backend nếu cần thu tập trung.
+- [ ] Nhạc/story/domain/social preview đã được duyệt.
+- [ ] Chạy lint, typecheck, unit, E2E, build và visual QA.

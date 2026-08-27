@@ -1,20 +1,23 @@
-import { useMemo, type ReactNode } from 'react'
-import { CalendarPlus, MapPin, Phone } from 'lucide-react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
+import { CalendarPlus, Check, CircleParking, Copy, MapPin, Phone } from 'lucide-react'
 import { OrientalReveal } from '../components/motion'
 import { FloralCorner, HairlineDivider } from '../components/ornaments'
 import { Countdown } from '../components/wedding/Countdown'
 import { WeddingCalendar } from '../components/wedding/WeddingCalendar'
-import { weddingConfig as config } from '../config/wedding'
+import { MapModal } from '../components/wedding/MapModal'
+import { useWeddingConfig } from '../config/WeddingConfigContext'
 import type { GuestSide } from '../types/wedding'
 import {
-  ceremonyTitle,
-  eventHasMeaningfulDetails,
-  getEnabledEvents,
+  getDisplayableEvents,
   orderEventsForGuest,
-  resolveCeremony,
+  resolveWeddingEvent,
+  safeCalendarRange,
   safeExternalUrl,
-  type ResolvedCeremony,
+  safePhoneHref,
+  type ResolvedWeddingEvent,
 } from '../utils/ceremony'
+import { copyPlainText } from '../utils/clipboard'
+import { cleanOptionalText } from '../utils/contentSafety'
 import { parseIsoDateParts } from '../utils/dateFormat'
 import { calendarDataUri } from '../utils/ics'
 
@@ -23,18 +26,24 @@ interface CeremonySectionProps {
 }
 
 export function CeremonySection({ side }: CeremonySectionProps) {
-  const { day, monthIndex, year } = useMemo(() => parseIsoDateParts(config.date.iso), [])
+  const config = useWeddingConfig()
+  const { day, monthIndex, year } = useMemo(() => parseIsoDateParts(config.date.iso), [config.date.iso])
   const events = useMemo(() => (
-    orderEventsForGuest(getEnabledEvents(config).filter(eventHasMeaningfulDetails), side)
-      .map((event) => resolveCeremony(config, event))
-  ), [side])
+    orderEventsForGuest(getDisplayableEvents(config), side).map(resolveWeddingEvent)
+  ), [config, side])
+  const mainCalendarRange = safeCalendarRange(config.date.eventStartIso, config.date.eventEndIso)
   const calendarHref = calendarDataUri({
     title: `Đám cưới ${config.couple.groom.fullName} & ${config.couple.bride.fullName}`,
     date: config.date.iso,
     description: config.seo.description,
-    startIso: config.date.eventStartIso || undefined,
-    endIso: config.date.eventEndIso || undefined,
+    startIso: mainCalendarRange?.startIso,
+    endIso: mainCalendarRange?.endIso,
   })
+  const eventGridVariant = events.length === 1
+    ? 'single'
+    : events.length === 2
+      ? 'double'
+      : 'multiple'
 
   return (
     <section className="wedding-day" id="wedding-day" aria-labelledby="wedding-day-title">
@@ -44,7 +53,7 @@ export function CeremonySection({ side }: CeremonySectionProps) {
           <p className="eyebrow">Save the date</p>
           <h2 id="wedding-day-title">Ngày mình chung đôi</h2>
           <p>Một ngày thật đặc biệt, mong được sẻ chia cùng những người chúng mình yêu quý.</p>
-          <HairlineDivider className="wedding-day__divider" center="diamond" tone="rose" />
+          <HairlineDivider className="wedding-day__divider" center="star" tone="rose" />
         </OrientalReveal>
 
         <div className="wedding-day__primary">
@@ -74,13 +83,13 @@ export function CeremonySection({ side }: CeremonySectionProps) {
         {events.length > 0 && (
           <div className="wedding-day__events" aria-labelledby="events-title">
             <div className="wedding-day__events-header">
-              <p className="eyebrow">Thông tin buổi lễ</p>
+              <p className="eyebrow">{config.copy.ceremonyTitle}</p>
               <h3 id="events-title">Hẹn bạn tại ngày vui</h3>
             </div>
-            <div className={`events__grid events__grid--${events.length === 1 ? 'single' : 'multiple'}`}>
+            <div className={`events__grid events__grid--${eventGridVariant} events__grid--count-${events.length}`}>
               {events.map((event, index) => (
-                <OrientalReveal variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 100} key={event.id}>
-                  <EventCard ceremony={event} />
+                <OrientalReveal variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 80} key={event.id}>
+                  <EventCard event={event} />
                 </OrientalReveal>
               ))}
             </div>
@@ -91,82 +100,176 @@ export function CeremonySection({ side }: CeremonySectionProps) {
   )
 }
 
-function EventCard({ ceremony }: { ceremony: ResolvedCeremony }) {
-  const mapNavigationUrl = safeExternalUrl(ceremony.mapNavigationUrl)
-  const mapEmbedUrl = safeExternalUrl(ceremony.mapEmbedUrl)
-  const title = ceremonyTitle(ceremony) || ceremony.label || 'Buổi lễ'
-  const dateDay = ceremony.date ? Number(ceremony.date.split('-')[2]) : null
-  const phoneHref = ceremony.phone ? `tel:${ceremony.phone.replace(/[^+\d]/g, '')}` : ''
-  const calendarHref = ceremony.date ? calendarDataUri({
-    title,
-    date: ceremony.date,
-    description: config.seo.description,
-    location: ceremony.address || ceremony.venueName || undefined,
-    startIso: ceremony.calendar.startIso || undefined,
-    endIso: ceremony.calendar.endIso || undefined,
-  }) : ''
+function EventCard({ event }: { event: ResolvedWeddingEvent }) {
+  const config = useWeddingConfig()
+  const headingId = useId()
+  const eyebrow = cleanOptionalText(event.eyebrow)
+  const lunarDate = cleanOptionalText(event.lunarDate)
+  const guestArrivalTime = cleanOptionalText(event.guestArrivalTime)
+  const ceremonyTime = cleanOptionalText(event.ceremonyTime)
+  const receptionTime = cleanOptionalText(event.receptionTime)
+  const venueName = cleanOptionalText(event.venueName)
+  const address = cleanOptionalText(event.address)
+  const parkingNote = cleanOptionalText(event.parkingNote)
+  const contactName = cleanOptionalText(event.contactName)
+  const contactPhone = cleanOptionalText(event.contactPhone)
+  const mapUrl = safeExternalUrl(event.mapUrl)
+  const mapEmbedUrl = safeExternalUrl(event.mapEmbedUrl)
+  const phoneHref = safePhoneHref(contactPhone)
+  const dateParts = event.date ? parseEventDate(event.date) : null
+  const hasTimedCalendar = Boolean(
+    dateParts
+    && event.calendar.startIso
+    && event.calendar.endIso,
+  )
+  const eventCalendarHref = hasTimedCalendar && event.date
+    ? calendarDataUri({
+        title: event.title,
+        date: event.date,
+        description: config.seo.description,
+        location: address || venueName || undefined,
+        startIso: event.calendar.startIso,
+        endIso: event.calendar.endIso,
+      })
+    : ''
+  const { copyStatus, handleCopy } = useCopyFeedback(address)
+  const [mapOpen, setMapOpen] = useState(false)
+  const hasEventRows = Boolean(
+    lunarDate
+    || guestArrivalTime
+    || ceremonyTime
+    || receptionTime
+    || venueName
+    || address
+    || parkingNote
+    || contactName
+    || phoneHref,
+  )
+  const downloadId = event.id.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'event'
 
   return (
-    <article className="event-card" aria-labelledby={`event-${ceremony.id}-title`}>
+    <article className="event-card" aria-labelledby={headingId}>
       <header className="event-card__head">
-        {ceremony.label && <p className="event-card__label">{ceremony.label}</p>}
-        <h4 className="event-card__title" id={`event-${ceremony.id}-title`}>{title}</h4>
+        {eyebrow && <p className="event-card__label">{eyebrow}</p>}
+        <h4 className="event-card__title" id={headingId}>{event.title}</h4>
       </header>
 
-      {ceremony.date && (
-        <div className="event-card__date">
-          <time className="event-card__date-day" dateTime={ceremony.date}>{dateDay}</time>
-          <span className="event-card__date-rest">{ceremony.dateDisplayLong}<small>{ceremony.weekday}</small></span>
-        </div>
+      {dateParts && (
+        <time className="event-card__date" dateTime={event.date}>
+          <span className="event-card__date-day">{dateParts.day}</span>
+          <span className="event-card__date-rest">
+            <strong>Tháng {dateParts.month}</strong>
+            <span>{dateParts.year}</span>
+            {event.weekday && <small>{event.weekday}</small>}
+          </span>
+        </time>
       )}
 
-      <dl className="event-card__list">
-        {ceremony.lunarDate && <EventRow label="Âm lịch">{ceremony.lunarDate}</EventRow>}
-        {ceremony.guestArrivalTime && <EventRow label="Đón khách">{ceremony.guestArrivalTime}</EventRow>}
-        {ceremony.ceremonyTime && <EventRow label="Cử hành lễ">{ceremony.ceremonyTime}</EventRow>}
-        {ceremony.banquetTime && <EventRow label="Vào tiệc">{ceremony.banquetTime}</EventRow>}
-        {(ceremony.venueName || ceremony.address) && (
-          <EventRow label="Địa điểm">
-            {ceremony.venueName && <strong>{ceremony.venueName}</strong>}
-            {ceremony.address && <span>{ceremony.address}</span>}
-          </EventRow>
-        )}
-        {ceremony.phone && <EventRow label="Liên hệ"><a href={phoneHref}>{ceremony.phone}</a></EventRow>}
-      </dl>
-
-      {mapEmbedUrl && (
-        <iframe
-          className="event-card__iframe"
-          src={mapEmbedUrl}
-          title={`Bản đồ ${ceremony.venueName || title}`}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+      {hasEventRows && (
+        <dl className="event-card__list">
+          {lunarDate && <EventRow label="Âm lịch">{lunarDate}</EventRow>}
+          {guestArrivalTime && <EventRow label="Đón khách"><strong>{guestArrivalTime}</strong></EventRow>}
+          {ceremonyTime && <EventRow label="Làm lễ"><strong>{ceremonyTime}</strong></EventRow>}
+          {receptionTime && <EventRow label="Khai tiệc"><strong>{receptionTime}</strong></EventRow>}
+          {(venueName || address) && (
+            <EventRow label="Tại">
+              {venueName && <strong>{venueName}</strong>}
+              {address && <address>{address}</address>}
+            </EventRow>
+          )}
+          {parkingNote && (
+            <EventRow label="Gửi xe">
+              <span className="event-card__note"><CircleParking aria-hidden="true" />{parkingNote}</span>
+            </EventRow>
+          )}
+          {(contactName || phoneHref) && (
+            <EventRow label="Liên hệ">
+              {contactName && <strong>{contactName}</strong>}
+              {phoneHref && <a href={phoneHref}>{contactPhone}</a>}
+            </EventRow>
+          )}
+        </dl>
       )}
 
-      {(mapNavigationUrl || phoneHref || calendarHref) && (
+      {(mapUrl || address || phoneHref || eventCalendarHref) && (
         <div className="event-card__actions">
-          {mapNavigationUrl && (
-            <a className="button button--outline" href={mapNavigationUrl} target="_blank" rel="noopener noreferrer">
+          {mapEmbedUrl ? (
+            <button className="button button--primary" type="button" onClick={() => setMapOpen(true)}>
+              <MapPin aria-hidden="true" /> Chỉ đường
+            </button>
+          ) : mapUrl ? (
+            <a className="button button--primary" href={mapUrl} target="_blank" rel="noopener noreferrer">
               <MapPin aria-hidden="true" /> Chỉ đường
             </a>
+          ) : null}
+          {address && (
+            <button className="button button--quiet" type="button" onClick={handleCopy}>
+              {copyStatus === 'copied' ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+              {copyStatus === 'copied' ? 'Đã sao chép' : 'Sao chép địa chỉ'}
+            </button>
           )}
           {phoneHref && (
             <a className="button button--outline" href={phoneHref}>
-              <Phone aria-hidden="true" /> Gọi điện
+              <Phone aria-hidden="true" /> Gọi
             </a>
           )}
-          {calendarHref && (
-            <a className="button button--primary" href={calendarHref} download={`wedding-${ceremony.id}.ics`}>
-              <CalendarPlus aria-hidden="true" /> Thêm vào lịch
+          {eventCalendarHref && (
+            <a className="button button--outline" href={eventCalendarHref} download={`wedding-${downloadId}.ics`}>
+              <CalendarPlus aria-hidden="true" /> Lưu ngày cưới
             </a>
           )}
         </div>
       )}
+
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {copyStatus === 'copied' ? 'Đã sao chép địa chỉ' : copyStatus === 'failed' ? 'Không thể sao chép địa chỉ' : ''}
+      </span>
+      <MapModal
+        open={mapOpen}
+        onClose={() => setMapOpen(false)}
+        title={venueName || event.title}
+        address={address}
+        mapUrl={mapUrl}
+        mapEmbedUrl={mapEmbedUrl}
+      />
     </article>
   )
 }
 
 function EventRow({ label, children }: { label: string; children: ReactNode }) {
   return <div className="event-card__row"><dt>{label}</dt><dd>{children}</dd></div>
+}
+
+function parseEventDate(value: string): { day: number; month: number; year: number } | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (!match) return null
+  const [, year, month, day] = match.map(Number)
+  if (!year || !month || !day) return null
+  const date = new Date(Date.UTC(year, month - 1, day))
+  if (
+    date.getUTCFullYear() !== year
+    || date.getUTCMonth() !== month - 1
+    || date.getUTCDate() !== day
+  ) return null
+  return { day, month, year }
+}
+
+type CopyStatus = 'idle' | 'copied' | 'failed'
+
+function useCopyFeedback(value: string) {
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle')
+  const resetTimer = useRef<number | null>(null)
+
+  useEffect(() => () => {
+    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current)
+  }, [])
+
+  const handleCopy = async () => {
+    const copied = await copyPlainText(value)
+    setCopyStatus(copied ? 'copied' : 'failed')
+    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current)
+    resetTimer.current = window.setTimeout(() => setCopyStatus('idle'), 2400)
+  }
+
+  return { copyStatus, handleCopy }
 }

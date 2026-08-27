@@ -132,9 +132,10 @@ test('omits unconfigured event, map, gift, and music controls', async ({ page })
   await expect(page.locator('.event-card')).toHaveCount(0)
   await expect(page.locator('iframe')).toHaveCount(0)
   await expect(page.getByRole('link', { name: /Chỉ đường/i })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: /Gửi quà mừng/i })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Mừng cưới online/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /(?:Bật|Tắt) nhạc/i })).toHaveCount(0)
   await expect(page.locator('audio')).toHaveCount(0)
+  await expect(page.getByText(/Chưa cập nhật|Đang cập nhật|\bTBD\b/i)).toHaveCount(0)
 })
 
 test('opens the gallery by keyboard and closes the lightbox with Escape', async ({ page }) => {

@@ -21,7 +21,7 @@ body {
 }
 
 body.invitation-closed { overflow: hidden; }
-body[data-modal-open='true'] .floating-controls { opacity: 0; pointer-events: none; }
+body[data-modal-open='true'] .floating-controls, body[data-modal-open='true'] .floating-gift { opacity: 0; pointer-events: none; }
 
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }

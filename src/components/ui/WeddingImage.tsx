@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ImgHTMLAttributes } from 'react'
-import { weddingConfig } from '../../config/wedding'
+import { useWeddingConfig } from '../../config/WeddingConfigContext'
 
 interface WeddingImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'loading' | 'src'> {
   src: string
@@ -25,6 +25,7 @@ export function WeddingImage({
   className = '',
   ...props
 }: WeddingImageProps) {
+  const config = useWeddingConfig()
   const [failed, setFailed] = useState(false)
   const dimensions = dimensionsFromRatio(aspectRatio)
   const style = { '--image-ratio': aspectRatio, '--image-position': objectPosition } as CSSProperties
@@ -46,7 +47,7 @@ export function WeddingImage({
         />
       ) : (
         <span className="wedding-image__fallback" role="img" aria-label={alt}>
-          <span>{weddingConfig.couple.monogram}</span>
+          <span>{config.couple.monogram}</span>
           <small>Ảnh sẽ được cập nhật</small>
         </span>
       )}

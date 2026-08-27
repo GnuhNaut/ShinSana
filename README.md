@@ -20,6 +20,12 @@ npm run build
 npm run preview
 ```
 
+## Demo preview đầy đủ dữ liệu
+
+Mở `http://localhost:5173/?demo=1` khi chạy dev, hoặc `http://localhost:4173/?demo=1` khi chạy preview. Chế độ này tải riêng `src/config/wedding.demo.ts`, hiển thị badge `DEMO PREVIEW` và đặt robots runtime thành `noindex, nofollow`.
+
+URL `/`, `?demo=0` và mọi URL không có đúng tham số `demo=1` luôn dùng `src/config/wedding.ts`. Demo được tách thành lazy chunk; dữ liệu mẫu không nằm trong HTML hay entry JavaScript mặc định và không thay metadata/canonical production.
+
 QA:
 
 ```bash
@@ -41,16 +47,16 @@ npm run test:e2e
 
 1. Cover ảnh điện ảnh + paper invitation.
 2. Lời kính mời/gia đình conditional + tên cặp đôi.
-3. Ngày cưới, calendar, countdown và event/location conditional.
+3. Ngày cưới, calendar, countdown và “Thông tin hôn lễ” conditional: giờ, địa chỉ, chỉ đường, liên hệ và gửi xe.
 4. Lời chuyện ngắn + gallery editorial 4 ảnh/lightbox.
 5. RSVP Có/Không, party size conditional, lời nhắn; Gift chỉ hiện khi có dữ liệu thật.
 6. Closing full-bleed.
 
 ## Nội dung tập trung
 
-Chỉ sửa `src/config/wedding.ts` để thay tên, bố mẹ, ngày, sự kiện, giờ, địa điểm, phone, Maps, ảnh, story, QR, nhạc và SEO. Schema nằm ở `src/types/wedding.ts`.
+Chỉ sửa `src/config/wedding.ts` để thay tên, bố mẹ, ngày, sự kiện, giờ, địa điểm, phone, Maps, gửi xe, ảnh, story, QR, nhạc và SEO. Schema nằm ở `src/types/wedding.ts`.
 
-Hai event template, bố mẹ, Maps, phone, gift/QR và music hiện để trống/tắt. UI không render “chưa cập nhật”, map giả, CTA disabled hoặc QR giả. Xem ví dụ chính xác tại [docs/CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md).
+`events` là mảng linh hoạt 0–3+ phần tử, không có `enabled` hoặc template rỗng. Hiện `events: []`, thông tin gia đình chưa có và `gift: { enabled: false, accounts: [] }`, nên toàn bộ UI tương ứng được ẩn. Không render “chưa cập nhật”, map giả, CTA disabled hoặc QR giả. Xem schema và ví dụ placeholder rõ ràng tại [docs/CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md). Không sao chép dữ liệu từ `wedding.demo.ts` sang production.
 
 ## Cá nhân hóa
 
@@ -59,7 +65,7 @@ Hai event template, bố mẹ, Maps, phone, gift/QR và music hiện để trố
 /?guest=Nguy%E1%BB%85n%20V%C4%83n%20A&side=groom
 ```
 
-`guest` được normalize/sanitize như text, giới hạn 80 ký tự. `side=bride|groom|both` chỉ ưu tiên thứ tự event khi có nhiều lễ.
+`guest` được normalize/sanitize như text, giới hạn 80 ký tự. `side=bride|groom|both` ưu tiên thứ tự event phù hợp khi có nhiều lễ; nội dung từng event vẫn đến hoàn toàn từ config.
 
 ## RSVP
 

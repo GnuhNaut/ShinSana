@@ -2,9 +2,10 @@ import { ArrowUp } from 'lucide-react'
 import { OrientalReveal } from '../components/motion'
 import { HairlineDivider, RoseSeal } from '../components/ornaments'
 import { WeddingImage } from '../components/ui/WeddingImage'
-import { weddingConfig as config } from '../config/wedding'
+import { useWeddingConfig } from '../config/WeddingConfigContext'
 
 export function FinaleSection() {
+  const config = useWeddingConfig()
   const weddingYear = config.date.iso.slice(0, 4)
   const replay = () => {
     window.scrollTo({
@@ -21,7 +22,7 @@ export function FinaleSection() {
         <RoseSeal className="closing__seal" tone="gold" monogram={config.couple.monogram} ring="thin" />
         <p className="closing__eyebrow">{config.copy.finalTitle}</p>
         <h2 id="closing-title">{config.copy.finalMessage}</h2>
-        <HairlineDivider className="closing__divider" center="diamond" tone="gold" />
+        <HairlineDivider className="closing__divider" center="star" tone="gold" />
         <time dateTime={config.date.iso}>{config.date.display}</time>
         <small>{config.date.lunar}</small>
         <strong className="closing__signature">{config.couple.signature}</strong>
