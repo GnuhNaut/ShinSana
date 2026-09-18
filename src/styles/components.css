@@ -208,10 +208,10 @@
 }
 .floating-controls { bottom: calc(1rem + env(safe-area-inset-bottom)); display: grid; gap: .5rem; position: fixed; right: calc(1rem + env(safe-area-inset-right)); transition: opacity .2s; z-index: 1000; }
 .floating-controls .icon-button { background: var(--color-surface); border-color: var(--color-rose-strong); box-shadow: var(--shadow-paper-tiny); color: var(--color-rose-strong); }
-.floating-gift { align-items: center; animation: gift-bob 3.6s ease-in-out infinite; background: var(--color-rose-strong); border: 1px solid rgb(255 255 255 / 76%); border-radius: 999px; bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: 0 .55rem 1.4rem rgb(143 41 77 / 30%); color: var(--color-on-rose); cursor: pointer; display: inline-flex; font-size: .72rem; font-weight: 800; gap: .4rem; left: calc(1rem + env(safe-area-inset-left)); letter-spacing: .03em; min-height: 2.85rem; padding: .55rem .78rem; position: fixed; z-index: 1000; }
+.floating-gift { align-items: center; animation: gift-intro .7s ease-out 2; background: var(--color-rose-strong); border: 1px solid rgb(255 255 255 / 76%); border-radius: 999px; bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: 0 .4rem 1.1rem rgb(143 41 77 / 24%); color: var(--color-on-rose); cursor: pointer; display: inline-flex; font-size: .72rem; font-weight: 800; gap: .4rem; left: calc(1rem + env(safe-area-inset-left)); letter-spacing: .03em; min-height: 2.85rem; padding: .55rem .78rem; position: fixed; z-index: 1000; }
 .floating-gift svg { height: 1.1rem; width: 1.1rem; }.floating-gift i { color: #ffe9ae; font-size: .75rem; font-style: normal; }
 .floating-gift:hover { background: var(--color-burgundy); }.floating-gift:focus-visible { outline: 3px solid var(--color-champagne); outline-offset: 3px; }
-@keyframes gift-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes gift-intro { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-2px); } 70% { transform: translateY(1px); } }
 
 @media (min-width: 48rem) {
   .modal-backdrop { align-items: center; padding: 1.5rem; }

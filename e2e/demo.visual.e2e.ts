@@ -3,7 +3,10 @@ import { expect, test, type Page } from '@playwright/test'
 const screenshotStyle = '.skip-link,.floating-controls,.scroll-progress{display:none!important}'
 
 const fullPageViewports = [
+  { width: 360, height: 800, fileName: 'final-polish-360.png' },
+  { width: 375, height: 812, fileName: 'final-polish-375.png' },
   { width: 390, height: 844, fileName: 'demo-mobile-390.png' },
+  { width: 412, height: 915, fileName: 'final-polish-412.png' },
   { width: 430, height: 932, fileName: 'demo-mobile-430.png' },
   { width: 768, height: 1024, fileName: 'demo-tablet-768.png' },
   { width: 1440, height: 900, fileName: 'demo-desktop-1440.png' },

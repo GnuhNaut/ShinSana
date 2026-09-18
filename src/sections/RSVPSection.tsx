@@ -15,9 +15,11 @@ import {
 
 interface RSVPSectionProps {
   guestName: string | null
+  /** Local storage is deliberately usable only in the explicit preview. */
+  demoMode?: boolean
 }
 
-export function RSVPSection({ guestName }: RSVPSectionProps) {
+export function RSVPSection({ guestName, demoMode = true }: RSVPSectionProps) {
   const config = useWeddingConfig()
   const initialValues = useMemo<RSVPFormValues>(() => ({
     name: guestName ?? '',
@@ -45,6 +47,7 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
   }
 
   const rsvpEnabled = config.features.rsvp
+  const canSubmit = rsvpService.mode === 'remote' || demoMode
   if (!rsvpEnabled) return null
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -113,7 +116,11 @@ export function RSVPSection({ guestName }: RSVPSectionProps) {
               <HairlineDivider className="rsvp__divider" center="star" tone="rose" />
             </OrientalReveal>
 
-            {submittedResponse ? (
+            {!canSubmit ? (
+              <p className="rsvp__unavailable" role="status">
+                Chức năng xác nhận trực tuyến sẽ được cập nhật khi gia đình hoàn tất kênh tiếp nhận.
+              </p>
+            ) : submittedResponse ? (
               <div className="rsvp__success" role="status">
                 <OrientalReveal variant="scale">
                   <Lotus className="rsvp__success-icon" tone="rose" withWater={false} size="3rem" />

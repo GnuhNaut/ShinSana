@@ -54,7 +54,7 @@ export default function App({ config = weddingConfig, demoMode = false }: AppPro
               <InvitationPageSection guestName={guestName} />
               <CeremonySection side={guestSide} />
               <StorySection />
-              <RSVPSection guestName={guestName} />
+              <RSVPSection guestName={guestName} demoMode={demoMode} />
               <GiftSection />
               <FinaleSection />
               <FloatingControls />

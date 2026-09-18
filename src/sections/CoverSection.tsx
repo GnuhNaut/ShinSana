@@ -36,7 +36,6 @@ export function CoverSection({ onOpened }: CoverSectionProps) {
       </div>
       <div className="cover__veil" aria-hidden="true" />
       <span className="cover__sparkle cover__sparkle--one" aria-hidden="true">✦</span>
-      <span className="cover__sparkle cover__sparkle--two" aria-hidden="true">✧</span>
       <DecorativeSticker placement="hero" className="cover__sticker" eager />
       <div className="cover__layout">
         <article className="cover__paper">

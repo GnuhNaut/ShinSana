@@ -70,7 +70,6 @@ export function GiftExperience({ gift, heading, intro, ctaLabel }: GiftExperienc
     <>
       <OrientalReveal className="gift-section" variant="up" delay={120}>
         <span className="gift-section__sparkle gift-section__sparkle--one" aria-hidden="true">✦</span>
-        <span className="gift-section__sparkle gift-section__sparkle--two" aria-hidden="true">✧</span>
         <div className="container gift-section__inner">
           <HeartHandshake className="gift-section__icon" aria-hidden="true" />
           <p className="eyebrow">Tấm lòng yêu thương</p>
@@ -87,7 +86,6 @@ export function GiftExperience({ gift, heading, intro, ctaLabel }: GiftExperienc
           <div className="gift-modal__frame">
             <FloralCorner className="gift-modal__peony" tone="rose" variant="bloom" />
             <span className="gift-modal__sparkle gift-modal__sparkle--one" aria-hidden="true">✦</span>
-            <span className="gift-modal__sparkle gift-modal__sparkle--two" aria-hidden="true">♥</span>
             <header className="gift-modal__header">
               <Sparkles className="gift-modal__sparkles" aria-hidden="true" />
               <Lotus className="gift-modal__lotus" tone="rose" withWater={false} size="2.5rem" />

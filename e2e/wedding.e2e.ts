@@ -72,8 +72,8 @@ test('loads and personalizes the invitation with the confirmed names and date', 
   expect(criticalFailures, criticalFailures.join('\n')).toEqual([])
 })
 
-test('validates and stores attending and declined RSVP responses in the local adapter', async ({ page }) => {
-  await page.goto('/')
+test('validates and stores attending and declined RSVP responses in the explicit demo adapter', async ({ page }) => {
+  await page.goto('/?demo=1')
   await openInvitation(page)
 
   const form = page.locator('#rsvp form')
@@ -122,6 +122,15 @@ test('validates and stores attending and declined RSVP responses in the local ad
   }))
   expect(finalEnvelope.data[1]).not.toHaveProperty('partySize')
   expect(finalEnvelope.data[1]).not.toHaveProperty('message')
+})
+
+test('does not present local RSVP storage as a production submission channel', async ({ page }) => {
+  await page.goto('/')
+  await openInvitation(page)
+  const rsvp = page.locator('#rsvp')
+  await rsvp.scrollIntoViewIfNeeded()
+  await expect(rsvp.getByRole('status')).toContainText('hoàn tất kênh tiếp nhận')
+  await expect(rsvp.locator('form')).toHaveCount(0)
 })
 
 test('omits unconfigured event, map, gift, and music controls', async ({ page }) => {
