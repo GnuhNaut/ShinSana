@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FloatingControls } from './components/wedding/FloatingControls'
-import { ContextCursor } from './components/ui/ContextCursor'
 import { WeddingConfigContext } from './config/WeddingConfigContext'
 import { weddingConfig } from './config/wedding'
 import { applyRuntimeRobots } from './config/weddingRuntime'
@@ -94,7 +93,6 @@ export default function App({ config = weddingConfig }: AppProps) {
           onToggleMusic={toggleMusic}
         />
       )}
-      <ContextCursor />
     </WeddingConfigContext.Provider>
   )
 }

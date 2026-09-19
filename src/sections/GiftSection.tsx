@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Check, Copy, HeartHandshake } from 'lucide-react'
-import { PeonyLineArt } from '../components/ui/PeonyLineArt'
 import { useWeddingConfig } from '../config/WeddingConfigContext'
 import type { GuestSide, WeddingGiftAccount, WeddingSide } from '../types/wedding'
 import { copyPlainText } from '../utils/clipboard'
@@ -22,7 +21,6 @@ export function GiftSection({ side }: GiftSectionProps) {
 
   return (
     <section className={'gifts gifts--' + side} id="gifts" aria-labelledby="gifts-title">
-      <PeonyLineArt className="gifts__peony" />
       <div className="shell">
         <header className="gifts__header">
           <p className="section-kicker">{config.content.giftEyebrow}</p>
@@ -71,7 +69,6 @@ function GiftEnvelope({
       <button
         className="gift-envelope__activate"
         type="button"
-        data-context-cursor="MỞ"
         onClick={onActivate}
         aria-pressed={active}
       >

@@ -414,7 +414,6 @@ export function GalleryCoverflow({ images, chapters }: GalleryCoverflowProps) {
         <div
           className="coverflow__stage"
           ref={stageRef}
-          data-context-cursor="KÉO"
           role="region"
           aria-roledescription="carousel"
           aria-label="Bộ ảnh cưới, dùng phím mũi tên hoặc vuốt để xem ảnh"
@@ -449,7 +448,6 @@ export function GalleryCoverflow({ images, chapters }: GalleryCoverflowProps) {
                     type="button"
                     aria-current={active ? 'true' : undefined}
                     aria-label={(active ? 'Mở ảnh ' : 'Chọn ảnh ') + (index + 1) + ': ' + image.caption}
-                    data-context-cursor={active ? 'XEM' : undefined}
                     tabIndex={active ? 0 : -1}
                     onClick={() => selectSlide(index)}
                   >

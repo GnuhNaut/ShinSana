@@ -42,8 +42,8 @@ export function CoverSection({ onOpening, onReveal, onOpened }: CoverSectionProp
     ) return
     const button = event.currentTarget
     const bounds = button.getBoundingClientRect()
-    const x = Math.max(-4, Math.min(4, ((event.clientX - (bounds.left + bounds.width / 2)) / (bounds.width / 2)) * 4))
-    const y = Math.max(-3, Math.min(3, ((event.clientY - (bounds.top + bounds.height / 2)) / (bounds.height / 2)) * 3))
+    const x = Math.max(-2, Math.min(2, ((event.clientX - (bounds.left + bounds.width / 2)) / (bounds.width / 2)) * 2))
+    const y = Math.max(-2, Math.min(2, ((event.clientY - (bounds.top + bounds.height / 2)) / (bounds.height / 2)) * 2))
     if (magneticFrame.current !== null) window.cancelAnimationFrame(magneticFrame.current)
     magneticFrame.current = window.requestAnimationFrame(() => {
       button.style.setProperty('--magnet-x', `${x}px`)
@@ -91,11 +91,11 @@ export function CoverSection({ onOpening, onReveal, onOpened }: CoverSectionProp
         <button
           className="cover__open"
           type="button"
-          data-context-cursor="MỞ"
           onClick={openInvitation}
           onPointerMove={moveOpenButton}
           onPointerLeave={resetOpenButton}
           disabled={leaving}
+          aria-label={leaving ? 'Đang mở thiệp' : 'Mở lời mời'}
         >
           <span>{leaving ? 'Đang mở thiệp' : config.content.coverPrompt}</span>
           <i aria-hidden="true">↘</i>
