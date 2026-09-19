@@ -1,0 +1,2 @@
+import { expect, test } from '@playwright/test';
+test('personalized invitation opens and filters ceremony', async ({ page }) => { await page.goto('/?guest=Nguyen%20Van%20A&side=groom'); await expect(page.getByText('Trân trọng kính mời Nguyen Van A')).toBeVisible(); await page.getByRole('button', { name: 'Mở thiệp cưới' }).click(); const ceremony = page.getByTestId('ceremony'); await expect(ceremony.getByText('NHÀ TRAI')).toBeVisible(); await expect(ceremony.getByText('NHÀ GÁI')).toHaveCount(0); });

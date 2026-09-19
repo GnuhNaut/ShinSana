@@ -1,14 +1,6 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import { ErrorBoundary } from './app/ErrorBoundary'
-import './styles/fonts.css'
-import './styles/site.css'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './styles/global.css';
+import { App } from './App';
 
-ReactDOM.createRoot(document.getElementById('app')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </React.StrictMode>,
-)
+createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);

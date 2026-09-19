@@ -1,98 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FloatingControls } from './components/wedding/FloatingControls'
-import { WeddingConfigContext } from './config/WeddingConfigContext'
-import { weddingConfig } from './config/wedding'
-import { applyRuntimeRobots } from './config/weddingRuntime'
-import { CoverSection } from './sections/CoverSection'
-import { CeremonySection } from './sections/CeremonySection'
-import { FinaleSection } from './sections/FinaleSection'
-import { GiftSection } from './sections/GiftSection'
-import { InvitationPageSection } from './sections/InvitationPageSection'
-import { PhotoBreakSection } from './sections/PhotoBreakSection'
-import { RSVPSection } from './sections/RSVPSection'
-import { StorySection } from './sections/StorySection'
-import { WishSection } from './sections/WishSection'
-import type { WeddingConfig } from './types/wedding'
-import { getGuestNameFromUrl, getGuestSideFromUrl } from './utils/guest'
+import { useEffect, useRef, useState } from 'react';
+import { cinematicImage, finaleImage, heroImage, introImage, wedding, type WeddingSide } from './config/wedding';
+import { guestFromSearch } from './utils/guest';
+import { Gallery } from './components/Gallery';
+import { Response } from './components/Response';
+import { Gift } from './components/Gift';
 
-interface AppProps {
-  config?: WeddingConfig
-}
-
-export default function App({ config = weddingConfig }: AppProps) {
-  const [opened, setOpened] = useState(false)
-  const [contentPrepared, setContentPrepared] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [audioFailed, setAudioFailed] = useState(false)
-  const invitationRef = useRef<HTMLElement>(null)
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const guestName = useMemo(() => getGuestNameFromUrl(), [])
-  const guestSide = useMemo(() => getGuestSideFromUrl(), [])
-
-  useEffect(() => applyRuntimeRobots(config.seo.robots), [config.seo.robots])
-
-  const startMusic = useCallback(() => {
-    const audio = audioRef.current
-    if (!audio || audioFailed || !audio.paused) return
-    void audio.play().then(() => setIsPlaying(true)).catch(() => setAudioFailed(true))
-  }, [audioFailed])
-
-  const toggleMusic = useCallback(() => {
-    const audio = audioRef.current
-    if (!audio || audioFailed) return
-    if (audio.paused) {
-      void audio.play().then(() => setIsPlaying(true)).catch(() => setAudioFailed(true))
-    } else {
-      audio.pause()
-      setIsPlaying(false)
-    }
-  }, [audioFailed])
-
-  const completeOpening = () => {
-    setOpened(true)
-    setContentPrepared(true)
-    window.setTimeout(() => invitationRef.current?.focus(), 30)
-  }
-
-  return (
-    <WeddingConfigContext.Provider value={config}>
-      {config.music.src && (
-        <audio
-          ref={audioRef}
-          src={config.music.src}
-          loop
-          preload="none"
-          onPause={() => setIsPlaying(false)}
-          onError={() => {
-            setAudioFailed(true)
-            setIsPlaying(false)
-          }}
-        />
-      )}
-      {!opened && <CoverSection onOpening={startMusic} onReveal={() => setContentPrepared(true)} onOpened={completeOpening} />}
-      {opened && <a className="skip-link" href="#locations">Đến thông tin buổi lễ</a>}
-      <div className="site" aria-hidden={!opened} inert={!opened}>
-        {contentPrepared && (
-          <main id="invitation-content" ref={invitationRef} tabIndex={-1} aria-label="Nội dung thiệp cưới">
-            <InvitationPageSection guestName={guestName} />
-            <CeremonySection side={guestSide} />
-            <PhotoBreakSection />
-            <StorySection />
-            <RSVPSection guestName={guestName} side={guestSide} />
-            <WishSection guestName={guestName} side={guestSide} />
-            <GiftSection side={guestSide} />
-            <FinaleSection />
-          </main>
-        )}
-      </div>
-      {opened && (
-        <FloatingControls
-          hasMusic={Boolean(config.music.src)}
-          isPlaying={isPlaying}
-          audioFailed={audioFailed}
-          onToggleMusic={toggleMusic}
-        />
-      )}
-    </WeddingConfigContext.Provider>
-  )
-}
+function Music({ opened }: { opened: boolean }) { const audio=useRef<HTMLAudioElement>(null); const [playing,setPlaying]=useState(false); useEffect(()=>{if(opened&&wedding.music.src) audio.current?.play().then(()=>setPlaying(true)).catch(()=>{});},[opened]); const toggle=()=>{if(!wedding.music.src)return;if(playing){audio.current?.pause();setPlaying(false)}else audio.current?.play().then(()=>setPlaying(true)).catch(()=>{})};return <><audio ref={audio} preload="none" src={wedding.music.src}/><button className={`music ${playing?'playing':''}`} onClick={toggle} aria-label={playing?'Tạm dừng nhạc':'Bật nhạc'}><i/><i/><i/><span>{playing?'TẮT NHẠC':'NHẠC'}</span></button></> }
+function Ceremony({ side }: {side: WeddingSide}) { const entries=side==='both'?(['groom','bride'] as const):[side]; return <section data-testid="ceremony" className={`scene ceremony-scene ${entries.length===1?'one-event':''}`}><div className="date-lockup"><span>19</span><i>10</i><span>2026</span></div><div className="ceremonies">{entries.map(key=>{const item=wedding.locations[key];return <article key={key}><p className="eyebrow">{item.label}</p><h2>{item.time}</h2><p>{item.address}</p><a href={item.map} target="_blank" rel="noreferrer">Chỉ đường <span>→</span></a></article>})}</div></section> }
+export function App(){const [{guest,side}]=useState(guestFromSearch);const [opened,setOpened]=useState(false);useEffect(()=>{document.title=wedding.seo.title;},[]);const invitee=guest?`Trân trọng kính mời ${guest}`:wedding.copy.intro;return <main className={opened?'opened':''}><Music opened={opened}/><section className="scene cover-scene" aria-label="Thiệp cưới Tuấn Hùng và Sao Mai"><img className="cover-photo" src={heroImage} srcSet={`${heroImage}&w=768 768w, ${heroImage}&w=1200 1200w, ${heroImage}&w=1600 1600w`} sizes="100vw" fetchPriority="high" alt="Khoảnh khắc của Tuấn Hùng và Sao Mai"/><div className="cover-shade"/><div className="cover-content"><p>{invitee}</p><h1><span>Tuấn Hùng</span><em>&</em><span>Sao Mai</span></h1><div className="cover-date"><span>{wedding.date}</span><small>{wedding.lunarDate}</small></div><button className="open-invitation" onClick={()=>setOpened(true)} aria-label="Mở thiệp cưới"><i>囍</i>MỞ THIỆP</button></div>{!opened&&<div className="curtain left"/>}{!opened&&<div className="curtain right"/>}</section>
+<section className="scene intro-scene"><div className="intro-photo"><img src={introImage} loading="lazy" alt="Cô dâu và chú rể trong bộ ảnh cưới"/></div><div className="intro-words"><p className="eyebrow">19 · 10 · 2026</p><h2>Ngày chúng mình<br/>về chung một nhà.</h2><p>Niềm vui sẽ trọn vẹn hơn khi có sự hiện diện của bạn.</p></div></section>
+<Ceremony side={side}/><section className="scene cinematic-scene"><img src={cinematicImage} loading="lazy" alt="Khoảnh khắc lãng mạn của cặp đôi"/><p>{wedding.copy.cinematic}</p></section><Gallery/><Response guest={guest} side={side}/><Gift side={side}/><section className="scene finale-scene"><img src={finaleImage} loading="lazy" alt="Tuấn Hùng và Sao Mai"/><div><p>{wedding.copy.finale}</p><span>{wedding.date}</span></div></section></main>}

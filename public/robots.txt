@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-# The invitation’s production indexing policy is supplied by its HTML meta tag.
