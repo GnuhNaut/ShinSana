@@ -4,6 +4,7 @@ async function openInvitation(pageUrl: string, page: Page) {
   await page.goto(pageUrl)
   await page.getByRole('button', { name: 'Mở lời mời' }).click()
   await expect(page.getByRole('main', { name: 'Nội dung thiệp cưới' })).toBeVisible()
+  await expect(page.locator('.cover')).toHaveCount(0)
 }
 
 test('guest personalization filters locations but keeps both envelopes', async ({ page }) => {
@@ -39,8 +40,62 @@ test('specified mobile and desktop viewports keep the full gallery inside the vi
   for (const viewport of viewports) {
     await page.setViewportSize(viewport)
     await openInvitation('/', page)
-    await expect(page.locator('.album-grid__item')).toHaveCount(24)
+    await expect(page.locator('.coverflow__slide')).toHaveCount(7)
+    await expect(page.getByText('Ảnh 1 trên 24')).toBeVisible()
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     await expect(page.getByText('Chức năng xác nhận trực tuyến sẽ sớm được mở.')).toBeVisible()
   }
+})
+
+test('coverflow supports keyboard and horizontal pointer navigation without stealing vertical movement', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await openInvitation('/', page)
+  const gallery = page.getByRole('region', { name: /Bộ ảnh cưới/i })
+  await gallery.scrollIntoViewIfNeeded()
+  await gallery.focus()
+  const galleryCounter = page.locator('.coverflow__caption [aria-live="polite"]')
+  await page.keyboard.press('ArrowRight')
+  await expect(galleryCounter).toHaveText('Ảnh 2 trên 24')
+
+  const box = await gallery.boundingBox()
+  expect(box).not.toBeNull()
+  if (!box) return
+
+  await page.mouse.move(box.x + box.width * .7, box.y + box.height * .5)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * .28, box.y + box.height * .52, { steps: 3 })
+  await page.mouse.up()
+  await expect(galleryCounter).toHaveText('Ảnh 3 trên 24')
+
+  const activeBox = await gallery.boundingBox()
+  expect(activeBox).not.toBeNull()
+  if (!activeBox) return
+
+  await page.mouse.move(activeBox.x + activeBox.width * .5, activeBox.y + activeBox.height * .38)
+  await page.mouse.down()
+  await page.mouse.move(activeBox.x + activeBox.width * .53, activeBox.y + activeBox.height * .78, { steps: 3 })
+  await page.mouse.up()
+  await expect(galleryCounter).toHaveText('Ảnh 3 trên 24')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+
+  const currentBox = await gallery.boundingBox()
+  expect(currentBox).not.toBeNull()
+  if (!currentBox) return
+
+  await page.mouse.move(currentBox.x + currentBox.width * .68, currentBox.y + currentBox.height * .48)
+  await page.mouse.down()
+  await page.mouse.move(currentBox.x + currentBox.width * .26, currentBox.y + currentBox.height * .49, { steps: 3 })
+  const viewportHeight = page.viewportSize()?.height ?? 0
+  const releaseY = currentBox.y + currentBox.height + 12 < viewportHeight - 2
+    ? currentBox.y + currentBox.height + 12
+    : Math.max(2, currentBox.y - 12)
+  await page.mouse.move(currentBox.x + currentBox.width * .26, releaseY)
+  await page.mouse.up()
+  await expect(galleryCounter).toHaveText('Ảnh 4 trên 24')
+  await page.waitForTimeout(320)
+  await page.getByRole('button', { name: /Mở ảnh 4:/ }).click()
+  await expect(page.getByRole('dialog', { name: 'thư viện ảnh' })).toBeVisible()
+  await page.waitForTimeout(450)
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 })

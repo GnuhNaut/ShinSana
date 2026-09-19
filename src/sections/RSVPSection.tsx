@@ -84,7 +84,7 @@ export function RSVPSection({ guestName, side }: RSVPSectionProps) {
             <span>Nhắn gửi đôi lời <small>Không bắt buộc</small></span>
             <textarea rows={4} value={message} onChange={(event) => setMessage(event.target.value)} maxLength={500} />
           </label>
-          <button className="button button--wine button--full" type="submit" disabled={!available || submitting}>
+          <button className="button button--red button--full" type="submit" disabled={!available || submitting}>
             <Send aria-hidden="true" /> {submitting ? 'Đang gửi' : available ? 'Gửi hồi âm' : 'Sắp mở'}
           </button>
         </form>

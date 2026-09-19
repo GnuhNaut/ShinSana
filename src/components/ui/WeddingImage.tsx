@@ -7,6 +7,11 @@ interface WeddingImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'l
   objectPosition?: string
   eager?: boolean
   wrapperClassName?: string
+  /** Gallery-only metadata is accepted so config objects can be passed safely. */
+  caption?: string
+  layout?: string
+  chapter?: string
+  featured?: boolean
 }
 
 function dimensionsFromRatio(ratio: string): { width: number; height: number } {
@@ -24,15 +29,21 @@ export function WeddingImage({
   eager = false,
   wrapperClassName = '',
   className = '',
+  fetchPriority,
+  caption,
+  layout,
+  chapter,
+  featured,
   ...props
 }: WeddingImageProps) {
   const config = useWeddingConfig()
   const [failed, setFailed] = useState(false)
   const dimensions = dimensionsFromRatio(aspectRatio)
   const style = { '--image-ratio': aspectRatio, '--image-position': objectPosition } as CSSProperties
+  const isGalleryImage = Boolean(caption || layout || chapter || featured)
 
   return (
-    <span className={`wedding-image ${wrapperClassName}`} style={style}>
+    <span className={`wedding-image ${wrapperClassName}`} style={style} data-gallery-image={isGalleryImage ? 'true' : undefined}>
       {!failed ? (
         <img
           {...props}
@@ -40,10 +51,11 @@ export function WeddingImage({
           className={className}
           src={src}
           alt={alt}
+          draggable={false}
           width={dimensions.width}
           height={dimensions.height}
           loading={eager ? 'eager' : 'lazy'}
-          fetchPriority={eager ? 'high' : 'auto'}
+          fetchPriority={eager ? 'high' : fetchPriority ?? 'auto'}
           decoding={eager ? 'sync' : 'async'}
           onError={() => setFailed(true)}
         />

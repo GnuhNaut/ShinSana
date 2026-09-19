@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CalendarDays, Clock3, Copy, MapPin, Navigation } from 'lucide-react'
+import { PeonyLineArt } from '../components/ui/PeonyLineArt'
 import { useWeddingConfig } from '../config/WeddingConfigContext'
 import type { GuestSide, WeddingLocation } from '../types/wedding'
 import { copyPlainText } from '../utils/clipboard'
@@ -17,6 +18,7 @@ export function CeremonySection({ side }: CeremonySectionProps) {
 
   return (
     <section className={'ceremony ceremony--' + side} id="locations" aria-labelledby="locations-title">
+      <PeonyLineArt className="ceremony__peony" />
       <div className="shell">
         <header className="ceremony__header">
           <p className="section-kicker">{config.content.dateEyebrow}</p>
@@ -50,7 +52,7 @@ function LocationCard({ location }: { location: WeddingLocation }) {
     <article className={'location-card location-card--' + location.side}>
       <div className="location-card__seal" aria-hidden="true">{location.side === 'groom' ? 'Nhà Trai' : 'Nhà Gái'}</div>
       <header>
-        <p>{location.side === 'groom' ? 'Groom’s family' : 'Bride’s family'}</p>
+        <p>{location.side === 'groom' ? 'Gia đình Nhà Trai' : 'Gia đình Nhà Gái'}</p>
         <h3>{location.title}</h3>
       </header>
       <dl>
@@ -74,7 +76,7 @@ function LocationCard({ location }: { location: WeddingLocation }) {
       {location.note && <p className="location-card__note">{location.note}</p>}
       <div className="location-card__actions">
         {mapUrl ? (
-          <a className="button button--wine" href={mapUrl} target="_blank" rel="noopener noreferrer">
+          <a className="button button--red" href={mapUrl} target="_blank" rel="noopener noreferrer" data-context-cursor="ĐI">
             <Navigation aria-hidden="true" /> Chỉ đường
           </a>
         ) : (

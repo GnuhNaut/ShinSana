@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FloatingControls } from './components/wedding/FloatingControls'
+import { ContextCursor } from './components/ui/ContextCursor'
 import { WeddingConfigContext } from './config/WeddingConfigContext'
 import { weddingConfig } from './config/wedding'
 import { applyRuntimeRobots } from './config/weddingRuntime'
@@ -8,6 +9,7 @@ import { CeremonySection } from './sections/CeremonySection'
 import { FinaleSection } from './sections/FinaleSection'
 import { GiftSection } from './sections/GiftSection'
 import { InvitationPageSection } from './sections/InvitationPageSection'
+import { PhotoBreakSection } from './sections/PhotoBreakSection'
 import { RSVPSection } from './sections/RSVPSection'
 import { StorySection } from './sections/StorySection'
 import { WishSection } from './sections/WishSection'
@@ -20,6 +22,7 @@ interface AppProps {
 
 export default function App({ config = weddingConfig }: AppProps) {
   const [opened, setOpened] = useState(false)
+  const [contentPrepared, setContentPrepared] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioFailed, setAudioFailed] = useState(false)
   const invitationRef = useRef<HTMLElement>(null)
@@ -48,6 +51,7 @@ export default function App({ config = weddingConfig }: AppProps) {
 
   const completeOpening = () => {
     setOpened(true)
+    setContentPrepared(true)
     window.setTimeout(() => invitationRef.current?.focus(), 30)
   }
 
@@ -66,13 +70,14 @@ export default function App({ config = weddingConfig }: AppProps) {
           }}
         />
       )}
-      {!opened && <CoverSection onOpening={startMusic} onOpened={completeOpening} />}
+      {!opened && <CoverSection onOpening={startMusic} onReveal={() => setContentPrepared(true)} onOpened={completeOpening} />}
       {opened && <a className="skip-link" href="#locations">Đến thông tin buổi lễ</a>}
       <div className="site" aria-hidden={!opened} inert={!opened}>
-        {opened && (
+        {contentPrepared && (
           <main id="invitation-content" ref={invitationRef} tabIndex={-1} aria-label="Nội dung thiệp cưới">
             <InvitationPageSection guestName={guestName} />
             <CeremonySection side={guestSide} />
+            <PhotoBreakSection />
             <StorySection />
             <RSVPSection guestName={guestName} side={guestSide} />
             <WishSection guestName={guestName} side={guestSide} />
@@ -89,6 +94,7 @@ export default function App({ config = weddingConfig }: AppProps) {
           onToggleMusic={toggleMusic}
         />
       )}
+      <ContextCursor />
     </WeddingConfigContext.Provider>
   )
 }

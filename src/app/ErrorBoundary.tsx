@@ -16,7 +16,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="eyebrow">{weddingConfig.couple.monogram}</p>
           <h1>Lời mời đang cần một chút thời gian.</h1>
           <p>Vui lòng tải lại trang để tiếp tục.</p>
-          <button className="button button--wine" type="button" onClick={() => window.location.reload()}>Tải lại trang</button>
+          <button className="button button--red" type="button" onClick={() => window.location.reload()}>Tải lại trang</button>
         </main>
       )
     }

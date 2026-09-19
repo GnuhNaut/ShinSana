@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Check, Copy, HeartHandshake } from 'lucide-react'
+import { PeonyLineArt } from '../components/ui/PeonyLineArt'
 import { useWeddingConfig } from '../config/WeddingConfigContext'
 import type { GuestSide, WeddingGiftAccount, WeddingSide } from '../types/wedding'
 import { copyPlainText } from '../utils/clipboard'
@@ -21,6 +22,7 @@ export function GiftSection({ side }: GiftSectionProps) {
 
   return (
     <section className={'gifts gifts--' + side} id="gifts" aria-labelledby="gifts-title">
+      <PeonyLineArt className="gifts__peony" />
       <div className="shell">
         <header className="gifts__header">
           <p className="section-kicker">{config.content.giftEyebrow}</p>
@@ -66,11 +68,18 @@ function GiftEnvelope({
 
   return (
     <article className={'gift-envelope gift-envelope--' + account.side + (active ? ' is-active' : '')}>
-      <button className="gift-envelope__activate" type="button" onClick={onActivate} aria-pressed={active}>
+      <button
+        className="gift-envelope__activate"
+        type="button"
+        data-context-cursor="MỞ"
+        onClick={onActivate}
+        aria-pressed={active}
+      >
         <span>{label}</span>
         <i aria-hidden="true">{active ? 'Đang mở' : 'Mở phong bao'}</i>
       </button>
       <div className="gift-envelope__seal" aria-hidden="true">囍</div>
+      <span className="gift-envelope__flap" aria-hidden="true" />
       <div className="gift-envelope__content">
         <p className="gift-envelope__label">{label}</p>
         <div className="gift-envelope__qr">

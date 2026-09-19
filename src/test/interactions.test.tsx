@@ -19,7 +19,7 @@ describe('invitation interactions', () => {
   it('opens the accessible gallery lightbox and closes it with Escape', async () => {
     openApp()
     await screen.findByRole('main', { name: 'Nội dung thiệp cưới' })
-    const firstPhoto = document.querySelector<HTMLElement>('.album-grid__item button')
+    const firstPhoto = document.querySelector<HTMLElement>('.coverflow__slide.is-active button')
     expect(firstPhoto).not.toBeNull()
     fireEvent.click(firstPhoto!)
     expect(await screen.findByRole('dialog', { name: 'thư viện ảnh' })).toBeVisible()

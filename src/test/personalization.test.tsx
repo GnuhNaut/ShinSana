@@ -43,6 +43,7 @@ describe('personalized invitation flows', () => {
     expect(screen.getByRole('heading', { name: 'Nhà Gái' })).toBeVisible()
     expect(screen.getByRole('button', { name: /Nhà Trai/ })).toBeVisible()
     expect(screen.getByRole('button', { name: /Nhà Gái/ })).toBeVisible()
-    await waitFor(() => expect(document.querySelectorAll('.album-grid__item')).toHaveLength(24))
+    await waitFor(() => expect(document.querySelectorAll('.coverflow__slide')).toHaveLength(7))
+    expect(screen.getByText('Ảnh 1 trên 24')).toBeVisible()
   })
 })

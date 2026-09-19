@@ -9,10 +9,11 @@ interface GalleryLightboxProps {
   activeIndex: number | null
   onChange: (index: number) => void
   onClose: () => void
+  returnFocusTarget?: () => HTMLElement | null
 }
 
-export function GalleryLightbox({ images, activeIndex, onChange, onClose }: GalleryLightboxProps) {
-  const touchStart = useRef<number | null>(null)
+export function GalleryLightbox({ images, activeIndex, onChange, onClose, returnFocusTarget }: GalleryLightboxProps) {
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
   const open = activeIndex !== null
   const current = activeIndex === null ? null : images[activeIndex]
 
@@ -47,15 +48,20 @@ export function GalleryLightbox({ images, activeIndex, onChange, onClose }: Gall
   if (!current || activeIndex === null) return null
 
   return (
-    <Modal open={open} onClose={onClose} title="thư viện ảnh" className="lightbox" showClose>
+    <Modal open={open} onClose={onClose} title="thư viện ảnh" className="lightbox" showClose returnFocusTarget={returnFocusTarget}>
       <div
         className="lightbox__stage"
-        onTouchStart={(event) => { touchStart.current = event.changedTouches[0]?.clientX ?? null }}
+        onTouchStart={(event) => {
+          const touch = event.changedTouches[0]
+          touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null
+        }}
         onTouchEnd={(event) => {
           if (touchStart.current === null) return
-          const delta = (event.changedTouches[0]?.clientX ?? touchStart.current) - touchStart.current
-          if (Math.abs(delta) > 48) {
-            if (delta > 0) previous()
+          const touch = event.changedTouches[0]
+          const deltaX = (touch?.clientX ?? touchStart.current.x) - touchStart.current.x
+          const deltaY = (touch?.clientY ?? touchStart.current.y) - touchStart.current.y
+          if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > 0) previous()
             else next()
           }
           touchStart.current = null

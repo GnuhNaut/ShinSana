@@ -10,11 +10,12 @@ interface ModalProps {
   className?: string
   labelledBy?: string
   showClose?: boolean
+  returnFocusTarget?: () => HTMLElement | null
 }
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-export function Modal({ open, onClose, title, children, className = '', labelledBy, showClose = true }: ModalProps) {
+export function Modal({ open, onClose, title, children, className = '', labelledBy, showClose = true, returnFocusTarget }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
 
@@ -64,12 +65,12 @@ export function Modal({ open, onClose, title, children, className = '', labelled
       document.body.style.overflow = previousOverflow
       delete document.body.dataset.modalOpen
       if (site) site.inert = siteWasInert
-      const focusTarget = previousFocus.current
+      const focusTarget = returnFocusTarget?.() ?? previousFocus.current
       window.setTimeout(() => {
         if (focusTarget?.isConnected && !document.body.dataset.modalOpen) focusTarget.focus({ preventScroll: true })
       }, 0)
     }
-  }, [onClose, open])
+  }, [onClose, open, returnFocusTarget])
 
   if (!open) return null
 

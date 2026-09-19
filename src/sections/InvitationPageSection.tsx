@@ -1,4 +1,5 @@
 import { WeddingImage } from '../components/ui/WeddingImage'
+import { PeonyLineArt } from '../components/ui/PeonyLineArt'
 import { useWeddingConfig } from '../config/WeddingConfigContext'
 
 interface InvitationPageSectionProps {
@@ -12,6 +13,7 @@ export function InvitationPageSection({ guestName }: InvitationPageSectionProps)
 
   return (
     <section className="invitation" aria-labelledby="invitation-title">
+      <PeonyLineArt className="invitation__peony" />
       <div className="invitation__window" aria-hidden="true" />
       <div className="shell invitation__grid">
         <div className="invitation__copy">

@@ -1,21 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { WeddingImage } from '../components/ui/WeddingImage'
 import { useWeddingConfig } from '../config/WeddingConfigContext'
 import { getGuestNameFromUrl } from '../utils/guest'
 
 interface CoverSectionProps {
   onOpening: () => void
+  onReveal: () => void
   onOpened: () => void
 }
 
-export function CoverSection({ onOpening, onOpened }: CoverSectionProps) {
+export function CoverSection({ onOpening, onReveal, onOpened }: CoverSectionProps) {
   const config = useWeddingConfig()
   const [leaving, setLeaving] = useState(false)
   const guestName = getGuestNameFromUrl()
+  const magneticFrame = useRef<number | null>(null)
 
   useEffect(() => {
     document.body.dataset.invitationState = 'closed'
-    return () => { delete document.body.dataset.invitationState }
+    return () => {
+      if (magneticFrame.current !== null) window.cancelAnimationFrame(magneticFrame.current)
+      delete document.body.dataset.invitationState
+    }
   }, [])
 
   const openInvitation = () => {
@@ -23,10 +28,34 @@ export function CoverSection({ onOpening, onOpened }: CoverSectionProps) {
     onOpening()
     setLeaving(true)
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    window.setTimeout(onReveal, reduced ? 1 : 360)
     window.setTimeout(() => {
       delete document.body.dataset.invitationState
       onOpened()
     }, reduced ? 1 : 820)
+  }
+
+  const moveOpenButton = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    ) return
+    const button = event.currentTarget
+    const bounds = button.getBoundingClientRect()
+    const x = Math.max(-4, Math.min(4, ((event.clientX - (bounds.left + bounds.width / 2)) / (bounds.width / 2)) * 4))
+    const y = Math.max(-3, Math.min(3, ((event.clientY - (bounds.top + bounds.height / 2)) / (bounds.height / 2)) * 3))
+    if (magneticFrame.current !== null) window.cancelAnimationFrame(magneticFrame.current)
+    magneticFrame.current = window.requestAnimationFrame(() => {
+      button.style.setProperty('--magnet-x', `${x}px`)
+      button.style.setProperty('--magnet-y', `${y}px`)
+      magneticFrame.current = null
+    })
+  }
+
+  const resetOpenButton = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (magneticFrame.current !== null) window.cancelAnimationFrame(magneticFrame.current)
+    event.currentTarget.style.setProperty('--magnet-x', '0px')
+    event.currentTarget.style.setProperty('--magnet-y', '0px')
   }
 
   return (
@@ -59,7 +88,15 @@ export function CoverSection({ onOpening, onOpened }: CoverSectionProps) {
           <time dateTime={config.date.iso}>{config.date.display}</time>
           <span>{config.date.lunar}</span>
         </p>
-        <button className="cover__open" type="button" onClick={openInvitation} disabled={leaving}>
+        <button
+          className="cover__open"
+          type="button"
+          data-context-cursor="MỞ"
+          onClick={openInvitation}
+          onPointerMove={moveOpenButton}
+          onPointerLeave={resetOpenButton}
+          disabled={leaving}
+        >
           <span>{leaving ? 'Đang mở thiệp' : config.content.coverPrompt}</span>
           <i aria-hidden="true">↘</i>
         </button>
