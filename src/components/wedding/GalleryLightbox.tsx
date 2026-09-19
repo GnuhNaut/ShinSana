@@ -36,6 +36,14 @@ export function GalleryLightbox({ images, activeIndex, onChange, onClose }: Gall
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [next, open, previous])
 
+  useEffect(() => {
+    if (!open || activeIndex === null || images.length < 2) return
+    const adjacent = images[(activeIndex + 1) % images.length]
+    if (!adjacent) return
+    const preload = new Image()
+    preload.src = adjacent.src
+  }, [activeIndex, images, open])
+
   if (!current || activeIndex === null) return null
 
   return (

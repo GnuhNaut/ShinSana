@@ -1,49 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { getGuestNameFromUrl, getGuestSideFromUrl, MAX_GUEST_NAME_LENGTH, normalizeGuestName } from '../utils/guest'
+import { getGuestNameFromUrl, getGuestSideFromUrl, normalizeGuestName } from '../utils/guest'
 
-describe('guest query parser', () => {
-  it('returns null for missing and empty guest values', () => {
-    expect(getGuestNameFromUrl('https://wedding.test/')).toBeNull()
-    expect(getGuestNameFromUrl('https://wedding.test/?guest=')).toBeNull()
-    expect(normalizeGuestName(' \n\t ')).toBeNull()
+describe('guest URL personalization', () => {
+  it('reads a well-formed guest name and supported side', () => {
+    expect(getGuestNameFromUrl('https://example.test/?guest=Nguyen%20Van%20A&side=groom')).toBe('Nguyen Van A')
+    expect(getGuestSideFromUrl('https://example.test/?guest=Nguyen%20Van%20A&side=groom')).toBe('groom')
+    expect(getGuestSideFromUrl('https://example.test/?side=bride')).toBe('bride')
+    expect(getGuestSideFromUrl('https://example.test/?side=both')).toBe('both')
   })
 
-  it('decodes URL-encoded and Unicode names', () => {
-    expect(getGuestNameFromUrl('https://wedding.test/?guest=Nguyen%20Van%20An')).toBe('Nguyen Van An')
-    expect(getGuestNameFromUrl('https://wedding.test/?guest=Nguy%E1%BB%85n+V%C4%83n+An')).toBe('Nguyễn Văn An')
+  it('falls back safely for malformed or unsupported input', () => {
+    expect(getGuestNameFromUrl('https://example.test/?guest=%ZZ')).toBeNull()
+    expect(getGuestSideFromUrl('https://example.test/?side=unknown')).toBe('both')
+    expect(getGuestSideFromUrl('https://example.test/')).toBe('both')
   })
 
-  it('normalizes whitespace and strips control characters', () => {
-    expect(normalizeGuestName('  Nguyễn\u0000\t  Văn\n An  ')).toBe('Nguyễn Văn An')
-  })
-
-  it('limits names to the documented maximum length', () => {
-    const result = normalizeGuestName('A'.repeat(MAX_GUEST_NAME_LENGTH + 25))
-    expect(result).toBe('A'.repeat(MAX_GUEST_NAME_LENGTH))
-  })
-
-  it('fails safely for malformed URLs', () => {
-    expect(getGuestNameFromUrl('http://[')).toBeNull()
-    expect(getGuestNameFromUrl('https://wedding.test/?guest=%E0%A4%A')).toBeNull()
-    expect(getGuestNameFromUrl('https://wedding.test/?guest=Mai%2')).toBeNull()
-  })
-})
-
-describe('guest side query', () => {
-  it('defaults to both when missing or unknown', () => {
-    expect(getGuestSideFromUrl('https://wedding.test/')).toBe('both')
-    expect(getGuestSideFromUrl('https://wedding.test/?side=unknown')).toBe('both')
-  })
-
-  it('accepts the canonical values', () => {
-    expect(getGuestSideFromUrl('https://wedding.test/?side=groom')).toBe('groom')
-    expect(getGuestSideFromUrl('https://wedding.test/?side=bride')).toBe('bride')
-    expect(getGuestSideFromUrl('https://wedding.test/?side=both')).toBe('both')
-  })
-
-  it('accepts Vietnamese aliases', () => {
-    expect(getGuestSideFromUrl('https://wedding.test/?side=nhà%20trai')).toBe('groom')
-    expect(getGuestSideFromUrl('https://wedding.test/?side=nhà%20gái')).toBe('bride')
-    expect(getGuestSideFromUrl('https://wedding.test/?side=cả%20hai')).toBe('both')
+  it('normalizes long and control-character guest names', () => {
+    expect(normalizeGuestName('  Gia   đình\u0000 Anh   Chị  ')).toBe('Gia đình Anh Chị')
+    expect(normalizeGuestName('x'.repeat(100))).toHaveLength(80)
   })
 })

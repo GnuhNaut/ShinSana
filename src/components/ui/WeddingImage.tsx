@@ -16,6 +16,7 @@ function dimensionsFromRatio(ratio: string): { width: number; height: number } {
 }
 
 export function WeddingImage({
+  id: imageId,
   src,
   alt,
   aspectRatio,
@@ -35,6 +36,7 @@ export function WeddingImage({
       {!failed ? (
         <img
           {...props}
+          data-image-id={imageId}
           className={className}
           src={src}
           alt={alt}

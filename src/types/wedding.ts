@@ -1,136 +1,95 @@
+export type WeddingSide = 'groom' | 'bride'
+export type GuestSide = WeddingSide | 'both'
+
 export interface ImageAsset {
+  id: string
   src: string
   srcSet?: string
   sizes?: string
   alt: string
+  /** CSS aspect ratio, kept with each image to prevent layout shift. */
   aspectRatio: string
   objectPosition?: string
 }
 
-export interface PersonProfile {
-  firstName: string
-  fullName: string
-  role: string
-  portrait: ImageAsset
-  introduction: string
-}
-
-export interface StoryChapter {
-  chapter: string
-  year: string
-  title: string
-  description: string
-  image: ImageAsset
-  placeholder: boolean
-}
-
 export interface GalleryImage extends ImageAsset {
-  id: string
-  layout: 'portrait' | 'landscape' | 'feature' | 'detail'
   caption: string
+  layout: 'wide' | 'portrait' | 'square' | 'detail'
 }
 
-/** Optional, non-essential cutout imagery used as a playful wedding-paper accent. */
-export interface DecorativeSticker {
-  id: string
-  src: string
-  alt: string
-  placement: 'hero' | 'gift' | 'album'
-}
-
-export type WeddingGiftSide = 'groom' | 'bride'
-
-export interface WeddingGiftAccount {
-  id: string
-  side?: WeddingGiftSide
-  label?: string
-  bankName: string
-  accountNumber: string
-  accountHolder: string
-  qrImage?: string
-  branch?: string
-}
-
-export interface WeddingFamily {
-  label?: string
-  father?: string
-  mother?: string
-  location?: string
-}
-
-export interface CeremonyCalendar {
-  /** ISO 8601 with offset, e.g. 2026-10-19T10:00:00+07:00. */
-  eventStartIso: string
-  /** ISO 8601 with offset and later than eventStartIso. */
-  eventEndIso: string
-}
-
-export type WeddingEventSide = 'groom' | 'bride' | 'both'
-
-export type WeddingEventType =
-  | 'vu-quy'
-  | 'thanh-hon'
-  | 'wedding-party'
-  | 'ceremony'
-  | 'other'
-
-export interface WeddingEvent {
-  /** Stable key used by React and calendar downloads. */
-  id: string
-  side?: WeddingEventSide
-  type?: WeddingEventType
-  eyebrow?: string
-  /** Free-form guest-facing title; no ceremony title is inferred. */
+/** The only two in-person locations presented on the invitation. */
+export interface WeddingLocation {
+  side: WeddingSide
   title: string
-  /** ISO date YYYY-MM-DD. */
-  date?: string
-  lunarDate?: string
-  /** Display times such as "09:00". */
-  guestArrivalTime?: string
-  ceremonyTime?: string
-  receptionTime?: string
-  venueName?: string
-  address?: string
-  /** Manually confirmed HTTPS navigation URL. */
-  mapUrl?: string
-  /** Optional manually confirmed HTTPS embed URL. */
-  mapEmbedUrl?: string
-  parkingNote?: string
-  contactName?: string
-  contactPhone?: string
-  calendar?: CeremonyCalendar
+  date: string
+  lunarDate: string
+  receptionTime: string
+  ceremonyTime: string
+  address: string
+  mapUrl: string
+  note?: string
+}
+
+/** Empty values deliberately render as a clear “will update” state, never invented bank data. */
+export interface WeddingGiftAccount {
+  side: WeddingSide
+  bankName: string
+  accountHolder: string
+  accountNumber: string
+  qrImage?: string
 }
 
 export interface WeddingConfig {
   couple: {
-    groom: PersonProfile
-    bride: PersonProfile
-    signature: string
+    groom: string
+    bride: string
     monogram: string
   }
   date: {
     iso: string
-    countdownIso: string
-    eventStartIso: string
-    eventEndIso: string
     display: string
     displayLong: string
-    weekday: string
     lunar: string
-    lunarLong: string
-    timezone: string
   }
-  families: {
-    groom: WeddingFamily
-    bride: WeddingFamily
-  }
-  events: WeddingEvent[]
   hero: ImageAsset
-  decorativeStickers?: DecorativeSticker[]
-  story: StoryChapter[]
+  locations: Record<WeddingSide, WeddingLocation>
+  gifts: Record<WeddingSide, WeddingGiftAccount>
+  music: {
+    src: string
+    title: string
+    artist: string
+  }
   gallery: GalleryImage[]
-  music: { title: string; artist: string; src: string }
-  gift: { enabled: boolean; accounts: WeddingGiftAccount[] }
+  content: {
+    coverEyebrow: string
+    coverPrompt: string
+    invitationEyebrow: string
+    invitationTitle: string
+    invitationBody: string
+    dateEyebrow: string
+    dateTitle: string
+    dateBody: string
+    storyEyebrow: string
+    storyTitle: string
+    storyLead: string
+    storyQuote: string
+    locationsEyebrow: string
+    locationsTitle: string
+    locationsBody: string
+    rsvpEyebrow: string
+    rsvpTitle: string
+    rsvpBody: string
+    wishEyebrow: string
+    wishTitle: string
+    wishBody: string
+    giftEyebrow: string
+    giftTitle: string
+    giftBody: string
+    closingEyebrow: string
+    closingTitle: string
+    closingBody: string
+  }
+  sampleWishes: Array<{ id: string; name: string; message: string }>
   seo: {
     title: string
     description: string
@@ -140,35 +99,4 @@ export interface WeddingConfig {
     robots: string
     siteUrl: string
   }
-  features: {
-    music: boolean
-    rsvp: boolean
-    wish: boolean
-    personalizedGuest: boolean
-    gallery: boolean
-  }
-  copy: {
-    coverEyebrow: string
-    coverHint: string
-    invitationTitle: string
-    invitationGeneric: string
-    invitationPersonalized: string
-    invitationBody: string
-    storyIntro: string
-    storyQuote: string
-    ceremonyIntro: string
-    ceremonyTitle: string
-    detailsNote: string
-    finalTitle: string
-    finalMessage: string
-    rsvpTitle: string
-    rsvpIntro: string
-    rsvpThanks: string
-    giftLabel: string
-    giftCta: string
-    giftIntro: string
-  }
-  sampleWishes: Array<{ id: string; name: string; message: string }>
 }
-
-export type GuestSide = WeddingEventSide

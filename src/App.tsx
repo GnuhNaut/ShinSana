@@ -1,37 +1,50 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { CoverSection } from './sections/CoverSection'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FloatingControls } from './components/wedding/FloatingControls'
 import { WeddingConfigContext } from './config/WeddingConfigContext'
 import { weddingConfig } from './config/wedding'
 import { applyRuntimeRobots } from './config/weddingRuntime'
+import { CoverSection } from './sections/CoverSection'
+import { CeremonySection } from './sections/CeremonySection'
+import { FinaleSection } from './sections/FinaleSection'
+import { GiftSection } from './sections/GiftSection'
+import { InvitationPageSection } from './sections/InvitationPageSection'
+import { RSVPSection } from './sections/RSVPSection'
+import { StorySection } from './sections/StorySection'
+import { WishSection } from './sections/WishSection'
 import type { WeddingConfig } from './types/wedding'
 import { getGuestNameFromUrl, getGuestSideFromUrl } from './utils/guest'
 
-const InvitationPageSection = lazy(() => import('./sections/InvitationPageSection').then((module) => ({ default: module.InvitationPageSection })))
-const CeremonySection = lazy(() => import('./sections/CeremonySection').then((module) => ({ default: module.CeremonySection })))
-const StorySection = lazy(() => import('./sections/StorySection').then((module) => ({ default: module.StorySection })))
-const RSVPSection = lazy(() => import('./sections/RSVPSection').then((module) => ({ default: module.RSVPSection })))
-const GiftSection = lazy(() => import('./sections/GiftSection').then((module) => ({ default: module.GiftSection })))
-const FinaleSection = lazy(() => import('./sections/FinaleSection').then((module) => ({ default: module.FinaleSection })))
-const FloatingControls = lazy(() => import('./components/wedding/FloatingControls').then((module) => ({ default: module.FloatingControls })))
-
 interface AppProps {
   config?: WeddingConfig
-  demoMode?: boolean
 }
 
-export default function App({ config = weddingConfig, demoMode = false }: AppProps) {
+export default function App({ config = weddingConfig }: AppProps) {
   const [opened, setOpened] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [audioFailed, setAudioFailed] = useState(false)
   const invitationRef = useRef<HTMLElement>(null)
-  const guestName = useMemo(
-    () => config.features.personalizedGuest ? getGuestNameFromUrl() : null,
-    [config.features.personalizedGuest],
-  )
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const guestName = useMemo(() => getGuestNameFromUrl(), [])
   const guestSide = useMemo(() => getGuestSideFromUrl(), [])
 
-  useEffect(
-    () => applyRuntimeRobots(demoMode, weddingConfig.seo.robots),
-    [demoMode],
-  )
+  useEffect(() => applyRuntimeRobots(config.seo.robots), [config.seo.robots])
+
+  const startMusic = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio || audioFailed || !audio.paused) return
+    void audio.play().then(() => setIsPlaying(true)).catch(() => setAudioFailed(true))
+  }, [audioFailed])
+
+  const toggleMusic = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio || audioFailed) return
+    if (audio.paused) {
+      void audio.play().then(() => setIsPlaying(true)).catch(() => setAudioFailed(true))
+    } else {
+      audio.pause()
+      setIsPlaying(false)
+    }
+  }, [audioFailed])
 
   const completeOpening = () => {
     setOpened(true)
@@ -40,28 +53,42 @@ export default function App({ config = weddingConfig, demoMode = false }: AppPro
 
   return (
     <WeddingConfigContext.Provider value={config}>
-      {demoMode && (
-        <p className="demo-badge" role="status" aria-label="Chế độ xem trước với dữ liệu mẫu">
-          DEMO PREVIEW
-        </p>
+      {config.music.src && (
+        <audio
+          ref={audioRef}
+          src={config.music.src}
+          loop
+          preload="none"
+          onPause={() => setIsPlaying(false)}
+          onError={() => {
+            setAudioFailed(true)
+            setIsPlaying(false)
+          }}
+        />
       )}
-      {opened && <a className="skip-link" href="#wedding-day">Bỏ qua đến ngày cưới</a>}
-      {!opened && <CoverSection onOpened={completeOpening} />}
+      {!opened && <CoverSection onOpening={startMusic} onOpened={completeOpening} />}
+      {opened && <a className="skip-link" href="#locations">Đến thông tin buổi lễ</a>}
       <div className="site" aria-hidden={!opened} inert={!opened}>
         {opened && (
           <main id="invitation-content" ref={invitationRef} tabIndex={-1} aria-label="Nội dung thiệp cưới">
-            <Suspense fallback={<p className="opening-fallback" role="status">Đang mở lời mời…</p>}>
-              <InvitationPageSection guestName={guestName} />
-              <CeremonySection side={guestSide} />
-              <StorySection />
-              <RSVPSection guestName={guestName} demoMode={demoMode} />
-              <GiftSection />
-              <FinaleSection />
-              <FloatingControls />
-            </Suspense>
+            <InvitationPageSection guestName={guestName} />
+            <CeremonySection side={guestSide} />
+            <StorySection />
+            <RSVPSection guestName={guestName} side={guestSide} />
+            <WishSection guestName={guestName} side={guestSide} />
+            <GiftSection side={guestSide} />
+            <FinaleSection />
           </main>
         )}
       </div>
+      {opened && (
+        <FloatingControls
+          hasMusic={Boolean(config.music.src)}
+          isPlaying={isPlaying}
+          audioFailed={audioFailed}
+          onToggleMusic={toggleMusic}
+        />
+      )}
     </WeddingConfigContext.Provider>
   )
 }

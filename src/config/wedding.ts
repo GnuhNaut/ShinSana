@@ -1,97 +1,169 @@
-import type { WeddingConfig } from '../types/wedding.ts'
-import { warnForInvalidWeddingConfig } from '../utils/weddingValidation.ts'
+import type { GalleryImage, ImageAsset, WeddingConfig } from '../types/wedding.ts'
 
-export { validateWeddingConfig } from '../utils/weddingValidation.ts'
+const asset = (file: string) => '/assets/placeholders/' + file
 
-const placeholder = (file: string) => `/assets/placeholders/${file}`
-const responsiveSet = (stem: string, widths: number[], sourceWidth: number) => [
-  ...widths.map((width) => `${placeholder(`${stem}-${width}.webp`)} ${width}w`),
-  `${placeholder(`${stem}.webp`)} ${sourceWidth}w`,
+const responsive = (stem: string, widths: number[], original: number) => [
+  ...widths.map((width) => asset(stem + '-' + width + '.webp') + ' ' + width + 'w'),
+  asset(stem + '.webp') + ' ' + original + 'w',
 ].join(', ')
 
-const heroSizes = '(max-width: 1536px) 100vw, 1536px'
-const portraitSizes = '(max-width: 1023px) calc(100vw - 40px), 470px'
-const gallerySizes = '(max-width: 1023px) calc(100vw - 40px), 720px'
-
-export const weddingConfig: WeddingConfig = {
-  couple: {
-    groom: {
-      firstName: 'Hùng', fullName: 'Tuấn Hùng', role: 'Chú rể',
-      portrait: { src: placeholder('couple-groom.webp'), srcSet: responsiveSet('couple-groom', [480, 720], 1024), sizes: portraitSizes, alt: 'Ảnh minh họa chú rể mặc áo dài đỏ đô thêu họa tiết Đông Sơn', aspectRatio: '2 / 3', objectPosition: '50% 42%' },
-      introduction: 'Một người chọn bình yên trong những điều giản dị và trân trọng từng khoảnh khắc được sẻ chia.',
-    },
-    bride: {
-      firstName: 'Mai', fullName: 'Sao Mai', role: 'Cô dâu',
-      portrait: { src: placeholder('couple-bride.webp'), srcSet: responsiveSet('couple-bride', [480, 720], 1024), sizes: portraitSizes, alt: 'Ảnh minh họa cô dâu mặc áo dài đỏ, cầm bó hoa sen và mẫu đơn', aspectRatio: '2 / 3', objectPosition: '50% 40%' },
-      introduction: 'Một người luôn tin rằng yêu thương đẹp nhất khi được nuôi dưỡng bằng sự chân thành mỗi ngày.',
-    },
-    signature: 'Hùng & Mai', monogram: 'H × M',
-  },
-  date: {
-    iso: '2026-10-19', countdownIso: '2026-10-19T00:00:00+07:00', eventStartIso: '', eventEndIso: '', display: '19.10.2026',
-    displayLong: '19 tháng 10 năm 2026', weekday: 'Thứ Hai', lunar: '10/09 âm lịch',
-    lunarLong: '10 tháng 09 âm lịch', timezone: 'Asia/Ho_Chi_Minh',
-  },
-  families: {
-    // NHẬP THÔNG TIN NHÀ TRAI TẠI ĐÂY
-    groom: { label: 'Nhà Trai' },
-    // NHẬP THÔNG TIN NHÀ GÁI TẠI ĐÂY
-    bride: { label: 'Nhà Gái' },
-  },
-  // THÊM CÁC NGHI LỄ ĐÃ XÁC NHẬN TẠI ĐÂY
-  events: [],
-  hero: { src: placeholder('hero.webp'), srcSet: responsiveSet('hero', [640, 960, 1280], 1536), sizes: heroSizes, alt: 'Ảnh minh họa cặp đôi mặc áo dài cưới đỏ bên hiên nhà cổ Việt Nam', aspectRatio: '3 / 2', objectPosition: '50% 48%' },
-  // Chỉ thêm sticker từ ảnh thật đã được cặp đôi đồng ý sử dụng.
-  decorativeStickers: [],
-  // Chưa có câu chuyện thật: để trống để UI chỉ hiện lời dẫn trung tính + gallery.
-  // Thêm tối đa 3 mốc theo StoryChapter khi cặp đôi cung cấp nội dung đã xác nhận.
-  story: [],
-  gallery: [
-    { id: 'cinematic-wide', src: placeholder('hero.webp'), srcSet: responsiveSet('hero', [640, 960, 1280], 1536), sizes: gallerySizes, alt: 'Ảnh minh họa cặp đôi mặc áo dài cưới đỏ bên hiên nhà cổ Việt Nam', aspectRatio: '3 / 2', objectPosition: '50% 48%', layout: 'feature', caption: 'Ngày mình thành đôi' },
-    { id: 'portrait-one', src: placeholder('couple-bride.webp'), srcSet: responsiveSet('couple-bride', [480, 720], 1024), sizes: gallerySizes, alt: 'Ảnh minh họa cô dâu mặc áo dài đỏ, cầm bó hoa sen và mẫu đơn', aspectRatio: '2 / 3', objectPosition: '50% 40%', layout: 'portrait', caption: 'Nét duyên ngày cưới' },
-    { id: 'story-hands', src: placeholder('story-01.webp'), srcSet: responsiveSet('story-01', [640, 960, 1280], 1536), sizes: gallerySizes, alt: 'Ảnh minh họa đôi tay cô dâu chú rể được nối bằng sợi chỉ đỏ bên hiên nhà', aspectRatio: '3 / 2', objectPosition: '50% 50%', layout: 'detail', caption: 'Duyên se chỉ đỏ' },
-    { id: 'story-wide', src: placeholder('story-02.webp'), srcSet: responsiveSet('story-02', [640, 960, 1280], 1536), sizes: gallerySizes, alt: 'Ảnh minh họa bàn trà lễ cưới Việt với hoa sen, trầu cau và khăn lụa đỏ', aspectRatio: '3 / 2', objectPosition: '50% 50%', layout: 'landscape', caption: 'Hương trà ngày hỷ' },
-  ],
-  music: { title: '', artist: '', src: '' },
-  // BẬT MỪNG CƯỚI ONLINE SAU KHI ĐÃ CÓ THÔNG TIN NGÂN HÀNG
-  gift: {
-    enabled: false,
-    accounts: [],
-  },
-  seo: {
-    title: 'Tuấn Hùng & Sao Mai | 19.10.2026',
-    description: 'Trân trọng mời bạn đến chung vui trong ngày đặc biệt của Tuấn Hùng & Sao Mai.',
-    image: '/assets/social-preview.jpg', imageWidth: 1200, imageHeight: 630,
-    robots: 'index, follow', siteUrl: '',
-  },
-  features: { music: true, rsvp: true, wish: true, personalizedGuest: true, gallery: true },
-  copy: {
-    coverEyebrow: 'Trân trọng kính mời',
-    coverHint: 'Chạm để mở lời mời',
-    invitationTitle: 'Thiệp cưới',
-    invitationGeneric: 'Trân trọng kính mời',
-    invitationPersonalized: 'Thân mời',
-    invitationBody: 'đến chung vui và chứng kiến khoảnh khắc chúng mình bắt đầu một chương mới.',
-    storyIntro: 'Không phải một câu chuyện cổ tích — chỉ là hai người, qua những ngày bình thường, đã chọn ở lại bên nhau.',
-    storyQuote: 'Có những khoảnh khắc chỉ cần được nhìn thấy, không cần được giải thích.',
-    ceremonyIntro: 'Thông tin buổi lễ sẽ được hiển thị sau khi gia đình xác nhận.',
-    ceremonyTitle: 'Thông tin hôn lễ',
-    detailsNote: 'Địa điểm và giờ cử hành sẽ được cập nhật ngay khi gia đình xác nhận.',
-    finalTitle: 'Cảm ơn bạn',
-    finalMessage: 'Vì đã trở thành một phần trong ngày đặc biệt của chúng mình.',
-    rsvpTitle: 'Xác nhận tham dự',
-    rsvpIntro: 'Sự hiện diện của bạn là niềm vui của chúng mình. Xin vui lòng hồi âm để chúng mình được đón tiếp thật chu đáo.',
-    rsvpThanks: 'Cảm ơn bạn đã xác nhận. Hùng & Mai rất mong được gặp bạn trong ngày đặc biệt này.',
-    giftLabel: 'Gửi mừng cưới',
-    giftCta: 'Mừng cưới online',
-    giftIntro: 'Sự hiện diện và những lời chúc của bạn đã là món quà quý giá đối với chúng mình.',
-  },
-  sampleWishes: [
-    { id: 'sample-1', name: 'Một người bạn', message: 'Chúc hai bạn luôn tìm thấy bình yên và niềm vui trong từng ngày bên nhau.' },
-    { id: 'sample-2', name: 'Khách mời', message: 'Mong hành trình mới của hai bạn sẽ đầy ắp tiếng cười và những điều dịu dàng.' },
-  ],
+const hero: ImageAsset = {
+  id: 'hero',
+  src: asset('hero.webp'),
+  srcSet: responsive('hero', [640, 960, 1280], 1536),
+  sizes: '100vw',
+  alt: 'Tuấn Hùng và Sao Mai trong trang phục cưới đỏ',
+  aspectRatio: '3 / 2',
+  objectPosition: '50% 48%',
 }
 
-if (typeof window !== 'undefined' && import.meta.env.DEV) {
-  warnForInvalidWeddingConfig(weddingConfig)
+const galleryImage = (
+  id: string,
+  source: 'hero' | 'couple-bride' | 'couple-groom' | 'story-01' | 'story-02' | 'gallery-detail',
+  caption: string,
+  layout: GalleryImage['layout'],
+  objectPosition = '50% 50%',
+): GalleryImage => {
+  const portrait = source === 'couple-bride' || source === 'couple-groom'
+  const hasWideVariants = source === 'hero' || source === 'story-01' || source === 'story-02'
+  const altBySource = {
+    hero: 'Khoảnh khắc cưới của Tuấn Hùng và Sao Mai',
+    'couple-bride': 'Chân dung cô dâu Sao Mai',
+    'couple-groom': 'Chân dung chú rể Tuấn Hùng',
+    'story-01': 'Khoảnh khắc dịu dàng trong bộ ảnh cưới',
+    'story-02': 'Không gian lễ cưới với sắc đỏ trầm',
+    'gallery-detail': 'Chi tiết bộ ảnh cưới',
+  }
+
+  return {
+    id,
+    src: asset(source + '.webp'),
+    ...(portrait
+      ? { srcSet: responsive(source, [480, 720], 1024), sizes: '(max-width: 700px) 78vw, 32vw' }
+      : hasWideVariants
+        ? { srcSet: responsive(source, [640, 960, 1280], 1536), sizes: '(max-width: 700px) 90vw, 48vw' }
+        : { srcSet: responsive(source, [480, 720], 1024), sizes: '(max-width: 700px) 78vw, 32vw' }),
+    alt: altBySource[source],
+    aspectRatio: portrait ? '2 / 3' : layout === 'square' ? '1 / 1' : '3 / 2',
+    objectPosition,
+    caption,
+    layout,
+  }
+}
+
+/**
+ * The single editing surface for wedding data. Replace placeholder venue, bank,
+ * QR, music and gallery values here; presentational components carry no wedding data.
+ */
+export const weddingConfig: WeddingConfig = {
+  couple: {
+    groom: 'Tuấn Hùng',
+    bride: 'Sao Mai',
+    monogram: '囍',
+  },
+  date: {
+    iso: '2026-10-19',
+    display: '19 · 10 · 2026',
+    displayLong: '19 tháng 10 năm 2026',
+    lunar: '10 / 09 âm lịch',
+  },
+  hero,
+  locations: {
+    groom: {
+      side: 'groom',
+      title: 'Nhà Trai',
+      date: '19.10.2026',
+      lunarDate: '10 / 09 âm lịch',
+      receptionTime: 'Sẽ cập nhật',
+      ceremonyTime: 'Sẽ cập nhật',
+      address: 'Địa chỉ sẽ được cập nhật',
+      mapUrl: '',
+      note: 'Thông tin buổi lễ sẽ được gia đình cập nhật sớm nhất.',
+    },
+    bride: {
+      side: 'bride',
+      title: 'Nhà Gái',
+      date: '19.10.2026',
+      lunarDate: '10 / 09 âm lịch',
+      receptionTime: 'Sẽ cập nhật',
+      ceremonyTime: 'Sẽ cập nhật',
+      address: 'Địa chỉ sẽ được cập nhật',
+      mapUrl: '',
+      note: 'Thông tin buổi lễ sẽ được gia đình cập nhật sớm nhất.',
+    },
+  },
+  gifts: {
+    groom: { side: 'groom', bankName: '', accountHolder: '', accountNumber: '' },
+    bride: { side: 'bride', bankName: '', accountHolder: '', accountNumber: '' },
+  },
+  // Add a licensed local track later. Empty source keeps the player honest and non-blocking.
+  music: { src: '', title: 'Nhạc nền', artist: '' },
+  gallery: [
+    galleryImage('01-opening', 'hero', 'Ngày mình thành đôi', 'wide', '50% 47%'),
+    galleryImage('02-mai-portrait', 'couple-bride', 'Nét duyên ngày hỷ', 'portrait', '50% 40%'),
+    galleryImage('03-hung-portrait', 'couple-groom', 'Một ánh nhìn', 'portrait', '50% 42%'),
+    galleryImage('04-red-thread', 'story-01', 'Duyên se chỉ đỏ', 'detail'),
+    galleryImage('05-tea-ceremony', 'story-02', 'Hương trà ngày vui', 'wide'),
+    galleryImage('06-detail', 'gallery-detail', 'Chạm vào kỷ niệm', 'square', '50% 48%'),
+    galleryImage('07-mai-editorial', 'couple-bride', 'Sắc đỏ của Mai', 'portrait', '53% 38%'),
+    galleryImage('08-hung-editorial', 'couple-groom', 'Đi về cùng nhau', 'portrait', '47% 43%'),
+    galleryImage('09-cinematic', 'hero', 'Một chương mới', 'wide', '45% 50%'),
+    galleryImage('10-hands', 'story-01', 'Gần nhau hơn một chút', 'detail', '47% 50%'),
+    galleryImage('11-lacquer', 'gallery-detail', 'Màu của hỷ sự', 'square', '45% 50%'),
+    galleryImage('12-table', 'story-02', 'Vẹn tròn', 'wide', '55% 49%'),
+    galleryImage('13-mai-close', 'couple-bride', 'Nụ cười của cô dâu', 'portrait', '47% 35%'),
+    galleryImage('14-hung-close', 'couple-groom', 'Nụ cười của chú rể', 'portrait', '54% 40%'),
+    galleryImage('15-walk', 'hero', 'Chúng mình', 'wide', '55% 46%'),
+    galleryImage('16-ribbon', 'story-01', 'Lời hẹn ước', 'detail', '55% 50%'),
+    galleryImage('17-flower', 'gallery-detail', 'Một đóa hoa cho ngày vui', 'square', '56% 48%'),
+    galleryImage('18-ritual', 'story-02', 'Những điều thân thương', 'wide', '46% 52%'),
+    galleryImage('19-mai-light', 'couple-bride', 'Dịu dàng mà rực rỡ', 'portrait', '55% 42%'),
+    galleryImage('20-hung-light', 'couple-groom', 'Bình yên', 'portrait', '45% 45%'),
+    galleryImage('21-together', 'hero', 'Ngày có đôi', 'wide', '50% 52%'),
+    galleryImage('22-letter', 'story-01', 'Gửi vào gió một lời thương', 'detail', '52% 52%'),
+    galleryImage('23-details', 'gallery-detail', 'Vết son ngày cưới', 'square', '50% 54%'),
+    galleryImage('24-closing', 'story-02', 'Hẹn gặp bạn tại ngày vui', 'wide', '50% 50%'),
+  ],
+  content: {
+    coverEyebrow: 'Trân trọng kính mời',
+    coverPrompt: 'Mở lời mời',
+    invitationEyebrow: 'Save the date',
+    invitationTitle: 'Ngày chúng mình chung đôi',
+    invitationBody: 'Một lời mời nhỏ, dành cho người chúng mình yêu quý. Mong được đón bạn trong khoảnh khắc bắt đầu hành trình mới.',
+    dateEyebrow: 'Tháng mười',
+    dateTitle: 'Một ngày thật đỏ',
+    dateBody: '19 tháng 10 năm 2026 · 10 tháng 09 âm lịch',
+    storyEyebrow: 'The portrait chapter',
+    storyTitle: 'Những khung hình ở lại',
+    storyLead: 'Không cần một câu chuyện quá dài. Chỉ cần những khoảnh khắc thật, đủ để nhớ về một ngày rất đẹp.',
+    storyQuote: '“Chúng mình đã chọn cùng đi về phía những ngày bình thường.”',
+    locationsEyebrow: 'Lễ thành hôn',
+    locationsTitle: 'Hẹn bạn tại ngày vui',
+    locationsBody: 'Mỗi lời chúc và sự hiện diện của bạn đều làm ngày vui của chúng mình trọn vẹn hơn.',
+    rsvpEyebrow: 'Reply card',
+    rsvpTitle: 'Xác nhận tham dự',
+    rsvpBody: 'Xin để lại hồi âm để chúng mình chuẩn bị đón tiếp bạn chu đáo.',
+    wishEyebrow: 'Lời chúc',
+    wishTitle: 'Gửi đôi lời thương',
+    wishBody: 'Một câu chúc nhỏ của bạn sẽ là món quà chúng mình luôn trân quý.',
+    giftEyebrow: 'Red envelope',
+    giftTitle: 'Gửi mừng cưới',
+    giftBody: 'Sự hiện diện của bạn đã là niềm vui lớn. Nếu muốn gửi chút tình cảm, thông tin của cả hai gia đình luôn ở đây.',
+    closingEyebrow: 'With love',
+    closingTitle: 'Cảm ơn vì đã có mặt trong ngày đặc biệt của chúng mình.',
+    closingBody: 'Tuấn Hùng & Sao Mai',
+  },
+  sampleWishes: [
+    { id: 'wish-01', name: 'Một người bạn', message: 'Chúc hai bạn luôn giữ được niềm vui dịu dàng này trong mọi ngày về sau.' },
+    { id: 'wish-02', name: 'Khách mời thân thương', message: 'Chúc hành trình mới đầy ắp yêu thương, bình an và tiếng cười.' },
+  ],
+  seo: {
+    title: 'Tuấn Hùng & Sao Mai | 19.10.2026',
+    description: 'Trân trọng kính mời bạn đến chung vui cùng Tuấn Hùng và Sao Mai vào ngày 19 tháng 10 năm 2026.',
+    image: hero.src,
+    imageWidth: 1536,
+    imageHeight: 1024,
+    robots: 'index, follow',
+    siteUrl: '',
+  },
 }

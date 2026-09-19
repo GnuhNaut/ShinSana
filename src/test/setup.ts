@@ -25,6 +25,7 @@ afterEach(() => {
   window.localStorage.clear()
   document.body.className = ''
   document.body.removeAttribute('data-modal-open')
+  document.body.removeAttribute('data-invitation-state')
   document.body.style.removeProperty('overflow')
   vi.clearAllMocks()
   vi.useRealTimers()

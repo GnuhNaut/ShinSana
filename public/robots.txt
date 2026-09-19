@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-# V1 remains noindex through its HTML meta tag; privacy must be enforced at the host.
+# The invitation’s production indexing policy is supplied by its HTML meta tag.
