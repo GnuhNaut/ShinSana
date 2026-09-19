@@ -1,5 +1,6 @@
 export type WeddingSide = 'groom' | 'bride'
 export type GuestSide = WeddingSide | 'both'
+export type GalleryChapterId = 'opening' | 'portraits' | 'ritual' | 'closing'
 
 export interface ImageAsset {
   id: string
@@ -15,6 +16,17 @@ export interface ImageAsset {
 export interface GalleryImage extends ImageAsset {
   caption: string
   layout: 'wide' | 'portrait' | 'square' | 'detail'
+  /** A light editorial grouping; the gallery remains a single flat lightbox album. */
+  chapter: GalleryChapterId
+  /** Renders as a restrained full-width photo break within its chapter. */
+  featured?: boolean
+}
+
+export interface GalleryChapter {
+  id: GalleryChapterId
+  eyebrow: string
+  title: string
+  lead?: string
 }
 
 /** The only two in-person locations presented on the invitation. */
@@ -59,6 +71,7 @@ export interface WeddingConfig {
     title: string
     artist: string
   }
+  galleryChapters: GalleryChapter[]
   gallery: GalleryImage[]
   content: {
     coverEyebrow: string

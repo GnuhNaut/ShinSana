@@ -12,6 +12,9 @@ describe('wedding configuration', () => {
     expect(weddingConfig.gallery.length).toBeGreaterThanOrEqual(20)
     expect(new Set(weddingConfig.gallery.map((image) => image.id)).size).toBe(weddingConfig.gallery.length)
     expect(weddingConfig.gallery.every((image) => Boolean(image.aspectRatio && image.src && image.caption))).toBe(true)
+    expect(weddingConfig.galleryChapters.map((chapter) => chapter.id)).toEqual(['opening', 'portraits', 'ritual', 'closing'])
+    expect(weddingConfig.gallery.every((image) => weddingConfig.galleryChapters.some((chapter) => chapter.id === image.chapter))).toBe(true)
+    expect(weddingConfig.gallery.filter((image) => image.featured)).toHaveLength(2)
   })
 
   it('keeps sensitive integration data outside of the config', () => {

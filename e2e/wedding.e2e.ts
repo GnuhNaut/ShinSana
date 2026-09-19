@@ -29,7 +29,7 @@ test('bride and invalid-side routes have a graceful result', async ({ page }) =>
 
 test('specified mobile and desktop viewports keep the full gallery inside the viewport', async ({ page }) => {
   const viewports = [
-    { width: 320, height: 720 },
+    { width: 320, height: 568 },
     { width: 390, height: 844 },
     { width: 430, height: 932 },
     { width: 768, height: 1024 },

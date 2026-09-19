@@ -7,7 +7,7 @@ Chỉ cần mở src/config/wedding.ts để thay dữ liệu. Không cần sử
 1. locations.groom và locations.bride: giờ đón khách, giờ làm lễ, địa chỉ và mapUrl HTTPS.
 2. gifts.groom và gifts.bride: ngân hàng, chủ tài khoản, số tài khoản và đường dẫn QR thật. QR để trống sẽ hiện placeholder rõ ràng, không tạo QR giả.
 3. music.src: đường dẫn bản nhạc đã có quyền sử dụng. Player dùng preload="none" và chỉ thử phát sau thao tác “Mở lời mời”.
-4. gallery: thay bằng ảnh cưới thật. Có thể giữ 24+ object và đổi src, srcSet, sizes, aspectRatio, objectPosition, caption/alt cho từng ảnh.
+4. galleryChapters và gallery: thay bằng ảnh cưới thật. Giữ chapter của từng ảnh khớp với một galleryChapters.id; dùng featured: true tiết chế cho 1–2 ảnh break toàn chiều rộng. Có thể giữ 24+ object và đổi src, srcSet, sizes, aspectRatio, objectPosition, caption/alt cho từng ảnh.
 5. seo.siteUrl: URL HTTPS chính thức nếu đã có domain.
 
 ## RSVP và lời chúc

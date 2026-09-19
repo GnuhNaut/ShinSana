@@ -68,7 +68,7 @@ function GiftEnvelope({
     <article className={'gift-envelope gift-envelope--' + account.side + (active ? ' is-active' : '')}>
       <button className="gift-envelope__activate" type="button" onClick={onActivate} aria-pressed={active}>
         <span>{label}</span>
-        <i aria-hidden="true">{active ? 'Đang xem' : 'Xem thông tin'}</i>
+        <i aria-hidden="true">{active ? 'Đang mở' : 'Mở phong bao'}</i>
       </button>
       <div className="gift-envelope__seal" aria-hidden="true">囍</div>
       <div className="gift-envelope__content">
@@ -87,7 +87,7 @@ function GiftEnvelope({
           <div><dt>Chủ tài khoản</dt><dd>{account.accountHolder || 'Chưa cập nhật'}</dd></div>
           <div><dt>Số tài khoản</dt><dd>{account.accountNumber || 'Chưa cập nhật'}</dd></div>
         </dl>
-        <button className="button button--cream button--full" type="button" disabled={!hasAccountNumber} onClick={copy}>
+        <button className="button button--cream gift-envelope__copy" type="button" disabled={!hasAccountNumber} onClick={copy}>
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
           {copied ? 'Đã sao chép' : hasAccountNumber ? 'Copy số tài khoản' : 'Chưa có số tài khoản'}
         </button>
