@@ -39,10 +39,19 @@ export function GalleryLightbox({ images, activeIndex, onChange, onClose, return
 
   useEffect(() => {
     if (!open || activeIndex === null || images.length < 2) return
-    const adjacent = images[(activeIndex + 1) % images.length]
-    if (!adjacent) return
-    const preload = new Image()
-    preload.src = adjacent.src
+    const adjacentIndexes = new Set([
+      (activeIndex - 1 + images.length) % images.length,
+      (activeIndex + 1) % images.length,
+    ])
+
+    adjacentIndexes.forEach((index) => {
+      const adjacent = images[index]
+      if (!adjacent) return
+      const preload = new Image()
+      if (adjacent.srcSet) preload.srcset = adjacent.srcSet
+      if (adjacent.sizes) preload.sizes = adjacent.sizes
+      preload.src = adjacent.src
+    })
   }, [activeIndex, images, open])
 
   if (!current || activeIndex === null) return null

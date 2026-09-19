@@ -87,12 +87,18 @@ export function ContextCursor() {
     }
 
     document.addEventListener('pointermove', onPointerMove, { passive: true })
+    document.addEventListener('pointerup', hide, { passive: true })
     document.documentElement.addEventListener('mouseleave', hide)
+    document.addEventListener('visibilitychange', hide)
     window.addEventListener('blur', hide)
+    window.addEventListener('scroll', hide, { passive: true })
     return () => {
       document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', hide)
       document.documentElement.removeEventListener('mouseleave', hide)
+      document.removeEventListener('visibilitychange', hide)
       window.removeEventListener('blur', hide)
+      window.removeEventListener('scroll', hide)
       document.documentElement.classList.remove('has-context-cursor')
       if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current)
       frameRef.current = null

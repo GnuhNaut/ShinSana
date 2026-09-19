@@ -58,6 +58,8 @@ describe('virtual gallery coverflow', () => {
     expect(slides).toHaveLength(7)
     expect(new Set([...slides].map((slide) => slide.dataset.imageId)).size).toBe(7)
     expect(region.querySelectorAll('.coverflow__slide img')).toHaveLength(5)
+    expect(region.querySelector('.coverflow__slide.is-active')).toHaveAttribute('data-layout', 'wide')
+    expect(region.querySelector('.coverflow__slide.is-active')).toHaveStyle('--coverflow-ratio: 3 / 2')
     expect(screen.getByText('Ảnh 1 trên 24')).toBeVisible()
     expect(region.closest('.coverflow')).toHaveAttribute('data-reduced-motion', 'true')
 
@@ -67,6 +69,8 @@ describe('virtual gallery coverflow', () => {
     const secondPhoto = region.querySelector<HTMLButtonElement>('[aria-current="true"]')
     expect(secondPhoto).toHaveAttribute('aria-label', 'Mở ảnh 2: Khoảnh khắc 2')
     expect(document.activeElement).toBe(secondPhoto)
+    expect(region.querySelector('.coverflow__slide.is-active')).toHaveAttribute('data-layout', 'portrait')
+    expect(region.querySelector('.coverflow__slide.is-active')).toHaveStyle('--coverflow-ratio: 2 / 3')
 
     fireEvent.click(screen.getByRole('button', { name: /Về chung một lối/i }))
     await screen.findByText('Ảnh 4 trên 24')

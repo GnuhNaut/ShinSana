@@ -23,6 +23,12 @@ Frontend gửi các payload:
 
 Không đưa secret hoặc token vào biến VITE_; biến này sẽ được đưa vào client bundle.
 
+## Chuẩn bị ảnh thật
+
+- Hero nên là ảnh ngang 3:2 hoặc 16:10, có bản `srcSet` 640w/960w/1280w/1536w để ảnh đầu trang vẫn rõ mà không tải ảnh lớn cho màn hình nhỏ.
+- Ảnh chân dung dùng 2:3, ảnh ngang dùng 3:2; ảnh vuông/chi tiết có thể dùng 1:1 hoặc 4:5. Chừa khoảng thở quanh khuôn mặt vì gallery luôn giữ nguyên tỉ lệ thay vì crop ép.
+- Ảnh photo break và finale nên là ảnh ngang độ phân giải cao. Với mỗi ảnh, giữ `alt`, `srcSet`, `sizes`, `aspectRatio`, `objectPosition`, `caption`, `chapter` và `layout` đồng bộ trong `src/config/wedding.ts`.
+
 ## Guest links
 
     /?guest=Nguyen%20Van%20A&side=groom

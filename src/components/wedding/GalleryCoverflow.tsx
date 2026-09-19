@@ -431,12 +431,16 @@ export function GalleryCoverflow({ images, chapters }: GalleryCoverflowProps) {
           <div className="coverflow__track">
             {slides.map(({ image, index, offset }) => {
               const active = offset === 0
-              const slideStyle = { '--coverflow-offset': offset } as CSSProperties
+              const slideStyle = {
+                '--coverflow-offset': offset,
+                '--coverflow-ratio': image.aspectRatio,
+              } as CSSProperties
 
               return (
                 <figure
                   className={'coverflow__slide' + (active ? ' is-active' : '')}
                   data-image-id={image.id}
+                  data-layout={image.layout}
                   data-offset={offset}
                   key={image.id}
                   style={slideStyle}
