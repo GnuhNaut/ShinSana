@@ -140,7 +140,7 @@ test('uses a bounded heart-arrow cursor, ghost pool, and grow-shrink click pulse
   expect(Math.abs(cursorBox.y + 1.5 - 120)).toBeLessThanOrEqual(1);
 
   // Start from a settled pool, then use a deterministic in-page PointerEvent
-  // to exercise a movement greater than the 12–18px production threshold.
+  // to exercise a movement greater than the 7–13px production threshold.
   await page.waitForTimeout(650);
   expect(await activeHeartNodes(page, '[data-heart-ghost]')).toBe(0);
   await dispatchHeroPointerMove(page, 260, 200);
@@ -148,7 +148,7 @@ test('uses a bounded heart-arrow cursor, ghost pool, and grow-shrink click pulse
   const trailSizes = await ghosts.evaluateAll((items) => items
     .filter((item) => item.getAnimations().some((animation) => animation.playState === 'running'))
     .map((item) => Number.parseFloat((item as HTMLElement).style.width)));
-  expect(trailSizes.every((size) => size >= 8 && size <= 11)).toBe(true);
+  expect(trailSizes.every((size) => size >= 12 && size <= 17)).toBe(true);
 
   const fixedPoolCount = await layer.locator('[data-heart-ghost], [data-heart-click]').count();
   await page.evaluate(async () => {
@@ -302,20 +302,20 @@ test('creates a bounded temporary opening heart rain on desktop and mobile', asy
   const desktopRain = page.locator('[data-heart-rain]');
   await expect(desktopRain).toHaveCount(1);
   await expect(desktopRain).toHaveAttribute('aria-hidden', 'true');
-  await expect(desktopRain.locator('[data-heart-rain-drop]')).toHaveCount(56);
+  await expect(desktopRain.locator('[data-heart-rain-drop]')).toHaveCount(210);
   expect(await desktopRain.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
   const desktopSizes = await desktopRain.locator('[data-heart-rain-drop]').evaluateAll((drops) => (
     drops.map((drop) => Number.parseFloat(getComputedStyle(drop).width))
   ));
   expect(Math.min(...desktopSizes)).toBeGreaterThanOrEqual(7);
-  expect(Math.max(...desktopSizes)).toBeLessThanOrEqual(22);
+  expect(Math.max(...desktopSizes)).toBeLessThanOrEqual(50);
   await expect(desktopRain).toHaveCount(0, { timeout: 5_000 });
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/?mobile-rain=1');
   await page.getByRole('button', { name: /Mở thiệp cưới/ }).click();
   const mobileRain = page.locator('[data-heart-rain]');
-  await expect(mobileRain.locator('[data-heart-rain-drop]')).toHaveCount(36);
+  await expect(mobileRain.locator('[data-heart-rain-drop]')).toHaveCount(120);
   await expect(mobileRain).toHaveCount(0, { timeout: 5_000 });
 });
 

@@ -66,17 +66,19 @@ function Music({
 function Opening({
   guest,
   opening,
+  closing,
   onOpen,
 }: {
   guest: string;
   opening: boolean;
+  closing: boolean;
   onOpen: () => void;
 }) {
   const pointerRef = usePointerSurface<HTMLElement>();
   return (
     <section
       ref={pointerRef}
-      className={`opening ${opening ? 'is-opening' : ''}`}
+      className={`opening ${opening ? 'is-opening' : ''} ${closing ? 'is-closing' : ''}`}
       aria-label="Thiệp cưới Tuấn Hùng và Sao Mai"
     >
       <div className="opening__ambient" aria-hidden="true" />
@@ -107,10 +109,15 @@ function Opening({
             <span className="opening__monogram">SM</span>
           </span>
           <span className="opening__copy">
-            <span className="opening__eyebrow">HỶ LỄ · 19.10.2026</span>
-            <strong><span>Tuấn Hùng</span><i>&amp;</i><span>Sao Mai</span></strong>
-            <span className="opening__guest-label">{guest ? 'Trân trọng kính mời' : 'Thiệp mời thành hôn'}</span>
-            {guest && <b>{guest}</b>}
+            {/* <span className="opening__eyebrow">HỶ LỄ · 19.10.2026</span> */}
+            <strong className="opening__names">
+              <span className="opening__name">Tuấn <br /> Hùng</span>
+              <span className="opening__name">Sao <br /> Mai</span>
+            </strong>
+            <span className={`opening__invitation-badge ${guest ? 'has-guest' : ''}`}>
+              <span className="opening__guest-label">{guest ? 'Trân trọng kính mời' : 'Thiệp mời thành hôn'}</span>
+              {guest && <b className="opening__guest-name">{guest}</b>}
+            </span>
           </span>
           <span className="opening__seal" aria-hidden="true">
             <span className="opening__seal-ring" />
@@ -170,7 +177,7 @@ function StoryIntro() {
       <div className="intro-scene__seal" aria-hidden="true"><span>囍</span><i>19 · 10</i></div>
       <div className="intro-scene__copy">
         <p className="scene-kicker">CHÚNG MÌNH SẮP CƯỚI</p>
-        <h2 id="intro-title">Một ngày son,<br /><em>một đời chung đôi.</em></h2>
+        <h2 id="intro-title" style={{lineHeight: 1.2}}>Một ngày son,<br /><em>một đời chung đôi.</em></h2>
         <p>Giữa rất nhiều cuộc gặp gỡ, chúng mình đã tìm thấy nhau. Giờ đây, niềm vui sẽ trọn vẹn hơn khi có bạn ở bên.</p>
         <div className="intro-scene__signature"><span>Tuấn Hùng</span><i>&</i><span>Sao Mai</span></div>
       </div>
@@ -218,9 +225,12 @@ export function App() {
   const [{ guest, side }] = useState(guestFromSearch);
   const [opening, setOpening] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [showOpening, setShowOpening] = useState(true);
+  const [closingOpening, setClosingOpening] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const openingTimerRef = useRef<number>(0);
+  const closingTimerRef = useRef<number>(0);
   const { normalizeTop } = useInvitationEntryScroll(opened);
 
   useEffect(() => {
@@ -238,6 +248,7 @@ export function App() {
 
   useEffect(() => () => {
     if (openingTimerRef.current) window.clearTimeout(openingTimerRef.current);
+    if (closingTimerRef.current) window.clearTimeout(closingTimerRef.current);
   }, []);
 
   const openInvitation = () => {
@@ -251,14 +262,25 @@ export function App() {
     openingTimerRef.current = window.setTimeout(() => {
       normalizeTop();
       setOpened(true);
+      if (reduced) {
+        setShowOpening(false);
+        setOpening(false);
+        return;
+      }
+      setClosingOpening(true);
+      closingTimerRef.current = window.setTimeout(() => {
+        setShowOpening(false);
+        setOpening(false);
+        setClosingOpening(false);
+      }, 420);
     }, reduced ? 150 : 980);
   };
 
   return (
     <main className={opened ? 'invitation-open' : ''}>
       <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} revealed={opened} />
-      <RomanticHearts celebrating={opening} />
-      {!opened && <Opening guest={guest} opening={opening} onOpen={openInvitation} />}
+      <RomanticHearts celebrating={opening && !opened} />
+      {showOpening && <Opening guest={guest} opening={opening} closing={closingOpening} onOpen={openInvitation} />}
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />
         <StoryIntro />

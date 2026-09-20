@@ -194,6 +194,11 @@ textarea:focus-visible,
   color: var(--ivory);
   isolation: isolate;
 }
+.opening.is-closing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .42s ease;
+}
 .opening__ambient {
   position: absolute;
   inset: 0;
@@ -405,15 +410,77 @@ textarea:focus-visible,
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: .16em;
+  width: 100%;
+  gap: clamp(18px, 5vw, 58px);
   color: var(--ivory);
-  font: 600 clamp(44px, 4.7vw, 64px)/.82 var(--serif);
-  letter-spacing: -.055em;
+  font: 600 clamp(44px, 4.7vw, 64px)/.86 var(--serif);
+  letter-spacing: -.035em;
   text-shadow: 0 6px 22px rgba(56,2,5,.26);
 }
+.opening__name { width: min(42%, 220px); text-transform: uppercase; text-align: center; }
 .opening__copy strong i { display: inline-block; color: var(--light-champagne); font-size: .52em; font-weight: 500; }
-.opening__guest-label { margin-top: 33px; color: rgba(255,244,228,.82); font: italic 500 18px/1 var(--serif); }
-.opening__copy b { max-width: 420px; margin-top: 9px; overflow-wrap: anywhere; color: var(--ivory); font: 600 25px/1.05 var(--serif); }
+.opening__invitation-badge {
+  position: relative;
+  display: grid;
+  width: min(420px, calc(100% - 96px));
+  justify-items: center;
+  margin-top: 30px;
+  border-top: 1px solid rgba(236,210,143,.72);
+  border-bottom: 1px solid rgba(236,210,143,.72);
+  padding: 13px 25px 17px;
+  background:
+    linear-gradient(90deg, transparent, rgba(105,16,20,.42) 18%, rgba(105,16,20,.52) 50%, rgba(105,16,20,.42) 82%, transparent);
+}
+.opening__invitation-badge.has-guest { width: min(540px, calc(100% - 96px)); }
+.opening__invitation-badge::before {
+  display: none;
+}
+.opening__invitation-badge::after {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 56px;
+  height: 1px;
+  background: var(--light-champagne);
+  content: '';
+  transform: translateX(-50%);
+}
+.opening__guest-label {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 20px 9px;
+  color: var(--light-champagne);
+  font: italic 500 clamp(16px, 1.8vw, 20px)/1 var(--serif);
+  letter-spacing: .025em;
+}
+.opening__guest-label::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 58px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--champagne), transparent);
+  content: '';
+  transform: translateX(-50%);
+}
+.opening__guest-name {
+  position: relative;
+  z-index: 1;
+  display: block;
+  justify-self: center;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0;
+  padding: 3px 8px 0;
+  overflow-wrap: anywhere;
+  color: var(--ivory);
+  font: 600 clamp(21px, 2.7vw, 30px)/1.08 var(--serif);
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  text-shadow: none;
+}
 .opening__seal {
   position: absolute;
   z-index: 9;
@@ -501,6 +568,12 @@ textarea:focus-visible,
   100% { opacity: 0; transform: translateY(70%); }
 }
 /* Hero */
+.site-content {
+  opacity: 0;
+  transition: opacity .55s var(--ease-out);
+  will-change: opacity;
+}
+.invitation-open .site-content { opacity: 1; }
 .hero-scene {
   height: 100svh;
   min-height: 650px;
@@ -1281,7 +1354,7 @@ textarea:focus-visible,
   will-change: transform, opacity;
 }
 .heart-cursor { z-index: 4; transform-origin: 1.5px 1.5px; transition: opacity .1s ease; }
-.heart-cursor__art { display: block; width: 34px; height: 34px; overflow: visible; filter: drop-shadow(0 2px 3px rgba(93,16,47,.24)); transform-origin: 1.5px 1.5px; transition: filter .16s ease, transform .16s var(--ease-out); }
+.heart-cursor__art { display: block; width: 34px; height: 34px; object-fit: contain; overflow: visible; filter: drop-shadow(0 2px 3px rgba(93,16,47,.24)); transform-origin: 1.5px 1.5px; transition: filter .16s ease, transform .16s var(--ease-out); }
 .heart-cursor[data-interactive='true'] .heart-cursor__art { filter: drop-shadow(0 2px 4px rgba(93,16,47,.3)) saturate(1.08); transform: scale(1.11); }
 .heart-trail { position: absolute; z-index: 2; inset: 0; }
 .heart-ghost { opacity: 0; filter: blur(0); }
@@ -1291,9 +1364,22 @@ textarea:focus-visible,
 .heart-ghost svg { filter: drop-shadow(0 1px 1px rgba(113,26,61,.13)); }
 .heart-click-layer { position: absolute; z-index: 3; inset: 0; }
 .heart-click { opacity: 0; }
+.heart-ripple-layer { position: absolute; z-index: 2; inset: 0; }
+.heart-ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  color: rgba(255,165,198,.9);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.heart-ripple svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 5px rgba(255,111,167,.3)); }
 .heart-click--primary svg { filter: drop-shadow(0 3px 6px rgba(151,39,84,.24)); }
 .heart-click--secondary svg { filter: drop-shadow(0 1px 2px rgba(151,39,84,.16)); }
 .heart-rain { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+.heart-rain.is-exiting { opacity: 0; transition: opacity .22s ease; }
 .heart-rain__heart {
   left: var(--heart-x);
   width: var(--heart-size);
@@ -1301,7 +1387,7 @@ textarea:focus-visible,
   color: var(--heart-color);
   opacity: 0;
   animation: heart-rain-fall var(--heart-duration) linear var(--heart-delay) both;
-  filter: drop-shadow(0 2px 3px rgba(116,29,65,.12));
+  filter: drop-shadow(0 2px 4px rgba(116,29,65,.16));
 }
 @keyframes heart-rain-fall {
   0% { opacity: 0; transform: translate3d(0, -14vh, 0) rotate(0deg) scale(.72); }
@@ -1406,9 +1492,12 @@ textarea:focus-visible,
   .opening__copy { width: calc(100% - 38px); transform: translate3d(-50%, -49%, 30px); }
   .opening__eyebrow { margin-bottom: 18px; font-size: 7px; }
   .opening__copy strong { max-width: 300px; flex-direction: column; align-items: center; gap: .11em; font-size: clamp(39px, 12.7vw, 52px); line-height: .78; }
+  .opening__name { width: auto; }
   .opening__copy strong i { display: block; margin: 0; }
   .opening__guest-label { margin-top: 27px; font-size: 16px; }
-  .opening__copy b { max-width: 270px; margin-top: 8px; font-size: 22px; }
+  .opening__invitation-badge,
+  .opening__invitation-badge.has-guest { width: calc(100% - 18px); margin-top: 27px; padding: 11px 16px 15px; }
+  .opening__guest-name { width: 100%; padding: 3px 4px 0; font-size: 22px; }
   .opening__seal { top: 14%; width: 76px; height: 76px; }
   .opening__seal-face { width: 62px; height: 62px; }
   .opening__seal-face b { font-size: 31px; }

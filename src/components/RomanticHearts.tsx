@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 
 const CURSOR_CLASS = 'heart-cursor-enabled';
-const GHOST_POOL_SIZE = 14;
+const GHOST_POOL_SIZE = 28;
 const PRIMARY_POOL_SIZE = 4;
 const SECONDARY_POOL_SIZE = 24;
+const RIPPLE_POOL_SIZE = 16;
 const HEART_PATH = 'M12 21.25C10.9 20.36 4 15.63 4 9.67A4.67 4.67 0 0 1 12 6.4a4.67 4.67 0 0 1 8 3.27c0 5.96-6.9 10.69-8 11.58Z';
 
 const SUPPRESSED_SELECTOR = [
@@ -81,15 +82,15 @@ function createRainHeart(index: number, count: number) {
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   const smallWeight = Math.random();
   const size = smallWeight < 0.7
-    ? 7 + Math.round(Math.random() * 4)
+    ? 14 + Math.round(Math.random() * 8)
     : smallWeight < 0.94
-      ? 12 + Math.round(Math.random() * 4)
-      : 17 + Math.round(Math.random() * 5);
-  const isLongDrop = index % 7 === 0;
-  const delay = Math.round(Math.random() * (isLongDrop ? 160 : 330));
-  const duration = Math.round(isLongDrop ? 2350 + Math.random() * 350 : 1700 + Math.random() * 550);
-  const x = ((index + 0.18 + Math.random() * 0.64) / count) * 100;
-  const drift = Math.round(-42 + Math.random() * 84);
+      ? 23 + Math.round(Math.random() * 11)
+      : 35 + Math.round(Math.random() * 15);
+  const isLongDrop = index % 9 === 0;
+  const delay = Math.round(Math.random() * (isLongDrop ? 900 : 700));
+  const duration = Math.round(isLongDrop ? 5000 + Math.random() * 1200 : 3600 + Math.random() * 1600);
+  const x = ((index + Math.random() * 1.15) / count) * 100;
+  const drift = Math.round(-78 + Math.random() * 156);
   const rotation = Math.round(-150 + Math.random() * 300);
   const color = index % 17 === 0
     ? '#F1B7C9'
@@ -103,8 +104,8 @@ function createRainHeart(index: number, count: number) {
   drop.style.setProperty('--heart-duration', `${duration}ms`);
   drop.style.setProperty('--heart-drift', `${drift}px`);
   drop.style.setProperty('--heart-rotation', `${rotation}deg`);
-  drop.style.setProperty('--heart-opacity', `${(0.42 + Math.random() * 0.4).toFixed(2)}`);
-  drop.style.setProperty('--heart-scale', `${(0.84 + Math.random() * 0.28).toFixed(2)}`);
+  drop.style.setProperty('--heart-opacity', `${(0.5 + Math.random() * 0.4).toFixed(2)}`);
+  drop.style.setProperty('--heart-scale', `${(0.88 + Math.random() * 0.34).toFixed(2)}`);
   drop.style.setProperty('--heart-color', color);
   drop.style.animationDelay = `${delay}ms`;
   drop.style.animationDuration = `${duration}ms`;
@@ -137,6 +138,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
     const ghostNodes = Array.from(root.querySelectorAll<HTMLElement>('[data-heart-ghost]'));
     const primaryNodes = Array.from(root.querySelectorAll<HTMLElement>('[data-heart-click="primary"]'));
     const secondaryNodes = Array.from(root.querySelectorAll<HTMLElement>('[data-heart-click="secondary"]'));
+    const rippleNodes = Array.from(root.querySelectorAll<HTMLElement>('[data-heart-ripple]'));
     const animationGeneration = new WeakMap<HTMLElement, number>();
     let ghostIndex = 0;
     let primaryIndex = 0;
@@ -185,15 +187,14 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
     };
 
     const emitGhost = (x: number, y: number, dx: number, dy: number) => {
-      // Five visible echoes read as an afterimage; more begins to look like confetti.
-      if (ghostNodes.filter((node) => node.dataset.active === 'true').length >= 5) return;
+      if (ghostNodes.filter((node) => node.dataset.active === 'true').length >= 12) return;
       const node = ghostNodes[ghostIndex++ % ghostNodes.length];
       const order = ghostIndex;
       const length = Math.max(1, Math.hypot(dx, dy));
       const backwardX = -(dx / length) * 8;
       const backwardY = -(dy / length) * 5 - 3;
-      const size = 8 + (order % 4);
-      const duration = 390 + (order % 5) * 32;
+      const size = 12 + (order % 6);
+      const duration = 430 + (order % 5) * 38;
       const rotation = -12 + (order % 7) * 4;
       const startX = x - (dx / length) * 7 - size / 2;
       const startY = y - (dy / length) * 7 - size / 2;
@@ -226,6 +227,29 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
         ],
         { duration, easing: 'linear' },
       );
+    };
+
+    const emitRipple = (x: number, y: number, compact: boolean) => {
+      const ringCount = compact ? 3 : 4;
+      const size = compact ? 22 : 30;
+      for (let index = 0; index < ringCount; index += 1) {
+        const node = rippleNodes[(burstSequence * ringCount + index) % rippleNodes.length];
+        const ringSize = size + index * (compact ? 12 : 16);
+        const left = x - ringSize / 2;
+        const top = y - ringSize / 2;
+        node.style.width = `${ringSize}px`;
+        node.style.height = `${ringSize}px`;
+        node.style.borderWidth = `${Math.max(1, 2 - index * 0.25)}px`;
+        animateNode(
+          node,
+          [
+            { opacity: 0, transform: `translate3d(${left}px, ${top}px, 0) scale(.2)` },
+            { opacity: 0.72, offset: 0.18, transform: `translate3d(${left}px, ${top}px, 0) scale(.7)` },
+            { opacity: 0, transform: `translate3d(${left}px, ${top}px, 0) scale(1.65)` },
+          ],
+          { duration: compact ? 620 : 820, delay: index * (compact ? 55 : 75), easing: 'cubic-bezier(.18,.72,.28,1)' },
+        );
+      }
     };
 
     const emitPrimary = (x: number, y: number, compact: boolean) => {
@@ -320,8 +344,8 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
 
       const dx = event.clientX - lastGhostX;
       const dy = event.clientY - lastGhostY;
-      const threshold = 12 + (ghostIndex % 4) * 2;
-      if (Math.hypot(dx, dy) < threshold || timestamp - lastGhostAt < 68) return;
+      const threshold = 7 + (ghostIndex % 4) * 2;
+      if (Math.hypot(dx, dy) < threshold || timestamp - lastGhostAt < 38) return;
       emitGhost(event.clientX, event.clientY, dx, dy);
       lastGhostX = event.clientX;
       lastGhostY = event.clientY;
@@ -370,6 +394,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
       const compact = isButtonLike(event.target);
       const secondaryCount = touch ? 2 + (burstSequence % 3) : 3 + (burstSequence % 4);
       burstSequence += 1;
+      emitRipple(event.clientX, event.clientY, compact);
       emitPrimary(event.clientX, event.clientY, compact);
       for (let index = 0; index < secondaryCount; index += 1) {
         emitSecondary(event.clientX, event.clientY, index, secondaryCount, compact);
@@ -396,7 +421,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
       root.dataset.finePointer = String(finePointer.matches);
       root.dataset.reducedMotion = String(reducedMotion.matches);
       if (reducedMotion.matches) {
-        [...ghostNodes, ...primaryNodes, ...secondaryNodes].forEach((node) => {
+        [...ghostNodes, ...primaryNodes, ...secondaryNodes, ...rippleNodes].forEach((node) => {
           animationGeneration.set(node, (animationGeneration.get(node) ?? 0) + 1);
           node.getAnimations().forEach((animation) => animation.cancel());
           node.dataset.active = 'false';
@@ -431,7 +456,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
       reducedMotion.removeEventListener('change', onCapabilityChange);
       if (frame) window.cancelAnimationFrame(frame);
       document.documentElement.classList.remove(CURSOR_CLASS);
-      [...ghostNodes, ...primaryNodes, ...secondaryNodes].forEach((node) => {
+      [...ghostNodes, ...primaryNodes, ...secondaryNodes, ...rippleNodes].forEach((node) => {
         animationGeneration.set(node, (animationGeneration.get(node) ?? 0) + 1);
         node.getAnimations().forEach((animation) => animation.cancel());
         node.dataset.active = 'false';
@@ -440,6 +465,20 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
   }, []);
 
   useEffect(() => {
+    if (!celebrating) {
+      previousCelebratingRef.current = false;
+      const layer = rainLayerRef.current;
+      if (!layer) return;
+      if (rainTimerRef.current !== null) window.clearTimeout(rainTimerRef.current);
+      layer.classList.add('is-exiting');
+      rainTimerRef.current = window.setTimeout(() => {
+        layer.remove();
+        if (rainLayerRef.current === layer) rainLayerRef.current = null;
+        rainTimerRef.current = null;
+      }, 220);
+      return;
+    }
+
     const crossedIntoCelebration = celebrating && !previousCelebratingRef.current;
     previousCelebratingRef.current = celebrating;
     if (!crossedIntoCelebration) return;
@@ -456,7 +495,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
     layer.dataset.active = 'true';
     layer.setAttribute('aria-hidden', 'true');
     const mobile = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
-    const count = mobile ? 36 : 56;
+    const count = mobile ? 120 : 210;
     const fragment = document.createDocumentFragment();
     for (let index = 0; index < count; index += 1) {
       fragment.append(createRainHeart(index, count));
@@ -470,7 +509,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
       layer.remove();
       if (rainLayerRef.current === layer) rainLayerRef.current = null;
       rainTimerRef.current = null;
-    }, 3050);
+    }, 4800);
   }, [celebrating]);
 
   useEffect(() => {
@@ -511,31 +550,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
         data-interactive="false"
         style={{ height: 34, opacity: 0, pointerEvents: 'none', width: 34 }}
       >
-        <svg className="heart-cursor__art" viewBox="0 0 34 34" focusable="false" aria-hidden="true">
-          <defs>
-            <linearGradient id="heart-cursor-rose" x1="4" y1="3" x2="27" y2="29" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#FFA5C6" />
-              <stop offset=".52" stopColor="#FF6FA7" />
-              <stop offset="1" stopColor="#E34F87" />
-            </linearGradient>
-          </defs>
-          <path
-            className="heart-cursor__arrow"
-            d="M1.5 1.5 12.25 30.2l4.62-10.08 8.2 8.2 3.54-3.54-8.2-8.2 10.08-4.62L1.5 1.5Z"
-            fill="url(#heart-cursor-rose)"
-            stroke="#C94178"
-            strokeLinejoin="round"
-            strokeWidth="1.15"
-          />
-          <path
-            className="heart-cursor__heart"
-            d="M11.65 23.1c-1.8-1.35-4.45-3.38-4.45-5.8a2.6 2.6 0 0 1 4.45-1.83 2.6 2.6 0 0 1 4.45 1.83c0 2.42-2.65 4.45-4.45 5.8Z"
-            fill="#FFD1E0"
-            stroke="#C94178"
-            strokeWidth=".7"
-          />
-          <path className="heart-cursor__highlight" d="m4.2 4.35 7.15 18.95" fill="none" stroke="#FFF4E4" strokeLinecap="round" strokeWidth=".85" opacity=".7" />
-        </svg>
+        <img className="heart-cursor__art" src="/images/cursor.png" alt="" aria-hidden="true" />
       </div>
 
       <div className="heart-trail" data-heart-trail="" aria-hidden="true">
@@ -555,6 +570,16 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
         {Array.from({ length: SECONDARY_POOL_SIZE }, (_, index) => (
           <span className="heart-click heart-click--secondary" data-heart-click="secondary" data-active="false" key={`secondary-${index}`}>
             <HeartGlyph />
+          </span>
+        ))}
+      </div>
+
+      <div className="heart-ripple-layer" data-heart-ripple-layer="" aria-hidden="true">
+        {Array.from({ length: RIPPLE_POOL_SIZE }, (_, index) => (
+          <span className="heart-ripple" data-heart-ripple={index} data-active="false" key={`ripple-${index}`}>
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <path d={HEART_PATH} fill="none" stroke="currentColor" strokeWidth="1.35" />
+            </svg>
           </span>
         ))}
       </div>
