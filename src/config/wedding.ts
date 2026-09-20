@@ -55,7 +55,7 @@ export const wedding = {
       qrImage: '',
     },
   },
-  music: { src: '/audio/wedding-ambient.m4a', label: 'Khúc nhạc ngày vui' },
+  music: { src: '/audio/audio.mp3', label: 'Khúc nhạc ngày vui' },
   copy: {
     intro: 'Trân trọng kính mời',
     cinematic: 'Hai người · một lời hẹn · một đời bên nhau.',
