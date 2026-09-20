@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { gallery } from '../config/wedding';
 import { useModalDialog } from '../hooks/useModalDialog';
 import { usePointerSurface } from '../hooks/usePointerSurface';
+import { ArrowIcon, CloseIcon } from './Icons';
 
 type TransitionDocument = Document & {
   startViewTransition?: (update: () => void) => { finished: Promise<void> };
@@ -211,7 +212,7 @@ export function Gallery() {
                 draggable={false}
               />
               <span className="gallery-slide__shine" aria-hidden="true" />
-              {offset === 0 && <span className="gallery-slide__action">XEM ẢNH <i aria-hidden="true">↗</i></span>}
+              {offset === 0 && <span className="gallery-slide__action">XEM ẢNH <ArrowIcon direction="external" /></span>}
             </span>
           </button>
         ))}
@@ -222,8 +223,12 @@ export function Gallery() {
           <i style={{ width: `${((index + 1) / gallery.length) * 100}%` }} />
         </div>
         <div className="gallery-nav">
-          <button type="button" onClick={() => move(-1)} aria-label="Ảnh trước">←</button>
-          <button type="button" onClick={() => move(1)} aria-label="Ảnh tiếp">→</button>
+          <button className="gallery-nav__button gallery-nav__button--prev" type="button" onClick={() => move(-1)} aria-label="Ảnh trước">
+            <ArrowIcon direction="left" />
+          </button>
+          <button className="gallery-nav__button gallery-nav__button--next" type="button" onClick={() => move(1)} aria-label="Ảnh tiếp">
+            <ArrowIcon />
+          </button>
         </div>
       </div>
 
@@ -242,14 +247,14 @@ export function Gallery() {
         >
           <div className="viewer__bar">
             <span>PHOTO · {String(index + 1).padStart(2, '0')} / {String(gallery.length).padStart(2, '0')}</span>
-            <button className="seal-button viewer__close" type="button" onClick={closeViewer} aria-label="Đóng ảnh toàn màn hình" data-autofocus>×</button>
+            <button className="seal-button viewer__close" type="button" onClick={closeViewer} aria-label="Đóng ảnh toàn màn hình" data-autofocus><CloseIcon /></button>
           </div>
-          <button className="viewer__nav viewer__nav--prev" type="button" onClick={() => move(-1)} aria-label="Ảnh trước">←</button>
+          <button className="viewer__nav viewer__nav--prev" type="button" onClick={() => move(-1)} aria-label="Ảnh trước"><ArrowIcon direction="left" /></button>
           <figure>
             <img src={gallery[index].src} alt={gallery[index].alt} />
             <figcaption>{gallery[index].alt}</figcaption>
           </figure>
-          <button className="viewer__nav viewer__nav--next" type="button" onClick={() => move(1)} aria-label="Ảnh tiếp">→</button>
+          <button className="viewer__nav viewer__nav--next" type="button" onClick={() => move(1)} aria-label="Ảnh tiếp"><ArrowIcon /></button>
         </div>,
         document.body,
       )}

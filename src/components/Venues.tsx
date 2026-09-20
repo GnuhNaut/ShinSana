@@ -3,10 +3,7 @@ import { createPortal } from 'react-dom';
 import { wedding, type Venue, type VenueKey, type WeddingSide } from '../config/wedding';
 import { useModalDialog } from '../hooks/useModalDialog';
 import { usePointerSurface } from '../hooks/usePointerSurface';
-
-type TransitionDocument = Document & {
-  startViewTransition?: (update: () => void) => { finished: Promise<void> };
-};
+import { ArrowIcon, CloseIcon } from './Icons';
 
 function VenuePanel({
   venueKey,
@@ -37,7 +34,7 @@ function VenuePanel({
         <span className="venue-panel__date">{venue.date}</span>
         <span className="venue-panel__time">{venue.time}</span>
         <span className="venue-panel__address">{venue.address}</span>
-        <span className="text-action">Xem bản đồ <i aria-hidden="true">↗</i></span>
+        <span className="text-action">Xem bản đồ <ArrowIcon direction="external" /></span>
       </span>
     </button>
   );
@@ -95,7 +92,7 @@ export function VenueMapDialog({
           <span className="venue-dialog__mark" aria-hidden="true">囍</span>
           <span>{venue.label} · {venue.date}</span>
           <button className="seal-button venue-dialog__close" type="button" onClick={close} aria-label="Đóng bản đồ" data-autofocus>
-            <span aria-hidden="true">×</span>
+            <CloseIcon />
           </button>
         </header>
         <div className="venue-dialog__body">
@@ -120,7 +117,7 @@ export function VenueMapDialog({
             <p id="venue-dialog-address" className="venue-dialog__address">{venue.address}</p>
             <div className="venue-dialog__actions">
               <a className="lacquer-button" href={venue.mapUrl} target="_blank" rel="noreferrer">
-                Chỉ đường <span aria-hidden="true">↗</span>
+                Chỉ đường <ArrowIcon direction="external" />
               </a>
               <button className="ivory-button" type="button" onClick={copyAddress}>
                 {copyState === 'copied' ? 'Đã sao chép' : copyState === 'failed' ? 'Không thể sao chép' : 'Sao chép địa chỉ'}
@@ -146,13 +143,7 @@ export function Venues({ side }: { side: WeddingSide }) {
   const showVenue = (key: VenueKey, trigger: HTMLButtonElement) => {
     opener.current = trigger;
     setSelected(key);
-    const update = () => setOpen(true);
-    const transition = (document as TransitionDocument).startViewTransition;
-    if (transition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      transition.call(document, update);
-    } else {
-      update();
-    }
+    setOpen(true);
   };
 
   const close = useCallback(() => setOpen(false), []);

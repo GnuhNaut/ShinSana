@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { cinematicImage, finaleImage, heroImage, introImage, wedding } from './config/wedding';
 import { guestFromSearch } from './utils/guest';
 import { usePointerSurface } from './hooks/usePointerSurface';
@@ -6,41 +6,53 @@ import { Gallery } from './components/Gallery';
 import { Venues } from './components/Venues';
 import { Response } from './components/Response';
 import { Gift } from './components/Gift';
+import { RomanticHearts } from './components/RomanticHearts';
 
-function Music({ opened }: { opened: boolean }) {
-  const audio = useRef<HTMLAudioElement>(null);
-  const [playing, setPlaying] = useState(false);
+function Music({
+  audio,
+  playing,
+  onPlayingChange,
+}: {
+  audio: RefObject<HTMLAudioElement | null>;
+  playing: boolean;
+  onPlayingChange: (playing: boolean) => void;
+}) {
   const available = Boolean(wedding.music.src);
-
-  useEffect(() => {
-    if (!opened || !available) return;
-    audio.current?.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-  }, [available, opened]);
-
   const toggle = () => {
     if (!available || !audio.current) return;
     if (playing) {
       audio.current.pause();
-      setPlaying(false);
+      onPlayingChange(false);
     } else {
-      audio.current.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      audio.current.play().then(() => onPlayingChange(true)).catch(() => onPlayingChange(false));
     }
   };
 
   return (
     <>
-      <audio ref={audio} preload="none" src={wedding.music.src} onEnded={() => setPlaying(false)} />
+      <audio
+        ref={audio}
+        preload="none"
+        src={wedding.music.src}
+        loop
+        onPlay={() => onPlayingChange(true)}
+        onPause={() => onPlayingChange(false)}
+      />
       <button
         className={`music-control ${playing ? 'is-playing' : ''} ${!available ? 'is-unavailable' : ''}`}
         type="button"
         onClick={toggle}
         disabled={!available}
+        aria-pressed={playing}
         aria-label={!available ? 'Nhạc nền đang chờ cập nhật' : playing ? 'Tạm dừng nhạc' : 'Bật nhạc'}
         title={!available ? 'Nhạc đang cập nhật' : undefined}
+        data-no-hearts
       >
-        <span className="music-control__ring" aria-hidden="true" />
-        <span className="music-control__bars" aria-hidden="true"><i /><i /><i /></span>
-        <span className="music-control__label">{playing ? 'TẮT NHẠC' : 'NHẠC'}</span>
+        <span className="music-control__seal" aria-hidden="true">
+          <span className="music-control__ring" />
+          <span className="music-control__bars"><i /><i /><i /></span>
+        </span>
+        <span className="music-control__label">{playing ? 'ĐANG PHÁT' : 'ÂM NHẠC'}</span>
       </button>
     </>
   );
@@ -60,35 +72,50 @@ function Opening({
     <section
       ref={pointerRef}
       className={`opening ${opening ? 'is-opening' : ''}`}
-      aria-label="Cổng thiệp cưới Tuấn Hùng và Sao Mai"
+      aria-label="Thiệp cưới Tuấn Hùng và Sao Mai"
     >
-      <div className="opening__depth" aria-hidden="true" />
-      <div className="opening__doors" aria-hidden="true">
-        <div className="opening__door opening__door--left">
-          <span className="opening__door-edge" />
-          <span className="opening__lattice opening__lattice--top" />
-          <span className="opening__engraving" />
-          <span className="opening__monogram">TH</span>
+      <div className="opening__ambient" aria-hidden="true" />
+      <div className="opening__stage">
+        <button
+          className="opening__folio"
+          type="button"
+          onClick={onOpen}
+          disabled={opening}
+          aria-label="Mở thiệp cưới Tuấn Hùng và Sao Mai"
+          data-heart-allowed
+        >
+          <span className="opening__interior" aria-hidden="true">
+            <img src={heroImage} alt="" />
+            <span className="opening__interior-shade" />
+            <span className="opening__interior-mark">T &amp; S</span>
+          </span>
+          <span className="opening__cover opening__cover--left" aria-hidden="true">
+            <span className="opening__cover-edge" />
+            <span className="opening__lattice" />
+            <span className="opening__engraving" />
+            <span className="opening__monogram">TH</span>
+          </span>
+          <span className="opening__cover opening__cover--right" aria-hidden="true">
+            <span className="opening__cover-edge" />
+            <span className="opening__lattice" />
+            <span className="opening__engraving" />
+            <span className="opening__monogram">SM</span>
+          </span>
+          <span className="opening__copy">
+            <span className="opening__eyebrow">HỶ LỄ · 19.10.2026</span>
+            <strong><span>Tuấn Hùng</span><i>&amp;</i><span>Sao Mai</span></strong>
+            <span className="opening__guest-label">{guest ? 'Trân trọng kính mời' : 'Thiệp mời thành hôn'}</span>
+            {guest && <b>{guest}</b>}
+          </span>
+          <span className="opening__seal" aria-hidden="true">
+            <span className="opening__seal-ring" />
+            <span className="opening__seal-face"><b>囍</b></span>
+          </span>
+          <span className="opening__instruction">CHẠM ĐỂ MỞ THIỆP <i /></span>
+        </button>
+        <div className="opening__folio-caption" aria-hidden="true">
+          <span>TH</span><i /><span>THIỆP HỶ</span><i /><span>SM</span>
         </div>
-        <div className="opening__door opening__door--right">
-          <span className="opening__door-edge" />
-          <span className="opening__lattice opening__lattice--top" />
-          <span className="opening__engraving" />
-          <span className="opening__monogram">SM</span>
-        </div>
-      </div>
-      <div className="opening__copy">
-        <p>HỶ LỄ · 19.10.2026</p>
-        <span>{guest ? 'Trân trọng kính mời' : 'Thiệp mời thành hôn'}</span>
-        {guest && <strong>{guest}</strong>}
-      </div>
-      <button className="opening__seal-control" type="button" onClick={onOpen} aria-label="Mở thiệp cưới">
-        <span className="opening__seal-ring" aria-hidden="true" />
-        <span className="opening__seal-face" aria-hidden="true"><b>囍</b></span>
-        <span className="opening__seal-label">MỞ THIỆP</span>
-      </button>
-      <div className="opening__footer" aria-hidden="true">
-        <span>TUẤN HÙNG</span><i /><span>SAO MAI</span>
       </div>
     </section>
   );
@@ -186,6 +213,8 @@ export function App() {
   const [{ guest, side }] = useState(guestFromSearch);
   const [opening, setOpening] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [musicPlaying, setMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     document.title = wedding.seo.title;
@@ -203,17 +232,21 @@ export function App() {
 
   const openInvitation = () => {
     if (opening) return;
+    if (wedding.music.src && audioRef.current) {
+      audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => setMusicPlaying(false));
+    }
     setOpening(true);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.setTimeout(() => {
       setOpened(true);
       window.requestAnimationFrame(() => document.getElementById('hero-title')?.focus({ preventScroll: true }));
-    }, reduced ? 160 : 1450);
+    }, reduced ? 150 : 980);
   };
 
   return (
     <main className={opened ? 'invitation-open' : ''}>
-      <Music opened={opening} />
+      <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} />
+      <RomanticHearts />
       {!opened && <Opening guest={guest} opening={opening} onOpen={openInvitation} />}
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />

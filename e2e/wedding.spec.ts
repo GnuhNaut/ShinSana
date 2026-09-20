@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 async function openInvitation(page: Page, url = '/') {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(url);
-  await page.locator('.opening__seal-control').click();
+  await page.getByRole('button', { name: /Mở thiệp cưới/ }).click();
   await expect(page.locator('.opening')).toHaveCount(0);
 }
 
@@ -12,7 +12,7 @@ test('personalizes the invitation and filters ceremonies for every side', async 
   await page.goto('/?guest=Nguyen%20Van%20A&side=groom');
   await expect(page.getByText('Trân trọng kính mời', { exact: true })).toBeVisible();
   await expect(page.getByText('Nguyen Van A', { exact: true })).toBeVisible();
-  await page.locator('.opening__seal-control').click();
+  await page.getByRole('button', { name: /Mở thiệp cưới/ }).click();
   await expect(page.locator('.opening')).toHaveCount(0);
 
   const groomCeremony = page.getByTestId('ceremony');
@@ -104,7 +104,7 @@ test('keeps response failures honest and opens both gift packets without a fake 
   await response.scrollIntoViewIfNeeded();
   await response.getByLabel('Họ và tên').fill('Nguyễn Văn A');
   await response.getByRole('button', { name: /GỬI XÁC NHẬN/ }).click();
-  await expect(response.getByRole('status')).toContainText('Dịch vụ đang được kết nối');
+  await expect(response.locator('.form-state[role="status"]')).toContainText('Dịch vụ đang được kết nối');
 
   await response.getByRole('button', { name: /GỬI LỜI CHÚC/ }).click();
   await expect(response.getByLabel('Lời chúc của bạn')).toBeVisible();
@@ -115,8 +115,9 @@ test('keeps response failures honest and opens both gift packets without a fake 
   await gift.locator('.red-envelope').nth(1).click();
   await expect(gift.locator('.red-envelope').nth(1)).toHaveAttribute('aria-expanded', 'true');
   await expect(gift.locator('.qr-empty')).toContainText('ĐANG CẬP NHẬT');
-  await expect(gift.getByRole('button', { name: /Sao chép số tài khoản/ })).toBeDisabled();
-  await expect(page.locator('.music-control')).toBeDisabled();
+  await expect(gift.getByRole('button', { name: /Sao chép/ })).toBeDisabled();
+  await expect(page.locator('.music-control')).toBeEnabled();
+  await expect(page.locator('audio')).toHaveAttribute('preload', 'none');
 });
 
 test('fits the smallest viewport and keeps reduced-motion functionality', async ({ page }) => {
