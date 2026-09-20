@@ -21,6 +21,8 @@ export function usePointerSurface<T extends HTMLElement>(): RefObject<T | null> 
       element.style.setProperty('--pointer-y', `${(y * 100).toFixed(2)}%`);
       element.style.setProperty('--pointer-nx', (x * 2 - 1).toFixed(3));
       element.style.setProperty('--pointer-ny', (y * 2 - 1).toFixed(3));
+      element.style.setProperty('--pointer-shift-x', `${((x * 2 - 1) * 1.6).toFixed(2)}px`);
+      element.style.setProperty('--pointer-shift-y', `${((y * 2 - 1) * 1.6).toFixed(2)}px`);
     };
 
     const onMove = (event: PointerEvent) => {
@@ -33,6 +35,8 @@ export function usePointerSurface<T extends HTMLElement>(): RefObject<T | null> 
       element.style.setProperty('--pointer-y', '50%');
       element.style.setProperty('--pointer-nx', '0');
       element.style.setProperty('--pointer-ny', '0');
+      element.style.setProperty('--pointer-shift-x', '0px');
+      element.style.setProperty('--pointer-shift-y', '0px');
     };
 
     element.addEventListener('pointermove', onMove, { passive: true });

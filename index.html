@@ -2,6 +2,20 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (() => {
+        const supportsRestoration = 'scrollRestoration' in history;
+        const initialHash = location.hash;
+        if (initialHash) history.replaceState(history.state, '', `${location.pathname}${location.search}`);
+        window.__invitationEntryScroll = {
+          originalScrollRestoration: supportsRestoration ? history.scrollRestoration : undefined,
+          initialHash,
+          pending: true,
+        };
+        if (supportsRestoration) history.scrollRestoration = 'manual';
+        scrollTo(0, 0);
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#d61f26" />
     <meta name="description" content="Thiệp cưới Tuấn Hùng & Sao Mai — 19.10.2026" />

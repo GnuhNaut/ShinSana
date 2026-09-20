@@ -14,9 +14,31 @@ async function enterInvitation(page: Page, reducedMotion: 'reduce' | 'no-prefere
 }
 
 async function activeHeartAnimations(page: Page) {
-  return page.locator('.heart-particle').evaluateAll((particles) => particles.filter((particle) => (
+  return page.locator('[data-heart-ghost], [data-heart-click]').evaluateAll((particles) => particles.filter((particle) => (
     particle.getAnimations().some((animation) => animation.playState === 'running')
   )).length);
+}
+
+async function activeHeartNodes(page: Page, selector: string) {
+  return page.locator(selector).evaluateAll((nodes) => nodes.filter((node) => (
+    node.getAnimations().some((animation) => animation.playState === 'running')
+  )).length);
+}
+
+async function dispatchHeroPointerMove(page: Page, clientX: number, clientY: number) {
+  await page.evaluate(async ({ x, y }) => {
+    const hero = document.querySelector('.hero-scene');
+    if (!hero) throw new Error('Hero is required for pointer-effect verification.');
+    hero.dispatchEvent(new PointerEvent('pointermove', {
+      bubbles: true,
+      clientX: x,
+      clientY: y,
+      isPrimary: true,
+      pointerId: 1,
+      pointerType: 'mouse',
+    }));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  }, { x: clientX, y: clientY });
 }
 
 async function expectSvgNavigation(controls: Locator) {
@@ -91,66 +113,220 @@ test('starts configured music from the opening gesture and supports pause/resume
   await expect.poll(() => page.evaluate(() => window.__mediaCalls.play)).toBe(2);
 });
 
-test('uses a bounded SVG heart pool for pointer trail and click burst', async ({ page }) => {
+test('uses a bounded heart-arrow cursor, ghost pool, and grow-shrink click pulse', async ({ page }) => {
+  test.setTimeout(60_000);
   await enterInvitation(page, 'no-preference');
-  const layer = page.locator('.romantic-hearts');
-  const particles = layer.locator('.heart-particle');
+  const layer = page.locator('[data-heart-effects]');
+  const cursor = layer.locator('[data-heart-cursor]');
+  const ghosts = layer.locator('[data-heart-ghost]');
+  const primary = layer.locator('[data-heart-click="primary"]');
+  const secondary = layer.locator('[data-heart-click="secondary"]');
   await expect(layer).toHaveAttribute('aria-hidden', 'true');
-  await expect(particles).toHaveCount(18);
-  await expect(particles.locator('svg')).toHaveCount(18);
+  await expect(cursor).toHaveCount(1);
+  await expect(cursor.locator('svg')).toHaveCount(1);
+  await expect(ghosts).toHaveCount(14);
+  await expect(primary).toHaveCount(4);
+  await expect(secondary).toHaveCount(24);
   expect(await layer.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
-  expect((await particles.allTextContents()).join('')).toBe('');
+  await expect(page.locator('html')).toHaveClass(/heart-cursor-enabled/);
 
-  await page.waitForTimeout(800);
   await page.mouse.move(100, 120);
-  await expect.poll(() => activeHeartAnimations(page)).toBeGreaterThanOrEqual(1);
+  await expect(cursor).toHaveAttribute('data-visible', 'true');
+  const cursorBox = await cursor.boundingBox();
+  if (!cursorBox) throw new Error('Heart cursor has no box');
+  expect(cursorBox.width).toBeGreaterThanOrEqual(26);
+  expect(cursorBox.width).toBeLessThanOrEqual(34);
+  expect(Math.abs(cursorBox.x + 1.5 - 100)).toBeLessThanOrEqual(1);
+  expect(Math.abs(cursorBox.y + 1.5 - 120)).toBeLessThanOrEqual(1);
 
-  await page.waitForTimeout(800);
-  await page.mouse.move(110, 120);
-  await page.waitForTimeout(80);
-  expect(await activeHeartAnimations(page)).toBe(0);
-  await page.mouse.move(126, 120);
-  await expect.poll(() => activeHeartAnimations(page)).toBeGreaterThanOrEqual(1);
-  const trailSizes = await particles.evaluateAll((items) => items
+  // Start from a settled pool, then use a deterministic in-page PointerEvent
+  // to exercise a movement greater than the 12–18px production threshold.
+  await page.waitForTimeout(650);
+  expect(await activeHeartNodes(page, '[data-heart-ghost]')).toBe(0);
+  await dispatchHeroPointerMove(page, 260, 200);
+  await expect.poll(() => activeHeartNodes(page, '[data-heart-ghost]')).toBeGreaterThanOrEqual(1);
+  const trailSizes = await ghosts.evaluateAll((items) => items
     .filter((item) => item.getAnimations().some((animation) => animation.playState === 'running'))
     .map((item) => Number.parseFloat((item as HTMLElement).style.width)));
-  expect(trailSizes.every((size) => size >= 5 && size <= 12)).toBe(true);
+  expect(trailSizes.every((size) => size >= 8 && size <= 11)).toBe(true);
 
-  await page.waitForTimeout(800);
+  const fixedPoolCount = await layer.locator('[data-heart-ghost], [data-heart-click]').count();
+  await page.evaluate(async () => {
+    for (let index = 0; index < 80; index += 1) {
+      const clientX = 80 + (index % 12) * 20;
+      const clientY = 160 + (index % 5) * 18;
+      document.elementFromPoint(clientX, clientY)?.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        clientX,
+        clientY,
+        isPrimary: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+      }));
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    }
+  });
+  expect(await layer.locator('[data-heart-ghost], [data-heart-click]').count()).toBe(fixedPoolCount);
+
+  await page.waitForTimeout(600);
   await page.mouse.move(210, 210);
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(90);
   await page.mouse.down();
   await page.mouse.up();
-  await expect.poll(() => activeHeartAnimations(page)).toBeGreaterThanOrEqual(6);
-  expect(await activeHeartAnimations(page)).toBeLessThanOrEqual(10);
+  await expect.poll(() => activeHeartNodes(page, '[data-heart-click="primary"]')).toBe(1);
+  const activeSecondaries = await activeHeartNodes(page, '[data-heart-click="secondary"]');
+  expect(activeSecondaries).toBeGreaterThanOrEqual(3);
+  expect(activeSecondaries).toBeLessThanOrEqual(6);
+  const activePrimary = layer.locator('[data-heart-click="primary"][data-active="true"]').first();
+  const pulse = await activePrimary.evaluate((node) => {
+    const animation = node.getAnimations()[0];
+    const frames = (animation.effect as KeyframeEffect).getKeyframes();
+    return {
+      duration: Number((animation.effect as KeyframeEffect).getTiming().duration),
+      transforms: frames.map((frame) => String(frame.transform)),
+    };
+  });
+  expect(pulse.duration).toBeGreaterThanOrEqual(400);
+  expect(pulse.duration).toBeLessThanOrEqual(650);
+  expect(pulse.transforms.some((transform) => transform.includes('scale(1.32)'))).toBe(true);
+  expect(pulse.transforms.some((transform) => transform.includes('scale(0.98)') || transform.includes('scale(.98)'))).toBe(true);
 
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(850);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator('.hero-scene').dispatchEvent('pointerup', {
+  const hero = page.locator('.hero-scene');
+  await hero.dispatchEvent('pointerdown', {
     bubbles: true,
     clientX: 180,
     clientY: 180,
     isPrimary: true,
+    pointerId: 7,
     pointerType: 'touch',
   });
-  await expect.poll(() => activeHeartAnimations(page)).toBe(6);
+  await hero.dispatchEvent('pointerup', {
+    bubbles: true,
+    clientX: 180,
+    clientY: 180,
+    isPrimary: true,
+    pointerId: 7,
+    pointerType: 'touch',
+  });
+  await expect.poll(() => activeHeartNodes(page, '[data-heart-click="primary"]')).toBe(1);
+  const touchSecondaries = await activeHeartNodes(page, '[data-heart-click="secondary"]');
+  expect(touchSecondaries).toBeGreaterThanOrEqual(2);
+  expect(touchSecondaries).toBeLessThanOrEqual(4);
 
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(850);
   const response = page.locator('.response-scene');
   await response.scrollIntoViewIfNeeded();
   const input = response.getByLabel('Họ và tên');
   const box = await input.boundingBox();
   if (!box) throw new Error('RSVP name input has no box');
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(800);
+  await expect(cursor).toHaveAttribute('data-visible', 'false');
+  await expect(page.locator('html')).not.toHaveClass(/heart-cursor-enabled/);
+  expect(['auto', 'text']).toContain(await input.evaluate((element) => getComputedStyle(element).cursor));
   await page.mouse.down();
   await page.mouse.up();
-  await page.waitForTimeout(80);
+  await page.waitForTimeout(100);
   expect(await activeHeartAnimations(page)).toBe(0);
 });
 
+test('keeps heart-pointer work bounded during a 10-second Hero stress pass', async ({ page }) => {
+  test.setTimeout(45_000);
+  await enterInvitation(page, 'no-preference');
+  await expect(page.locator('[data-heart-rain]')).toHaveCount(0, { timeout: 5_000 });
+
+  const metrics = await page.evaluate(async () => {
+    const layer = document.querySelector<HTMLElement>('[data-heart-effects]');
+    const hero = document.querySelector<HTMLElement>('.hero-scene');
+    if (!layer || !hero) throw new Error('Heart effects and Hero must be present for the stress pass.');
+
+    const poolSelector = '[data-heart-ghost], [data-heart-click]';
+    const poolBefore = layer.querySelectorAll(poolSelector).length;
+    let childListMutations = 0;
+    const observer = new MutationObserver((records) => {
+      childListMutations += records.filter((record) => record.type === 'childList').length;
+    });
+    observer.observe(layer, { childList: true, subtree: true });
+
+    const startedAt = performance.now();
+    let dispatchedMoves = 0;
+    await new Promise<void>((resolve) => {
+      const timer = window.setInterval(() => {
+        const now = performance.now();
+        const progress = Math.min(1, (now - startedAt) / 10_000);
+        const clientX = 24 + ((Math.sin(progress * Math.PI * 18) + 1) / 2) * (innerWidth - 48);
+        const clientY = 120 + ((Math.cos(progress * Math.PI * 24) + 1) / 2) * Math.min(380, innerHeight - 180);
+        hero.dispatchEvent(new PointerEvent('pointermove', {
+          bubbles: true,
+          clientX,
+          clientY,
+          isPrimary: true,
+          pointerId: 1,
+          pointerType: 'mouse',
+        }));
+        dispatchedMoves += 1;
+        if (now - startedAt >= 10_000) {
+          window.clearInterval(timer);
+          resolve();
+        }
+      }, 16);
+    });
+
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 650));
+    observer.disconnect();
+    return {
+      duration: performance.now() - startedAt,
+      dispatchedMoves,
+      childListMutations,
+      poolBefore,
+      poolAfter: layer.querySelectorAll(poolSelector).length,
+      activeAnimations: [...layer.querySelectorAll<HTMLElement>(poolSelector)].filter((node) => (
+        node.getAnimations().some((animation) => animation.playState === 'running')
+      )).length,
+    };
+  });
+
+  expect(metrics.duration).toBeGreaterThanOrEqual(10_000);
+  expect(metrics.dispatchedMoves).toBeGreaterThan(100);
+  expect(metrics.poolAfter).toBe(metrics.poolBefore);
+  expect(metrics.childListMutations).toBe(0);
+  expect(metrics.activeAnimations).toBe(0);
+});
+
+test('creates a bounded temporary opening heart rain on desktop and mobile', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  await page.getByRole('button', { name: /Mở thiệp cưới/ }).click();
+
+  const desktopRain = page.locator('[data-heart-rain]');
+  await expect(desktopRain).toHaveCount(1);
+  await expect(desktopRain).toHaveAttribute('aria-hidden', 'true');
+  await expect(desktopRain.locator('[data-heart-rain-drop]')).toHaveCount(56);
+  expect(await desktopRain.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe('none');
+  const desktopSizes = await desktopRain.locator('[data-heart-rain-drop]').evaluateAll((drops) => (
+    drops.map((drop) => Number.parseFloat(getComputedStyle(drop).width))
+  ));
+  expect(Math.min(...desktopSizes)).toBeGreaterThanOrEqual(7);
+  expect(Math.max(...desktopSizes)).toBeLessThanOrEqual(22);
+  await expect(desktopRain).toHaveCount(0, { timeout: 5_000 });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?mobile-rain=1');
+  await page.getByRole('button', { name: /Mở thiệp cưới/ }).click();
+  const mobileRain = page.locator('[data-heart-rain]');
+  await expect(mobileRain.locator('[data-heart-rain-drop]')).toHaveCount(36);
+  await expect(mobileRain).toHaveCount(0, { timeout: 5_000 });
+});
+
 test('disables all romantic heart motion when reduced motion is requested', async ({ page }) => {
-  await enterInvitation(page, 'reduce');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.locator('[data-heart-effects]')).toHaveAttribute('data-reduced-motion', 'true');
+  await page.getByRole('button', { name: /Mở thiệp cưới/ }).click();
+  await expect(page.locator('.opening')).toHaveCount(0);
+  await expect(page.locator('[data-heart-rain]')).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/heart-cursor-enabled/);
   await page.mouse.move(120, 140);
   await page.mouse.down();
   await page.mouse.up();

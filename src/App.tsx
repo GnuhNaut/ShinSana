@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { cinematicImage, finaleImage, heroImage, introImage, wedding } from './config/wedding';
 import { guestFromSearch } from './utils/guest';
 import { usePointerSurface } from './hooks/usePointerSurface';
@@ -7,15 +7,18 @@ import { Venues } from './components/Venues';
 import { Response } from './components/Response';
 import { Gift } from './components/Gift';
 import { RomanticHearts } from './components/RomanticHearts';
+import { useInvitationEntryScroll } from './hooks/useInvitationEntryScroll';
 
 function Music({
   audio,
   playing,
   onPlayingChange,
+  revealed,
 }: {
   audio: RefObject<HTMLAudioElement | null>;
   playing: boolean;
   onPlayingChange: (playing: boolean) => void;
+  revealed: boolean;
 }) {
   const available = Boolean(wedding.music.src);
   const toggle = () => {
@@ -38,22 +41,24 @@ function Music({
         onPlay={() => onPlayingChange(true)}
         onPause={() => onPlayingChange(false)}
       />
-      <button
-        className={`music-control ${playing ? 'is-playing' : ''} ${!available ? 'is-unavailable' : ''}`}
-        type="button"
-        onClick={toggle}
-        disabled={!available}
-        aria-pressed={playing}
-        aria-label={!available ? 'Nhạc nền đang chờ cập nhật' : playing ? 'Tạm dừng nhạc' : 'Bật nhạc'}
-        title={!available ? 'Nhạc đang cập nhật' : undefined}
-        data-no-hearts
-      >
-        <span className="music-control__seal" aria-hidden="true">
-          <span className="music-control__ring" />
-          <span className="music-control__bars"><i /><i /><i /></span>
-        </span>
-        <span className="music-control__label">{playing ? 'ĐANG PHÁT' : 'ÂM NHẠC'}</span>
-      </button>
+      {revealed && (
+        <button
+          className={`music-control ${playing ? 'is-playing' : ''} ${!available ? 'is-unavailable' : ''}`}
+          type="button"
+          onClick={toggle}
+          disabled={!available}
+          aria-pressed={playing}
+          aria-label={!available ? 'Nhạc nền đang chờ cập nhật' : playing ? 'Tạm dừng nhạc' : 'Bật nhạc'}
+          title={!available ? 'Nhạc đang cập nhật' : undefined}
+          data-no-hearts
+        >
+          <span className="music-control__seal" aria-hidden="true">
+            <span className="music-control__ring" />
+            <span className="music-control__bars"><i /><i /><i /></span>
+          </span>
+          <span className="music-control__label">{playing ? 'ĐANG PHÁT' : 'ÂM NHẠC'}</span>
+        </button>
+      )}
     </>
   );
 }
@@ -80,7 +85,7 @@ function Opening({
           className="opening__folio"
           type="button"
           onClick={onOpen}
-          disabled={opening}
+          aria-disabled={opening}
           aria-label="Mở thiệp cưới Tuấn Hùng và Sao Mai"
           data-heart-allowed
         >
@@ -215,6 +220,8 @@ export function App() {
   const [opened, setOpened] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const openingTimerRef = useRef<number>(0);
+  const { normalizeTop } = useInvitationEntryScroll(opened);
 
   useEffect(() => {
     document.title = wedding.seo.title;
@@ -223,30 +230,34 @@ export function App() {
     document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute('content', wedding.seo.description);
   }, []);
 
-  useEffect(() => {
-    if (opened) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previous; };
-  }, [opened]);
+  useLayoutEffect(() => {
+    if (!opened) return;
+    normalizeTop();
+    document.getElementById('hero-title')?.focus({ preventScroll: true });
+  }, [normalizeTop, opened]);
+
+  useEffect(() => () => {
+    if (openingTimerRef.current) window.clearTimeout(openingTimerRef.current);
+  }, []);
 
   const openInvitation = () => {
     if (opening) return;
     if (wedding.music.src && audioRef.current) {
       audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => setMusicPlaying(false));
     }
+    normalizeTop();
     setOpening(true);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.setTimeout(() => {
+    openingTimerRef.current = window.setTimeout(() => {
+      normalizeTop();
       setOpened(true);
-      window.requestAnimationFrame(() => document.getElementById('hero-title')?.focus({ preventScroll: true }));
     }, reduced ? 150 : 980);
   };
 
   return (
     <main className={opened ? 'invitation-open' : ''}>
-      <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} />
-      <RomanticHearts />
+      <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} revealed={opened} />
+      <RomanticHearts celebrating={opening} />
       {!opened && <Opening guest={guest} opening={opening} onOpen={openInvitation} />}
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />
