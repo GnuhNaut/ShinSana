@@ -63,7 +63,7 @@ export const wedding = {
   },
 } as const;
 
-export const heroImage = '/images/hero-ceremony.png';
-export const introImage = '/images/bride-detail.jpg';
-export const cinematicImage = '/images/bienhinh.png';
-export const finaleImage = '/images/finale-corridor.png';
+export const heroImage = '/images/hero-ceremony.webp';
+export const introImage = '/images/bride-detail.webp';
+export const cinematicImage = '/images/bienhinh.webp';
+export const finaleImage = '/images/finale-corridor.webp';

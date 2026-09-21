@@ -550,7 +550,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
         data-interactive="false"
         style={{ height: 34, opacity: 0, pointerEvents: 'none', width: 34 }}
       >
-        <img className="heart-cursor__art" src="/images/cursor.png" alt="" aria-hidden="true" />
+        <img className="heart-cursor__art" src="/images/cursor.webp" alt="" aria-hidden="true" />
       </div>
 
       <div className="heart-trail" data-heart-trail="" aria-hidden="true">
