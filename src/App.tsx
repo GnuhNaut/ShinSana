@@ -149,8 +149,6 @@ function Hero({ guest }: { guest: string }) {
       <div className="hero-scene__atmosphere" aria-hidden="true" />
       <div className="hero-scene__silk hero-scene__silk--left" aria-hidden="true" />
       <div className="hero-scene__silk hero-scene__silk--right" aria-hidden="true" />
-      <div className="hero-scene__lattice" aria-hidden="true"><i /><i /><i /><i /></div>
-
       <div className="hero-scene__content">
         <p className="hero-scene__invitee">{invitee}</p>
         <h1 id="hero-title" tabIndex={-1}>
@@ -194,7 +192,7 @@ function StoryIntro() {
 function CinematicBreak() {
   return (
     <section className="scene cinematic-scene" aria-label="Khoảnh khắc của cặp đôi">
-      <img src={cinematicImage} loading="lazy" alt="Cặp đôi bên nhau trên bờ biển" />
+      <img src={cinematicImage} loading="lazy" alt="Cặp đôi trong trang phục cưới đỏ" />
       <div className="cinematic-scene__wash" aria-hidden="true" />
       <blockquote>
         <span aria-hidden="true">“</span>

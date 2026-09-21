@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { gallery } from '../config/wedding';
+import { gallery as gallerySource } from '../config/gallery-manifest';
 import { useModalDialog } from '../hooks/useModalDialog';
 import { usePointerSurface } from '../hooks/usePointerSurface';
 import { ArrowIcon, CloseIcon } from './Icons';
@@ -18,9 +18,17 @@ type DragState = {
   dragged: boolean;
 };
 
-const wrap = (value: number) => (value + gallery.length) % gallery.length;
+const shuffle = <T,>(items: readonly T[]) => {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+};
 
 export function Gallery() {
+  const [gallery] = useState(() => shuffle(gallerySource));
   const [ready, setReady] = useState(false);
   const [index, setIndex] = useState(0);
   const [viewer, setViewer] = useState(false);
@@ -31,10 +39,11 @@ export function Gallery() {
   const dragFrame = useRef(0);
   const pendingX = useRef(0);
   const suppressClick = useRef(false);
+  const wrap = useCallback((value: number) => (value + gallery.length) % gallery.length, [gallery.length]);
 
   const move = useCallback((direction: number) => {
     setIndex((current) => wrap(current + direction));
-  }, []);
+  }, [wrap]);
   const closeViewer = useCallback(() => setViewer(false), []);
   const viewerRef = useModalDialog<HTMLDivElement>(viewer, closeViewer, activeButton);
 
@@ -56,6 +65,21 @@ export function Gallery() {
     observer.observe(section);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const preloadIndexes = [index, wrap(index + 1), wrap(index - 1)];
+    const preloadedImages = preloadIndexes.map((itemIndex) => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.fetchPriority = 'high';
+      image.src = gallery[itemIndex].src;
+      return image;
+    });
+
+    return () => {
+      preloadedImages.forEach((image) => { image.src = ''; });
+    };
+  }, [gallery, index, wrap]);
 
   useEffect(() => () => {
     if (dragFrame.current) window.cancelAnimationFrame(dragFrame.current);
@@ -209,6 +233,7 @@ export function Gallery() {
                 src={item.src}
                 alt={offset === 0 ? item.alt : ''}
                 loading={Math.abs(offset) <= 1 ? 'eager' : 'lazy'}
+                fetchPriority={offset === 0 ? 'high' : 'auto'}
                 draggable={false}
               />
               <span className="gallery-slide__shine" aria-hidden="true" />

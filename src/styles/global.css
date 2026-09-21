@@ -960,7 +960,7 @@ textarea:focus-visible,
 
 /* Cinematic photograph */
 .cinematic-scene { height: min(86svh, 900px); min-height: 580px; background: #271714; color: var(--ivory); }
-.cinematic-scene > img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: saturate(.8) contrast(1.04); }
+.cinematic-scene > img { width: 100%; height: 100%; object-fit: cover; object-position: center 54%; filter: saturate(.86) contrast(1.04); }
 .cinematic-scene__wash { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(104,16,22,.68), transparent 43%, rgba(104,16,22,.12)), linear-gradient(0deg, rgba(36,19,15,.6), transparent 46%); }
 .cinematic-scene blockquote { position: absolute; z-index: 2; left: max(32px, 8vw); bottom: clamp(48px, 10vh, 105px); width: min(500px, calc(100% - 64px)); margin: 0; }
 .cinematic-scene blockquote > span { display: block; height: 45px; color: var(--light-champagne); font: 500 74px/1 var(--serif); }
@@ -1008,8 +1008,10 @@ textarea:focus-visible,
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(54vw, 720px);
-  height: min(62vh, 650px);
+  width: auto;
+  max-width: 42vw;
+  height: min(70vh, 720px);
+  aspect-ratio: 2 / 3;
   border: 0;
   padding: 0;
   background: transparent;
@@ -1030,9 +1032,9 @@ textarea:focus-visible,
   z-index: 4;
   transform: translate3d(calc(-50% + var(--drag-px) * .86 + var(--pointer-nx) * 2px), calc(-50% + var(--pointer-ny) * 1px), calc(122px + var(--drag-progress) * 32px)) rotateX(calc(var(--pointer-ny) * -2deg)) rotateY(calc(var(--pointer-nx) * 3deg + var(--drag-progress) * -18deg));
 }
-.gallery-slide__frame { position: absolute; inset: 0; display: block; overflow: hidden; border: 1px solid rgba(240,214,139,.46); background: #690a0f; box-shadow: 0 35px 70px rgba(75,0,6,.46), inset 0 0 0 7px rgba(255,245,227,.06); transform-style: preserve-3d; }
+.gallery-slide__frame { position: absolute; inset: 0; display: block; overflow: hidden; border: 1px solid rgba(240,214,139,.46); background: linear-gradient(145deg, #7a1016, #4f080d); box-shadow: 0 35px 70px rgba(75,0,6,.46), inset 0 0 0 7px rgba(255,245,227,.06); transform-style: preserve-3d; }
 .gallery-slide__frame::before { position: absolute; z-index: 2; inset: 10px; border: 1px solid rgba(255,245,227,.16); content: ''; pointer-events: none; }
-.gallery-slide img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.gallery-slide img { width: 100%; height: 100%; object-fit: contain; object-position: center; pointer-events: none; }
 .gallery-slide__shine { position: absolute; z-index: 2; inset: 0; background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(255,241,197,.18), transparent 27%); opacity: 0; transition: opacity .3s; }
 .gallery-slide--active:hover .gallery-slide__shine { opacity: 1; }
 .gallery-slide__action { position: absolute; z-index: 3; right: 22px; bottom: 20px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--light-champagne); padding-bottom: 5px; color: var(--ivory); font-size: 8px; letter-spacing: .15em; text-shadow: 0 2px 8px #4b0509; }
@@ -1568,7 +1570,7 @@ textarea:focus-visible,
   .venue-dialog__actions .lacquer-button { border-color: var(--light-champagne); }
 
   .cinematic-scene { height: 76svh; min-height: 540px; }
-  .cinematic-scene > img { object-position: 55% center; }
+  .cinematic-scene > img { object-position: center 52%; }
   .cinematic-scene__wash { background: linear-gradient(0deg, rgba(104,16,22,.83), transparent 65%); }
   .cinematic-scene blockquote { left: 22px; bottom: 49px; width: calc(100% - 44px); }
   .cinematic-scene blockquote p { font-size: 34px; }
@@ -1582,7 +1584,7 @@ textarea:focus-visible,
   .gallery-counter strong { font-size: 25px; }
   .gallery-counter span { font-size: 8px; }
   .gallery-stage { height: calc(100% - 78px); perspective: 1150px; }
-  .gallery-slide { width: 78vw; height: 58svh; max-height: 520px; }
+  .gallery-slide { width: auto; max-width: 74vw; height: min(68svh, 600px); aspect-ratio: 2 / 3; }
   .gallery-slide--prev { --x: -40%; --rot: 17deg; }
   .gallery-slide--next { --x: 40%; --rot: -17deg; }
   .gallery-slide--depth-1 { --z: 5px; --scale: .86; --slide-opacity: .46; }

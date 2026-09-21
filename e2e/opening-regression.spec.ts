@@ -101,12 +101,12 @@ test('keeps the reduced-motion opening handoff at the top', async ({ page }) => 
 
 test('does not jump while the high-priority Hero image finishes loading', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.route('**/images/hero-ceremony.webp', async (route) => {
+  await page.route('**/images/hero-ceremony.png', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 1_000));
     await route.continue();
   });
 
-  const heroResponse = page.waitForResponse((response) => response.url().includes('/images/hero-ceremony.webp'));
+  const heroResponse = page.waitForResponse((response) => response.url().includes('/images/hero-ceremony.png'));
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await openingControl(page).click();
   await expectOpenedAtHero(page);
