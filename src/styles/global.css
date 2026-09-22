@@ -468,7 +468,7 @@ textarea:focus-visible,
   display: grid;
   width: min(420px, calc(100% - 96px));
   justify-items: center;
-  margin-top: 30px;
+  margin-top: 10%;
   border-top: 1px solid rgba(236,210,143,.72);
   border-bottom: 1px solid rgba(236,210,143,.72);
   padding: 13px 25px 17px;
@@ -1568,7 +1568,7 @@ textarea:focus-visible,
   .opening__copy strong i { display: block; margin: 0; }
   .opening__guest-label { margin-top: 27px; font-size: 16px; }
   .opening__invitation-badge,
-  .opening__invitation-badge.has-guest { width: calc(100% - 18px); margin-top: 27px; padding: 11px 16px 15px; }
+  .opening__invitation-badge.has-guest { width: calc(100% - 18px); margin-top: 30%; padding: 11px 16px 15px; }
   .opening__guest-name { width: 100%; padding: 3px 4px 0; font-size: 22px; }
   .opening__seal { top: 14%; width: 76px; height: 76px; }
   .opening__seal-face { width: 62px; height: 62px; }
