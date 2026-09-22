@@ -42,7 +42,15 @@ const INTERACTIVE_SELECTOR = [
 
 const BUTTON_LIKE_SELECTOR = 'button, [role="button"], a, summary';
 const GHOST_COLORS = ['#FF6FA7', '#FF88B4', '#FFA5C6', '#FFD1E0'] as const;
-const RAIN_COLORS = ['#FF6FA7', '#FF88B4', '#FFA5C6', '#FFC0D4', '#FFD1E0'] as const;
+const RAIN_COLORS = [
+  '#FF6FA7',
+  '#FF88B4',
+  '#FFA5C6',
+  '#FFD1E0',
+  '#F6D68E',
+  '#ECC066',
+  '#FFE6A8',
+] as const;
 
 function elementFromTarget(target: EventTarget | null) {
   if (target instanceof Element) return target;
@@ -76,25 +84,33 @@ function HeartGlyph({ className }: { className?: string }) {
   );
 }
 
-function createRainHeart(index: number, count: number) {
+function createRainHeart(index: number, count: number, isMobile: boolean) {
   const drop = document.createElement('span');
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   const smallWeight = Math.random();
-  const size = smallWeight < 0.7
-    ? 14 + Math.round(Math.random() * 8)
-    : smallWeight < 0.94
-      ? 23 + Math.round(Math.random() * 11)
-      : 35 + Math.round(Math.random() * 15);
-  const isLongDrop = index % 9 === 0;
-  const delay = Math.round(Math.random() * (isLongDrop ? 900 : 700));
-  const duration = Math.round(isLongDrop ? 5000 + Math.random() * 1200 : 3600 + Math.random() * 1600);
+  const size = isMobile
+    ? smallWeight < 0.72
+      ? 11 + Math.round(Math.random() * 6)
+      : 18 + Math.round(Math.random() * 6)
+    : smallWeight < 0.7
+      ? 14 + Math.round(Math.random() * 8)
+      : smallWeight < 0.94
+        ? 23 + Math.round(Math.random() * 11)
+        : 35 + Math.round(Math.random() * 15);
+  const isLongDrop = index % (isMobile ? 6 : 9) === 0;
+  const delay = isMobile
+    ? Math.round(Math.random() * (isLongDrop ? 1600 : 1200))
+    : Math.round(Math.random() * (isLongDrop ? 900 : 700));
+  const duration = isMobile
+    ? Math.round(3800 + Math.random() * 1600)
+    : Math.round(isLongDrop ? 5000 + Math.random() * 1200 : 3600 + Math.random() * 1600);
   const x = ((index + Math.random() * 1.15) / count) * 100;
-  const drift = Math.round(-78 + Math.random() * 156);
-  const rotation = Math.round(-150 + Math.random() * 300);
-  const color = index % 17 === 0
-    ? '#F1B7C9'
-    : RAIN_COLORS[Math.floor(Math.random() * RAIN_COLORS.length)];
+  const drift = isMobile
+    ? Math.round(-32 + Math.random() * 64)
+    : Math.round(-78 + Math.random() * 156);
+  const rotation = Math.round(-130 + Math.random() * 260);
+  const color = RAIN_COLORS[Math.floor(Math.random() * RAIN_COLORS.length)];
 
   drop.className = 'heart-rain__heart';
   drop.dataset.heartRainDrop = String(index);
@@ -104,8 +120,8 @@ function createRainHeart(index: number, count: number) {
   drop.style.setProperty('--heart-duration', `${duration}ms`);
   drop.style.setProperty('--heart-drift', `${drift}px`);
   drop.style.setProperty('--heart-rotation', `${rotation}deg`);
-  drop.style.setProperty('--heart-opacity', `${(0.5 + Math.random() * 0.4).toFixed(2)}`);
-  drop.style.setProperty('--heart-scale', `${(0.88 + Math.random() * 0.34).toFixed(2)}`);
+  drop.style.setProperty('--heart-opacity', `${(0.55 + Math.random() * 0.4).toFixed(2)}`);
+  drop.style.setProperty('--heart-scale', `${(0.85 + Math.random() * 0.35).toFixed(2)}`);
   drop.style.setProperty('--heart-color', color);
   drop.style.animationDelay = `${delay}ms`;
   drop.style.animationDuration = `${duration}ms`;
@@ -475,7 +491,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
         layer.remove();
         if (rainLayerRef.current === layer) rainLayerRef.current = null;
         rainTimerRef.current = null;
-      }, 220);
+      }, 480);
       return;
     }
 
@@ -484,8 +500,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
     if (!crossedIntoCelebration) return;
 
     const host = rootRef.current;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (!host || reducedMotion.matches) return;
+    if (!host) return;
 
     if (rainTimerRef.current !== null) window.clearTimeout(rainTimerRef.current);
     rainLayerRef.current?.remove();
@@ -495,10 +510,10 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
     layer.dataset.active = 'true';
     layer.setAttribute('aria-hidden', 'true');
     const mobile = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
-    const count = mobile ? 120 : 210;
+    const count = mobile ? 46 : 160;
     const fragment = document.createDocumentFragment();
     for (let index = 0; index < count; index += 1) {
-      fragment.append(createRainHeart(index, count));
+      fragment.append(createRainHeart(index, count, mobile));
     }
 
     layer.append(fragment);
@@ -509,7 +524,7 @@ export function RomanticHearts({ celebrating }: { celebrating: boolean }) {
       layer.remove();
       if (rainLayerRef.current === layer) rainLayerRef.current = null;
       rainTimerRef.current = null;
-    }, 4800);
+    }, 5600);
   }, [celebrating]);
 
   useEffect(() => {

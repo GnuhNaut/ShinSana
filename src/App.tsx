@@ -111,8 +111,8 @@ function Opening({
           <span className="opening__copy">
             {/* <span className="opening__eyebrow">HỶ LỄ · 19.10.2026</span> */}
             <strong className="opening__names">
-              <span className="opening__name">Tuấn <br /> Hùng</span>
-              <span className="opening__name">Sao <br /> Mai</span>
+              <span className="opening__name" data-text="Tuấn Hùng">Tuấn <br /> Hùng</span>
+              <span className="opening__name" data-text="Sao Mai">Sao <br /> Mai</span>
             </strong>
             <span className={`opening__invitation-badge ${guest ? 'has-guest' : ''}`}>
               <span className="opening__guest-label">{guest ? 'Trân trọng kính mời' : 'Thiệp mời thành hôn'}</span>
@@ -225,10 +225,12 @@ export function App() {
   const [opened, setOpened] = useState(false);
   const [showOpening, setShowOpening] = useState(true);
   const [closingOpening, setClosingOpening] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const openingTimerRef = useRef<number>(0);
   const closingTimerRef = useRef<number>(0);
+  const celebrationTimerRef = useRef<number>(0);
   const { normalizeTop } = useInvitationEntryScroll(opened);
 
   useEffect(() => {
@@ -247,6 +249,7 @@ export function App() {
   useEffect(() => () => {
     if (openingTimerRef.current) window.clearTimeout(openingTimerRef.current);
     if (closingTimerRef.current) window.clearTimeout(closingTimerRef.current);
+    if (celebrationTimerRef.current) window.clearTimeout(celebrationTimerRef.current);
   }, []);
 
   const openInvitation = () => {
@@ -256,28 +259,29 @@ export function App() {
     }
     normalizeTop();
     setOpening(true);
+    setCelebrating(true);
+    if (celebrationTimerRef.current) window.clearTimeout(celebrationTimerRef.current);
+    celebrationTimerRef.current = window.setTimeout(() => {
+      setCelebrating(false);
+    }, 5400);
+
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     openingTimerRef.current = window.setTimeout(() => {
       normalizeTop();
       setOpened(true);
-      if (reduced) {
-        setShowOpening(false);
-        setOpening(false);
-        return;
-      }
       setClosingOpening(true);
       closingTimerRef.current = window.setTimeout(() => {
         setShowOpening(false);
         setOpening(false);
         setClosingOpening(false);
       }, 420);
-    }, reduced ? 150 : 980);
+    }, reduced ? 250 : 980);
   };
 
   return (
     <main className={opened ? 'invitation-open' : ''}>
       <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} revealed={opened} />
-      <RomanticHearts celebrating={opening && !opened} />
+      <RomanticHearts celebrating={celebrating} />
       {showOpening && <Opening guest={guest} opening={opening} closing={closingOpening} onOpen={openInvitation} />}
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />
