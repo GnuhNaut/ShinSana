@@ -1173,7 +1173,7 @@ textarea:focus-visible,
 .response-paper--wish { min-height: 570px; }
 .response-paper__edge { position: absolute; top: 16px; right: 16px; bottom: 16px; left: 16px; border: 1px solid rgba(143,17,23,.13); pointer-events: none; }
 .response-modes { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 44px; border-bottom: 1px solid rgba(120,93,82,.25); }
-.response-modes button { position: relative; border: 0; padding: 0 0 17px; background: transparent; color: var(--muted); font-size: 9px; font-weight: 600; letter-spacing: .13em; text-align: left; transition: color .25s; }
+.response-modes button { position: relative; border: 0; padding: 0 0 17px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .13em; text-align: left; transition: color .25s; }
 .response-modes button span { margin-right: 9px; color: var(--champagne); font-family: var(--serif); font-size: 15px; }
 .response-modes button::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--lacquer); content: ''; transform: scaleX(0); transform-origin: left; transition: transform .32s var(--ease-out); }
 .response-modes button.is-active { color: var(--deep-red); }
