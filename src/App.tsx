@@ -174,8 +174,8 @@ function StoryIntro() {
     <section className="scene intro-scene" id="invitation-story" aria-labelledby="intro-title">
       <div className="intro-scene__seal" aria-hidden="true"><span>囍</span><i>19 · 10</i></div>
       <div className="intro-scene__copy">
-        <p className="scene-kicker">CHÚNG MÌNH SẮP CƯỚI</p>
-        <h2 id="intro-title" style={{lineHeight: 1.2}}>Một ngày son,<br /><em>một đời chung đôi.</em></h2>
+        <p className="scene-kicker">CHÚNG MÌNH SẮP VỀ CHUNG MỘT NHÀ</p>
+        <h2 id="intro-title" style={{ lineHeight: 1.2 }}>Một ngày son,<br /><em>một đời chung đôi.</em></h2>
         <p>Giữa rất nhiều cuộc gặp gỡ, chúng mình đã tìm thấy nhau. Giờ đây, niềm vui sẽ trọn vẹn hơn khi có bạn ở bên.</p>
         <div className="intro-scene__signature"><span>Tuấn Hùng</span><i>&</i><span>Sao Mai</span></div>
       </div>

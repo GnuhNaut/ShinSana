@@ -24,35 +24,28 @@ export const wedding = {
       label: 'NHÀ TRAI',
       name: 'Tiệc Cưới & Lễ Thành Hôn',
       date: 'Chủ Nhật - Thứ Hai · 18 - 19.10.2026',
-      time: '10:00',
+      time: '',
       address: 'Nhà Văn Hoá Thôn Tân Hưng - xã Đa Phúc (Thôn Cốc Lương, xã Tân Hưng cũ)',
       mapUrl: 'https://maps.app.goo.gl/ragsqLQmLqAaR1zp8',
       mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3717.1646106963476!2d105.893625!3d21.304510999999994!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31351b41ffbdf877%3A0xe8f33f3316a3db49!2zTmjDoCBWxINuIEjDs2EgVGjDtG4gQ-G7kWMgTMawxqFuZw!5e0!3m2!1sen!2s!4v1790076212885!5m2!1sen!2s',
     },
     bride: {
       label: 'NHÀ GÁI',
-      name: 'Lễ Vu Quy',
+      name: 'Tiệc Báo Hỷ',
       date: 'Chủ Nhật · 18.10.2026',
       time: '10:30',
       address: 'Phòng tiệc tầng 1 Royal 4 - Trống Đồng Palace Hà Đông - TTTM Melinh Plaza, Hà Nội',
-      mapUrl: 'https://www.google.com/maps/search/?api=1&query=Vi%E1%BB%87t%20Nam',
-      mapEmbedUrl: 'https://maps.google.com/maps?q=Vi%E1%BB%87t%20Nam&z=5&output=embed',
+      mapUrl: 'https://maps.app.goo.gl/KieiNiQXmooPRMhc7',
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.70652360095!2d105.771636!3d20.9642976!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x313452d76a3d8bbd%3A0xa699af82bbad2713!2zVHLhu5FuZyDEkOG7k25nIFBhbGFjZQ!5e0!3m2!1sen!2s!4v1790083004188!5m2!1sen!2s',
     },
   } satisfies Record<VenueKey, Venue>,
   gifts: {
     groom: {
       label: 'NHÀ TRAI',
-      bankName: 'Ngân hàng sẽ cập nhật',
-      accountHolder: 'TUẤN HÙNG',
-      accountNumber: 'Đang cập nhật',
-      qrImage: '',
-    },
-    bride: {
-      label: 'NHÀ GÁI',
-      bankName: 'Ngân hàng sẽ cập nhật',
-      accountHolder: 'SAO MAI',
-      accountNumber: 'Đang cập nhật',
-      qrImage: '',
+      bankName: 'TP BANK',
+      accountHolder: 'TRƯƠNG TUẤN HÙNG',
+      accountNumber: 'SHINSANA',
+      qrImage: '/images/qr-groom.png',
     },
   },
   music: { src: '/audio/audio.mp3', label: 'Khúc nhạc ngày vui' },
@@ -66,4 +59,4 @@ export const wedding = {
 export const heroImage = '/images/hero-ceremony.webp';
 export const introImage = '/images/bride-detail.webp';
 export const cinematicImage = '/images/bienhinh.webp';
-export const finaleImage = '/images/finale-corridor.webp';
+export const finaleImage = '/images/test.png';
