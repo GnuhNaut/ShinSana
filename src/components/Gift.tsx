@@ -41,7 +41,8 @@ export function Gift({ side }: { side: WeddingSide }) {
   const [open, setOpen] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const selected = wedding.gifts.groom;
-  const isPlaceholder = selected.accountNumber === 'Đang cập nhật';
+  const isPlaceholder = (selected.accountNumber as string) === 'Đang cập nhật';
+
 
   useEffect(() => setCopyState('idle'), [open]);
 
