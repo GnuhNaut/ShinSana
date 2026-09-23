@@ -8,6 +8,7 @@ import { Response } from './components/Response';
 import { Gift } from './components/Gift';
 import { RomanticHearts } from './components/RomanticHearts';
 import { useInvitationEntryScroll } from './hooks/useInvitationEntryScroll';
+import { InviteGenerator } from './components/InviteGenerator';
 
 function Music({
   audio,
@@ -65,16 +66,20 @@ function Music({
 
 function Opening({
   guest,
+  avatar,
   opening,
   closing,
   onOpen,
+
 }: {
   guest: string;
+  avatar?: string;
   opening: boolean;
   closing: boolean;
   onOpen: () => void;
 }) {
   const pointerRef = usePointerSurface<HTMLElement>();
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
   return (
     <section
       ref={pointerRef}
@@ -119,6 +124,29 @@ function Opening({
               {guest && <b className="opening__guest-name">{guest}</b>}
             </span>
           </span>
+          {avatar && (
+            <span className={`opening__guest-stamp ${avatarLoaded ? 'is-loaded' : 'is-loading'}`} aria-label={guest ? `Ảnh khách mời ${guest}` : 'Ảnh khách quý'}>
+              <span className="opening__guest-stamp-frame">
+                <img
+                  src={avatar}
+                  alt={guest ? `Ảnh ${guest}` : 'Khách quý'}
+                  className="opening__guest-stamp-img"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  onLoad={() => setAvatarLoaded(true)}
+                  onError={(e) => {
+                    const el = e.currentTarget.closest('.opening__guest-stamp') as HTMLElement | null;
+                    if (el) el.style.display = 'none';
+                  }}
+                />
+                {!avatarLoaded && <span className="opening__guest-stamp-spinner" aria-hidden="true" />}
+                <span className="opening__guest-stamp-rim" aria-hidden="true" />
+                <span className="opening__guest-stamp-pin" aria-hidden="true">✦</span>
+              </span>
+              <span className="opening__guest-stamp-tag">KHÁCH QUÝ</span>
+            </span>
+          )}
           <span className="opening__seal" aria-hidden="true">
             <span className="opening__seal-ring" />
             <span className="opening__seal-face"><b>囍</b></span>
@@ -132,6 +160,7 @@ function Opening({
     </section>
   );
 }
+
 
 function Hero({ guest }: { guest: string }) {
   const pointerRef = usePointerSurface<HTMLElement>();
@@ -219,9 +248,10 @@ function Finale() {
   );
 }
 
-export function App() {
-  const [{ guest, side }] = useState(guestFromSearch);
+function WeddingInvitation() {
+  const [{ guest, side, avatar }] = useState(guestFromSearch);
   const [opening, setOpening] = useState(false);
+
   const [opened, setOpened] = useState(false);
   const [showOpening, setShowOpening] = useState(true);
   const [closingOpening, setClosingOpening] = useState(false);
@@ -239,6 +269,19 @@ export function App() {
     document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', wedding.seo.title);
     document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute('content', wedding.seo.description);
   }, []);
+
+  useEffect(() => {
+    if (!avatar) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = avatar;
+    link.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(link);
+    return () => {
+      if (document.head.contains(link)) document.head.removeChild(link);
+    };
+  }, [avatar]);
 
   useLayoutEffect(() => {
     if (!opened) return;
@@ -282,7 +325,8 @@ export function App() {
     <main className={opened ? 'invitation-open' : ''}>
       <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} revealed={opened} />
       <RomanticHearts celebrating={celebrating} />
-      {showOpening && <Opening guest={guest} opening={opening} closing={closingOpening} onOpen={openInvitation} />}
+      {showOpening && <Opening guest={guest} avatar={avatar} opening={opening} closing={closingOpening} onOpen={openInvitation} />}
+
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />
         <StoryIntro />
@@ -295,4 +339,15 @@ export function App() {
       </div>
     </main>
   );
+}
+
+export function App() {
+  const isGenerator =
+    typeof window !== 'undefined' && /^\/(invite|tao-thiep)(\/|$)/i.test(window.location.pathname);
+
+  if (isGenerator) {
+    return <InviteGenerator />;
+  }
+
+  return <WeddingInvitation />;
 }
