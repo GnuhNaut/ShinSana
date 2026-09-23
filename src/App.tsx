@@ -92,7 +92,7 @@ function Opening({
           data-heart-allowed
         >
           <span className="opening__interior" aria-hidden="true">
-            <img src={heroImage} alt="" />
+            <img className='hero-scene__photo' src={heroImage} alt="" />
             <span className="opening__interior-shade" />
             <span className="opening__interior-mark">T &amp; S</span>
           </span>

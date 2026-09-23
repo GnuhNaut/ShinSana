@@ -59,4 +59,4 @@ export const wedding = {
 export const heroImage = '/images/hero-ceremony.webp';
 export const introImage = '/images/bride-detail.webp';
 export const cinematicImage = '/images/bienhinh.webp';
-export const finaleImage = '/images/test.png';
+export const finaleImage = '/images/finale-corridor.png';
