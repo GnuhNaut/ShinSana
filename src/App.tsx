@@ -9,6 +9,8 @@ import { Gift } from './components/Gift';
 import { RomanticHearts } from './components/RomanticHearts';
 import { useInvitationEntryScroll } from './hooks/useInvitationEntryScroll';
 import { InviteGenerator } from './components/InviteGenerator';
+import { Countdown } from './components/Countdown';
+import { GoldenStardust } from './components/GoldenStardust';
 
 function Music({
   audio,
@@ -147,7 +149,14 @@ function Opening({
               <span className="opening__guest-stamp-tag">KHÁCH QUÝ</span>
             </span>
           )}
-          <span className="opening__seal" aria-hidden="true">
+          <span className={`opening__seal ${opening ? 'is-bursting' : ''}`} aria-hidden="true">
+            {opening && (
+              <>
+                <span className="opening__seal-burst" />
+                <span className="opening__seal-burst opening__seal-burst--second" />
+                <span className="opening__seal-aura" />
+              </>
+            )}
             <span className="opening__seal-ring" />
             <span className="opening__seal-face"><b>囍</b></span>
           </span>
@@ -325,11 +334,13 @@ function WeddingInvitation() {
     <main className={opened ? 'invitation-open' : ''}>
       <Music audio={audioRef} playing={musicPlaying} onPlayingChange={setMusicPlaying} revealed={opened} />
       <RomanticHearts celebrating={celebrating} />
+      <GoldenStardust active={opened} />
       {showOpening && <Opening guest={guest} avatar={avatar} opening={opening} closing={closingOpening} onOpen={openInvitation} />}
 
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />
         <StoryIntro />
+        <Countdown />
         <Venues side={side} />
         <CinematicBreak />
         <Gallery />
