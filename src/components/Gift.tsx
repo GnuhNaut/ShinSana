@@ -77,23 +77,68 @@ export function Gift({ side }: { side: WeddingSide }) {
   };
 
   const downloadQrImage = async (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (!selected.qrImage) return;
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!selected.qrImage || downloadingQr) return;
     setDownloadingQr(true);
+
+    const cleanName = selected.accountHolder.trim().replace(/\s+/g, '_') || 'Tuan_Hung';
+    const fileName = `QR-MungCuoi-${cleanName}.png`;
+
     try {
       const res = await fetch(selected.qrImage);
+      if (!res.ok) throw new Error('Fetch failed');
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const cleanName = selected.accountHolder.trim().replace(/\s+/g, '_') || 'Tuan_Hung';
-      a.download = `QR-MungCuoi-${cleanName}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+
+      // Hỗ trợ Web Share API trên thiết bị di động (iOS / Android) lưu ảnh trực tiếp vào Thư viện ảnh
+      if (typeof navigator !== 'undefined' && navigator.canShare) {
+        const file = new File([blob], fileName, { type: blob.type || 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Mã QR Mừng Cưới',
+            });
+            setDownloadingQr(false);
+            return;
+          } catch (err: unknown) {
+            if ((err as Error)?.name === 'AbortError') {
+              setDownloadingQr(false);
+              return;
+            }
+          }
+        }
+      }
+
+      // Tải về cho Desktop và các trình duyệt hỗ trợ
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = blobUrl;
+      link.download = fileName;
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+
+      // Giữ blob trong 60 giây, không thu hồi ngay lập tức để tránh lỗi tải lại trang trên Safari
+      window.setTimeout(() => {
+        if (document.body.contains(link)) document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 60000);
     } catch {
-      window.open(selected.qrImage, '_blank');
+      // Phương thức dự phòng an toàn không dùng window.open để tránh chuyển hướng trang
+      const fallbackLink = document.createElement('a');
+      fallbackLink.href = selected.qrImage;
+      fallbackLink.download = fileName;
+      fallbackLink.target = '_blank';
+      fallbackLink.rel = 'noopener noreferrer';
+      document.body.appendChild(fallbackLink);
+      fallbackLink.click();
+      window.setTimeout(() => {
+        if (document.body.contains(fallbackLink)) document.body.removeChild(fallbackLink);
+      }, 1000);
     } finally {
       setDownloadingQr(false);
     }
@@ -217,6 +262,7 @@ export function Gift({ side }: { side: WeddingSide }) {
                       src={selected.qrImage}
                       alt={`Mã QR mừng cưới ${selected.label}`}
                       className="gift-modal__qr-image"
+                      title="Chạm giữ để lưu ảnh mã QR"
                     />
                   ) : (
                     <div className="qr-empty" role="img" aria-label="Mã QR đang chờ cập nhật">
@@ -238,7 +284,7 @@ export function Gift({ side }: { side: WeddingSide }) {
                 )}
 
                 <p className="gift-modal__hint">
-                  💡 Bạn có thể <strong>tải mã QR</strong> về máy để mở ứng dụng ngân hàng quét từ thư viện ảnh.
+                  💡 Bạn có thể bấm nút tải về hoặc chạm giữ vào ảnh QR để lưu trực tiếp vào máy.
                 </p>
               </div>
             </div>
