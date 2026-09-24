@@ -207,8 +207,23 @@ export function Response({ guest, side }: { guest: string; side: WeddingSide }) 
       <div className="response-scene__ornament" aria-hidden="true"><span>囍</span></div>
       <div className="response-scene__heading">
         <p className="scene-kicker">HỒI ÂM</p>
-        <h2 id="response-title">Dành một lời<br />cho ngày vui.</h2>
-        <p>Chúng mình rất mong được đón bạn, và luôn trân trọng từng lời chúc gửi về.</p>
+        <h2 id="response-title">
+          <span className="response-scene__title-main">Ngày vui có bạn,</span>
+          <span className="response-scene__title-accent">hạnh phúc nhân đôi.</span>
+        </h2>
+        <div className="response-scene__copy">
+          <p className="response-scene__lead">
+            Sự hiện diện của bạn sẽ làm ngày đặc biệt này thêm ấm áp và đáng nhớ.
+          </p>
+          <div className="response-scene__divider" aria-hidden="true">
+            <span className="response-scene__divider-line" />
+            <span className="response-scene__divider-star">✦</span>
+            <span className="response-scene__divider-line" />
+          </div>
+          <p className="response-scene__note">
+            Mong nhận được lời hồi âm từ bạn, để chúng mình và gia đình có thể chuẩn bị đón tiếp bạn thật chu đáo và trọn vẹn trong ngày vui.
+          </p>
+        </div>
       </div>
       <div className={`response-paper response-paper--${mode}`}>
         <div className="response-paper__edge" aria-hidden="true" />

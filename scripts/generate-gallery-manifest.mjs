@@ -4,7 +4,7 @@ import { extname, basename, resolve } from 'node:path';
 const root = resolve(globalThis.process.cwd());
 const galleryDirectory = resolve(root, 'public/images/gallery');
 const outputFile = resolve(root, 'src/config/gallery-manifest.ts');
-const supportedExtensions = new Set(['.webp']);
+const supportedExtensions = new Set(['.webp', '.jpg', '.jpeg', '.png', '.avif']);
 
 const files = (await readdir(galleryDirectory, { withFileTypes: true }))
   .filter((entry) => entry.isFile() && supportedExtensions.has(extname(entry.name).toLowerCase()))

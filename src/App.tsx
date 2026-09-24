@@ -195,7 +195,7 @@ function Hero({ guest }: { guest: string }) {
         <div className="hero-scene__invitation-card">
           <div className="hero-scene__ornament-line">
             <span className="hero-scene__ornament-dash" aria-hidden="true" />
-            <span className="hero-scene__card-kicker">LỄ THÀNH HÔN · 19.10.2026</span>
+            <span className="hero-scene__card-kicker">LỄ THÀNH HÔN</span>
           </div>
           <p className="hero-scene__invitation-lead">TRÂN TRỌNG KÍNH MỜI</p>
           <div className="hero-scene__guest-pill">
@@ -231,16 +231,11 @@ function StoryIntro() {
       <div className="intro-scene__copy">
         <p className="scene-kicker">CHÚNG MÌNH SẮP VỀ CHUNG MỘT NHÀ</p>
         <h2 id="intro-title" style={{ lineHeight: 1.2 }}>Một ngày son,<br /><em>một đời chung đôi.</em></h2>
-        <p style={{textAlign: 'justify'}}>Cuối cùng, chúng mình cũng đã viết nên câu chuyện của riêng mình. <br/>
-
-Bằng tất cả sự trân trọng và yêu thương,
-chúng mình tự tay chuẩn bị tấm thiệp nhỏ này,
-gửi lời mời đến những người đặc biệt nhất trong cuộc đời. <br/>
-
-Mong bạn sẽ đến,
-cùng chúng mình lưu giữ khoảnh khắc thật đẹp,
-và chứng kiến một chương mới
-trong câu chuyện tình yêu của chúng mình.</p>
+        <p style={{textAlign: 'justify'}}>
+          Cuối cùng, chúng mình cũng đã viết nên câu chuyện của riêng mình. <br/>
+          Bằng tất cả sự trân trọng và yêu thương, chúng mình tự tay chuẩn bị tấm thiệp nhỏ này để gửi lời mời đến những người đặc biệt nhất trong cuộc đời. <br/>
+          Mong bạn sẽ đến, cùng chúng mình lưu giữ khoảnh khắc thiêng liêng ấy và chứng kiến một chương mới trong câu chuyện tình yêu của chúng mình nhé!
+        </p>
         <div className="intro-scene__signature"><span>Tuấn Hùng</span><i>&</i><span>Sao Mai</span></div>
       </div>
       <figure className="intro-scene__portrait">
@@ -260,7 +255,10 @@ function CinematicBreak() {
       <div className="cinematic-scene__wash" aria-hidden="true" />
       <blockquote>
         <span aria-hidden="true">“</span>
-        <p>{wedding.copy.cinematic}</p>
+        <p>
+          <span>Hai người · một lời hẹn ·</span>
+          <span>một đời bên nhau.</span>
+        </p>
         <cite>HÙNG & MAI · 2026</cite>
       </blockquote>
       <div className="cinematic-scene__ribbon" aria-hidden="true" />

@@ -17,13 +17,13 @@ export const wedding = {
     groom: {
       father: 'Trương Văn Kiên',
       mother: 'Nguyễn Thị Bình',
-      child: 'Trương Tuấn Hùng',
+      child: 'TUẤN HÙNG',
       rank: 'Trưởng nam',
     },
     bride: {
       father: 'Tô Hiến Lam',
       mother: 'Nguyễn Thị Thu Nguyệt',
-      child: 'Nguyễn Sao Mai',
+      child: 'SAO MAI',
       rank: 'Thứ nữ',
     },
   },

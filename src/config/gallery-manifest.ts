@@ -3,7 +3,7 @@ export const gallery = [
   { id: '1', src: '/images/gallery/1.webp', alt: 'Khoảnh khắc cưới 1' },
   { id: '2', src: '/images/gallery/2.webp', alt: 'Khoảnh khắc cưới 2' },
   { id: '3', src: '/images/gallery/3.webp', alt: 'Khoảnh khắc cưới 3' },
-  { id: '4', src: '/images/gallery/4.webp', alt: 'Khoảnh khắc cưới 4' },
+  { id: 'anh1', src: '/images/gallery/anh1.jpg', alt: 'Khoảnh khắc cưới 4' },
   { id: 'quen1348', src: '/images/gallery/QUEN1348.webp', alt: 'Khoảnh khắc cưới 5' },
   { id: 'quen1354', src: '/images/gallery/QUEN1354.webp', alt: 'Khoảnh khắc cưới 6' },
   { id: 'quen1362', src: '/images/gallery/QUEN1362.webp', alt: 'Khoảnh khắc cưới 7' },

@@ -202,18 +202,18 @@ export function Venues({ side }: { side: WeddingSide }) {
 
           <div className="venue-ceremony-notice">
             <p className="ceremony-notice-lead">TRÂN TRỌNG BÁO TIN</p>
-            <p className="ceremony-notice-sub">LỄ THÀNH HÔN CỦA CON CHÚNG TÔI</p>
+            <p className="ceremony-notice-sub">LỄ THÀNH HÔN CỦA HAI CON CHÚNG TÔI</p>
           </div>
 
           <div className="venue-ceremony-couple">
             <div className="ceremony-couple-col">
+              {/* <span className="ceremony-couple-rank">{wedding.parents.groom.rank.toUpperCase()}</span> */}
               <span className="ceremony-couple-name">{wedding.parents.groom.child}</span>
-              <span className="ceremony-couple-rank">{wedding.parents.groom.rank.toUpperCase()}</span>
             </div>
             <span className="ceremony-couple-amp" aria-hidden="true">&amp;</span>
             <div className="ceremony-couple-col">
+              {/* <span className="ceremony-couple-rank">{wedding.parents.bride.rank.toUpperCase()}</span> */}
               <span className="ceremony-couple-name">{wedding.parents.bride.child}</span>
-              <span className="ceremony-couple-rank">{wedding.parents.bride.rank.toUpperCase()}</span>
             </div>
           </div>
 
@@ -221,13 +221,14 @@ export function Venues({ side }: { side: WeddingSide }) {
             <p className="ceremony-timebox-label">LỄ THÀNH HÔN ĐƯỢC CỬ HÀNH TẠI TƯ GIA NHÀ TRAI</p>
             {/* <div className="ceremony-timebox-clock">VÀO LÚC 09:00</div> */}
             <div className="ceremony-timebox-date">
-              <span className="timebox-dow">THỨ 2</span>
+              <span className="timebox-dow">THỨ HAI</span>
               <span className="timebox-bar">|</span>
               <strong className="timebox-day">19</strong>
               <span className="timebox-bar">|</span>
               <span className="timebox-month">THÁNG 10</span>
+              <span className="timebox-bar">|</span>
+              <span className="ceremony-timebox-year">2026</span>
             </div>
-            <span className="ceremony-timebox-year">2026</span>
             <p className="ceremony-timebox-lunar">(TỨC NGÀY 10 THÁNG 09 NĂM BÍNH NGỌ)</p>
           </div>
         </div>
@@ -245,18 +246,24 @@ export function Venues({ side }: { side: WeddingSide }) {
         <div className="venue-scene__intro">
           <h2 id="venues-title">
             <em>Kính mời</em>
-            <span>dự tiệc cưới</span>
-            <span>chung vui.</span>
+            <span className="venue-title-row">đến chung vui</span>
+            <span className="venue-title-row">ngày thành đôi.</span>
           </h2>
           <p className="venue-scene__subtext">
             Trân trọng kính mời bạn cùng người thương đến dự bữa cơm thân mật, chung vui và nâng ly chúc phúc cùng gia đình chúng tôi.
           </p>
+          <div className="venue-scene__divider" aria-hidden="true">
+            <span className="venue-scene__divider-line" />
+            <span className="venue-scene__divider-star">✦</span>
+            <span className="venue-scene__divider-line" />
+          </div>
           <p className="venue-scene__subtext-honor">
-            Sự hiện diện của bạn là niềm vinh hạnh to lớn cho hai bên gia đình!
+            Sự hiện diện của bạn sẽ khiến ngày vui của chúng tôi thêm trọn vẹn và đáng nhớ.
           </p>
           <div className="venue-scene__touch-guide">
-            {/* <span className="venue-scene__touch-badge">THIỆP MỜI</span> */}
-            <span>Chạm vào thiệp bên cạnh để xem thời gian, địa điểm và bản đồ chỉ đường.</span>
+            <span className="venue-scene__touch-guide-star" aria-hidden="true">✦</span>
+            <span>Chạm vào thiệp để xem thời gian, địa điểm & bản đồ chỉ đường</span>
+            <span className="venue-scene__touch-guide-star" aria-hidden="true">✦</span>
           </div>
         </div>
         <div className="venue-stage" style={{ '--venue-count': keys.length } as CSSProperties}>

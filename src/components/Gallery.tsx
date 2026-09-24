@@ -29,7 +29,7 @@ const shuffle = <T,>(items: readonly T[]) => {
 
 export function Gallery() {
   const [gallery] = useState(() => shuffle(gallerySource));
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(true);
   const [index, setIndex] = useState(0);
   const [viewer, setViewer] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -44,6 +44,26 @@ export function Gallery() {
   const move = useCallback((direction: number) => {
     setIndex((current) => wrap(current + direction));
   }, [wrap]);
+
+  // Tự động chuyển slide sau mỗi 2.8 giây, tạm dừng khi đang mở ảnh phóng to hoặc đang vuốt kéo
+  useEffect(() => {
+    if (viewer) return;
+    const interval = window.setInterval(() => {
+      if (!drag.current) {
+        move(1);
+      }
+    }, 2800);
+    return () => window.clearInterval(interval);
+  }, [viewer, move]);
+
+  // Tạm dừng khi chuyển tab trình duyệt
+  useEffect(() => {
+    const handleVisibility = () => {
+      // document.hidden handled naturally by browser timers
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
   const closeViewer = useCallback(() => setViewer(false), []);
   const viewerRef = useModalDialog<HTMLDivElement>(viewer, closeViewer, activeButton);
 
