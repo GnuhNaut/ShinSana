@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { wedding, type VenueKey, type WeddingSide } from '../config/wedding';
 import { usePointerSurface } from '../hooks/usePointerSurface';
-import { ArrowIcon } from './Icons';
+import { ArrowIcon, CloseIcon } from './Icons';
 
 function RedEnvelope({
   selected,
@@ -40,11 +41,15 @@ function RedEnvelope({
 export function Gift({ side }: { side: WeddingSide }) {
   const [open, setOpen] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [zoomQr, setZoomQr] = useState(false);
+  const [downloadingQr, setDownloadingQr] = useState(false);
   const selected = wedding.gifts.groom;
   const isPlaceholder = (selected.accountNumber as string) === 'Đang cập nhật';
 
-
-  useEffect(() => setCopyState('idle'), [open]);
+  useEffect(() => {
+    setCopyState('idle');
+    if (!open) setZoomQr(false);
+  }, [open]);
 
   const copyAccount = async () => {
     if (isPlaceholder) return;
@@ -57,12 +62,35 @@ export function Gift({ side }: { side: WeddingSide }) {
     }
   };
 
+  const downloadQrImage = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!selected.qrImage) return;
+    setDownloadingQr(true);
+    try {
+      const res = await fetch(selected.qrImage);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const cleanName = selected.accountHolder.trim().replace(/\s+/g, '_') || 'Tuan_Hung';
+      a.download = `QR-MungCuoi-${cleanName}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(selected.qrImage, '_blank');
+    } finally {
+      setDownloadingQr(false);
+    }
+  };
+
   return (
     <section className={`scene gift-scene ${open ? 'gift-scene--open' : ''}`} id="gift" aria-labelledby="gift-title">
       <div className="gift-scene__heading">
-        <p className="scene-kicker">MỪNG CƯỚI</p>
-        <h2 id="gift-title">Gửi một niềm vui nhỏ.</h2>
-        <p>Sự hiện diện của bạn là món quà quý nhất. Nếu muốn gửi lời mừng, hãy chạm vào phong bao dưới đây.</p>
+        <p className="scene-kicker">MỪNG HỶ</p>
+        <h2 id="gift-title">Gửi trọn yêu thương.</h2>
+        <p>Sự hiện diện của bạn là món quà quý giá nhất. Nếu muốn gửi lời chúc và mừng hỷ từ xa, xin mời chạm vào phong bao dưới đây.</p>
       </div>
 
       <div className="gift-stage">
@@ -114,7 +142,21 @@ export function Gift({ side }: { side: WeddingSide }) {
                   {isPlaceholder ? 'Thông tin chuyển khoản đang chờ cập nhật.' : copyState === 'copied' ? 'Số tài khoản đã được sao chép.' : copyState === 'failed' ? 'Vui lòng sao chép thủ công.' : ''}
                 </p>
               </div>
-              <div className="gift-insert__qr" data-no-hearts>
+              <div
+                className="gift-insert__qr"
+                data-no-hearts
+                onClick={() => selected.qrImage && setZoomQr(true)}
+                title={selected.qrImage ? 'Chạm để phóng to mã QR' : undefined}
+                style={{ cursor: selected.qrImage ? 'pointer' : 'default' }}
+                role={selected.qrImage ? 'button' : undefined}
+                tabIndex={selected.qrImage ? 0 : undefined}
+                onKeyDown={(e) => {
+                  if (selected.qrImage && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    setZoomQr(true);
+                  }
+                }}
+              >
                 {selected.qrImage ? (
                   <img src={selected.qrImage} alt={`Mã QR chuyển khoản ${selected.label}`} loading="lazy" />
                 ) : (
@@ -123,7 +165,7 @@ export function Gift({ side }: { side: WeddingSide }) {
                     <small>ĐANG CẬP NHẬT</small>
                   </div>
                 )}
-                <span>QUÉT MÃ MỪNG CƯỚI</span>
+                <span>CHẠM PHÓNG TO / TẢI VỀ 🔍</span>
               </div>
             </div>
             <footer><span>Tuấn Hùng</span><i>囍</i><span>Sao Mai</span></footer>
@@ -132,6 +174,59 @@ export function Gift({ side }: { side: WeddingSide }) {
 
         {!open && <p className="gift-stage__prompt">Chạm vào phong bao để mở</p>}
       </div>
+
+      {zoomQr && selected.qrImage && createPortal(
+        <div
+          className="qr-zoom-backdrop"
+          onClick={() => setZoomQr(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Phóng to mã QR mừng cưới"
+        >
+          <div className="qr-zoom-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="seal-button qr-zoom-close"
+              type="button"
+              onClick={() => setZoomQr(false)}
+              aria-label="Đóng"
+            >
+              <CloseIcon />
+            </button>
+            <div className="qr-zoom-header">
+              <span className="qr-zoom-seal">囍</span>
+              <h3>MÃ QR MỪNG CƯỚI</h3>
+              <p>{selected.accountHolder} · {selected.bankName}</p>
+            </div>
+            <div className="qr-zoom-img-wrap">
+              <img src={selected.qrImage} alt={`Mã QR ${selected.label}`} />
+            </div>
+            <div className="qr-zoom-account">
+              <span>Số tài khoản: <strong>{selected.accountNumber}</strong></span>
+              <div className="qr-zoom-actions">
+                <button
+                  type="button"
+                  className="ivory-button qr-zoom-btn"
+                  onClick={copyAccount}
+                >
+                  {copyState === 'copied' ? 'Đã sao chép STK ✓' : 'Sao chép STK'}
+                </button>
+                <button
+                  type="button"
+                  className="lacquer-button qr-zoom-btn"
+                  onClick={downloadQrImage}
+                  disabled={downloadingQr}
+                >
+                  {downloadingQr ? 'Đang tải về...' : 'Tải mã QR 📥'}
+                </button>
+              </div>
+            </div>
+            <p className="qr-zoom-hint">
+              💡 Bạn có thể <strong>tải mã QR</strong> về máy để mở ứng dụng ngân hàng và quét trực tiếp từ thư viện ảnh.
+            </p>
+          </div>
+        </div>,
+        document.body
+      )}
     </section>
   );
 }

@@ -112,12 +112,25 @@ export function VenueMapDialog({
             <h2 id="venue-dialog-title">{venue.name}</h2>
             <div className="venue-dialog__schedule">
               <span>Ngày</span><strong>{venue.date}</strong>
-              <span>Giờ</span><strong>{venue.time}</strong>
+              {venue.time ? <><span>Giờ</span><strong>{venue.time}</strong></> : null}
             </div>
             <p id="venue-dialog-address" className="venue-dialog__address">{venue.address}</p>
             <div className="venue-dialog__actions">
               <a className="lacquer-button" href={venue.mapUrl} target="_blank" rel="noreferrer">
                 Chỉ đường <ArrowIcon direction="external" />
+              </a>
+              <a
+                className="ivory-button venue-dialog__cal-btn"
+                href={
+                  venueKey === 'groom'
+                    ? `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Lễ Thành Hôn Tuấn Hùng & Sao Mai (Tiệc Nhà Trai)')}&dates=20261019T030000Z/20261019T060000Z&details=${encodeURIComponent('Trân trọng kính mời bạn đến chung vui lễ thành hôn cùng Tuấn Hùng & Sao Mai.')}&location=${encodeURIComponent(venue.address)}`
+                    : `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Tiệc Báo Hỷ Tuấn Hùng & Sao Mai (Tiệc Nhà Gái)')}&dates=20261018T033000Z/20261018T063000Z&details=${encodeURIComponent('Trân trọng kính mời bạn đến chung vui tiệc báo hỷ cùng Tuấn Hùng & Sao Mai.')}&location=${encodeURIComponent(venue.address)}`
+                }
+                target="_blank"
+                rel="noreferrer"
+                title="Thêm sự kiện vào Google Calendar trên điện thoại / máy tính"
+              >
+                Lưu vào lịch 📅
               </a>
               <button className="ivory-button" type="button" onClick={copyAddress}>
                 {copyState === 'copied' ? 'Đã sao chép' : copyState === 'failed' ? 'Không thể sao chép' : 'Sao chép địa chỉ'}
