@@ -23,6 +23,9 @@ export function InviteGenerator() {
   const [origin, setOrigin] = useState('');
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState<SavedInvite[]>([]);
+  const [downloadingQr, setDownloadingQr] = useState(false);
+  const [qrCopied, setQrCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -216,8 +219,79 @@ export function InviteGenerator() {
   };
 
   const qrUrl = currentLink
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=${encodeURIComponent(currentLink)}`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(currentLink)}`
     : '';
+
+  // 1. Tải ảnh mã QR về máy (PNG)
+  const handleDownloadQr = async () => {
+    if (!qrUrl) return;
+    setDownloadingQr(true);
+    try {
+      const res = await fetch(qrUrl);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const cleanGuest = guest.trim().replace(/[^a-zA-Z0-9\u00C0-\u024F\u1EA0-\u1EF9]/g, '_') || 'khach';
+      a.download = `QR-ThiepCuoi-${cleanGuest}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(qrUrl, '_blank');
+    } finally {
+      setDownloadingQr(false);
+    }
+  };
+
+  // 2. Sao chép trực tiếp ảnh mã QR vào Clipboard để dán Ctrl+V vào Zalo / Messenger
+  const handleCopyQrImage = async () => {
+    if (!qrUrl) return;
+    try {
+      const res = await fetch(qrUrl);
+      const blob = await res.blob();
+      const pngBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' });
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'image/png': pngBlob,
+        }),
+      ]);
+      setQrCopied(true);
+      setTimeout(() => setQrCopied(false), 2400);
+    } catch {
+      alert('Không thể sao chép ảnh trực tiếp trên trình duyệt này. Bạn hãy bấm "Tải ảnh QR" để lưu ảnh nhé!');
+    }
+  };
+
+  // 3. Chia sẻ nhanh qua Zalo / Facebook / Tin nhắn hoặc Sao chép lời mời kèm link
+  const handleShare = async () => {
+    const inviteText = guest.trim()
+      ? `💌 Trân trọng kính mời ${guest.trim()} đến chung vui lễ thành hôn cùng Tuấn Hùng & Sao Mai!`
+      : '💌 Trân trọng kính mời bạn đến chung vui lễ thành hôn cùng Tuấn Hùng & Sao Mai!';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Thiệp cưới Tuấn Hùng & Sao Mai',
+          text: inviteText,
+          url: currentLink,
+        });
+        return;
+      } catch {
+        // User closed native dialog
+      }
+    }
+
+    const fullMessage = `${inviteText}\n👉 Mở thiệp tại đây: ${currentLink}`;
+    try {
+      await navigator.clipboard.writeText(fullMessage);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2400);
+    } catch {
+      handleCopy(currentLink);
+    }
+  };
 
   return (
     <div className="invite-generator-page">
@@ -453,7 +527,41 @@ export function InviteGenerator() {
                 <div className="qr-placeholder">Đang tạo mã QR...</div>
               )}
             </div>
-            <p className="qr-hint">Khách có thể quét mã QR này trực tiếp bằng Zalo hoặc Camera điện thoại.</p>
+
+            {/* QR Actions */}
+            <div className="qr-actions">
+              <button
+                type="button"
+                className="qr-btn qr-btn--download"
+                onClick={handleDownloadQr}
+                disabled={downloadingQr}
+                title="Tải ảnh mã QR về máy để gửi hoặc in ấn"
+              >
+                <span>{downloadingQr ? '⏳ Đang tải...' : '📥 Tải ảnh QR'}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`qr-btn qr-btn--copy ${qrCopied ? 'is-success' : ''}`}
+                onClick={handleCopyQrImage}
+                title="Sao chép ảnh mã QR vào bộ nhớ tạm (dán thẳng vào Zalo / Messenger bằng Ctrl+V)"
+              >
+                <span>{qrCopied ? '✓ Đã copy ảnh QR!' : '📋 Copy ảnh QR'}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`qr-btn qr-btn--share ${shareCopied ? 'is-success' : ''}`}
+                onClick={handleShare}
+                title="Chia sẻ link qua Zalo / Facebook hoặc sao chép lời mời kèm link"
+              >
+                <span>{shareCopied ? '✓ Đã copy lời mời!' : '🚀 Chia sẻ link'}</span>
+              </button>
+            </div>
+
+            <p className="qr-hint">
+              💡 Bấm <strong>"Copy ảnh QR"</strong> để dán trực tiếp ảnh vào Zalo/Messenger (Ctrl+V), hoặc bấm <strong>"Tải ảnh QR"</strong> để lưu file về máy.
+            </p>
           </div>
         </section>
       </main>
