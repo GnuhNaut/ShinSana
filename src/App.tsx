@@ -121,9 +121,14 @@ function Opening({
               <span className="opening__name" data-text="Tuấn Hùng">Tuấn <br /> Hùng</span>
               <span className="opening__name" data-text="Sao Mai">Sao <br /> Mai</span>
             </strong>
-            <span className={`opening__invitation-badge ${guest ? 'has-guest' : ''}`}>
-              <span className="opening__guest-label">{guest ? 'Trân trọng kính mời' : 'Thiệp mời thành hôn'}</span>
-              {guest && <b className="opening__guest-name">{guest}</b>}
+            <span className="opening__invitation-card">
+              <span className="opening__invitation-eyebrow">TRÂN TRỌNG KÍNH MỜI</span>
+              <span className="opening__guest-pill">
+                <b>{guest ? guest : 'Quý Khách & Người Thương'}</b>
+              </span>
+              <span className="opening__invitation-purpose">
+                Đến dự buổi tiệc chung vui cùng gia đình chúng tôi
+              </span>
             </span>
           </span>
           {avatar && (
@@ -173,7 +178,6 @@ function Opening({
 
 function Hero({ guest }: { guest: string }) {
   const pointerRef = usePointerSurface<HTMLElement>();
-  const invitee = guest ? `Thân mời ${guest}` : wedding.copy.intro;
   return (
     <section ref={pointerRef} className="scene hero-scene" aria-labelledby="hero-title">
       <div className="hero-scene__photo-layer">
@@ -188,7 +192,20 @@ function Hero({ guest }: { guest: string }) {
       <div className="hero-scene__silk hero-scene__silk--left" aria-hidden="true" />
       <div className="hero-scene__silk hero-scene__silk--right" aria-hidden="true" />
       <div className="hero-scene__content">
-        <p className="hero-scene__invitee">{invitee}</p>
+        <div className="hero-scene__invitation-card">
+          <div className="hero-scene__ornament-line">
+            <span className="hero-scene__ornament-dash" aria-hidden="true" />
+            <span className="hero-scene__card-kicker">LỄ THÀNH HÔN · 19.10.2026</span>
+          </div>
+          <p className="hero-scene__invitation-lead">TRÂN TRỌNG KÍNH MỜI</p>
+          <div className="hero-scene__guest-pill">
+            <span className="hero-scene__guest-name">{guest ? guest : 'Quý Khách & Người Thương'}</span>
+          </div>
+          <p className="hero-scene__invitation-sub">
+            Đến dự buổi tiệc chung vui cùng gia đình chúng tôi
+          </p>
+        </div>
+
         <h1 id="hero-title" tabIndex={-1}>
           <span>{wedding.couple.groom}</span>
           <em>&</em>
@@ -214,7 +231,16 @@ function StoryIntro() {
       <div className="intro-scene__copy">
         <p className="scene-kicker">CHÚNG MÌNH SẮP VỀ CHUNG MỘT NHÀ</p>
         <h2 id="intro-title" style={{ lineHeight: 1.2 }}>Một ngày son,<br /><em>một đời chung đôi.</em></h2>
-        <p>Giữa rất nhiều cuộc gặp gỡ, chúng mình đã tìm thấy nhau. Giờ đây, niềm vui sẽ trọn vẹn hơn khi có bạn ở bên.</p>
+        <p style={{textAlign: 'justify'}}>Cuối cùng, chúng mình cũng đã viết nên câu chuyện của riêng mình. <br/>
+
+Bằng tất cả sự trân trọng và yêu thương,
+chúng mình tự tay chuẩn bị tấm thiệp nhỏ này,
+gửi lời mời đến những người đặc biệt nhất trong cuộc đời. <br/>
+
+Mong bạn sẽ đến,
+cùng chúng mình lưu giữ khoảnh khắc thật đẹp,
+và chứng kiến một chương mới
+trong câu chuyện tình yêu của chúng mình.</p>
         <div className="intro-scene__signature"><span>Tuấn Hùng</span><i>&</i><span>Sao Mai</span></div>
       </div>
       <figure className="intro-scene__portrait">
@@ -340,12 +366,12 @@ function WeddingInvitation() {
       <div className="site-content" aria-hidden={!opened} inert={!opened}>
         <Hero guest={guest} />
         <StoryIntro />
-        <Countdown />
         <Venues side={side} />
         <CinematicBreak />
         <Gallery />
         <Response guest={guest} side={side} />
         <Gift side={side} />
+        <Countdown />
         <Finale />
       </div>
     </main>

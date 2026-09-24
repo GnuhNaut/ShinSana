@@ -27,9 +27,11 @@ function VenuePanel({
       <span className="venue-panel__lattice" aria-hidden="true" />
       <span className="venue-panel__index" aria-hidden="true">{venueKey === 'groom' ? '壹' : '貳'}</span>
       <span className="venue-panel__content">
-        <span className="venue-panel__side">{venue.label}</span>
-        <span className="venue-panel__seal" aria-hidden="true">囍</span>
-        <strong>{venue.name}</strong>
+        <span className="venue-panel__top">
+          <span className="venue-panel__side">{venue.label}</span>
+          <span className="venue-panel__seal" aria-hidden="true">囍</span>
+        </span>
+        <strong className="venue-panel__title">{venue.name}</strong>
         <span className="venue-panel__rule" aria-hidden="true" />
         <span className="venue-panel__date">{venue.date}</span>
         {venue.time ? <span className="venue-panel__time">{venue.time}</span> : null}
@@ -168,8 +170,15 @@ export function Venues({ side }: { side: WeddingSide }) {
       aria-labelledby="venues-title"
     >
       <div className="venue-scene__intro">
-        <p className="scene-kicker">LỄ THÀNH HÔN · 19.10.2026</p>
-        <h2 id="venues-title"><span>Hai gia đình</span><br />một ngày chung vui.</h2>
+        <p className="scene-kicker">
+          <span className="venue-scene__ornament-dash" aria-hidden="true">—</span>
+          LỄ THÀNH HÔN · 19.10.2026
+        </p>
+        <h2 id="venues-title">
+          <em>Hai gia đình</em>
+          <span>một ngày</span>
+          <span>chung vui.</span>
+        </h2>
         <p>Chạm vào thiệp để xem thời gian, địa chỉ và bản đồ chỉ đường.</p>
       </div>
       <div className="venue-stage" style={{ '--venue-count': keys.length } as CSSProperties}>
