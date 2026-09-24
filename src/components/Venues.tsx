@@ -169,22 +169,101 @@ export function Venues({ side }: { side: WeddingSide }) {
       data-testid="ceremony"
       aria-labelledby="venues-title"
     >
-      <div className="venue-scene__intro">
-        <p className="scene-kicker">
-          <span className="venue-scene__ornament-dash" aria-hidden="true">—</span>
-          LỄ THÀNH HÔN · 19.10.2026
-        </p>
-        <h2 id="venues-title">
-          <em>Hai gia đình</em>
-          <span>một ngày</span>
-          <span>chung vui.</span>
-        </h2>
-        <p>Chạm vào thiệp để xem thời gian, địa chỉ và bản đồ chỉ đường.</p>
+      {/* Khối Báo Tin Hôn Lễ Hai Bên Gia Đình (Tham khảo ảnh 2 & 3) */}
+      <div className="venue-ceremony-card">
+        <div className="venue-ceremony-card__inner">
+          <div className="venue-ceremony-header">
+            <span className="ceremony-header-line" aria-hidden="true" />
+            <span className="venue-ceremony-badge">THÔNG TIN LỄ CƯỚI</span>
+            <span className="ceremony-header-line" aria-hidden="true" />
+          </div>
+
+          <div className="venue-families-row">
+            <div className="venue-family-branch venue-family-branch--groom">
+              <span className="venue-family-tag">NHÀ TRAI</span>
+              <p className="venue-family-prefix">Ông Bà</p>
+              <strong className="venue-family-name">{wedding.parents.groom.father.toUpperCase()}</strong>
+              <strong className="venue-family-name">{wedding.parents.groom.mother.toUpperCase()}</strong>
+              <span className="venue-family-origin">Tân Hưng, Đa Phúc, Hà Nội</span>
+            </div>
+
+            <div className="venue-family-divider" aria-hidden="true">
+              <span className="family-divider-seal">囍</span>
+            </div>
+
+            <div className="venue-family-branch venue-family-branch--bride">
+              <span className="venue-family-tag">NHÀ GÁI</span>
+              <p className="venue-family-prefix">Ông Bà</p>
+              <strong className="venue-family-name">{wedding.parents.bride.father.toUpperCase()}</strong>
+              <strong className="venue-family-name">{wedding.parents.bride.mother.toUpperCase()}</strong>
+              <span className="venue-family-origin">Phú Lương, Hà Nội</span>
+            </div>
+          </div>
+
+          <div className="venue-ceremony-notice">
+            <p className="ceremony-notice-lead">TRÂN TRỌNG BÁO TIN</p>
+            <p className="ceremony-notice-sub">LỄ THÀNH HÔN CỦA CON CHÚNG TÔI</p>
+          </div>
+
+          <div className="venue-ceremony-couple">
+            <div className="ceremony-couple-col">
+              <span className="ceremony-couple-name">{wedding.parents.groom.child}</span>
+              <span className="ceremony-couple-rank">{wedding.parents.groom.rank.toUpperCase()}</span>
+            </div>
+            <span className="ceremony-couple-amp" aria-hidden="true">&amp;</span>
+            <div className="ceremony-couple-col">
+              <span className="ceremony-couple-name">{wedding.parents.bride.child}</span>
+              <span className="ceremony-couple-rank">{wedding.parents.bride.rank.toUpperCase()}</span>
+            </div>
+          </div>
+
+          <div className="venue-ceremony-timebox">
+            <p className="ceremony-timebox-label">LỄ THÀNH HÔN ĐƯỢC CỬ HÀNH TẠI TƯ GIA NHÀ TRAI</p>
+            {/* <div className="ceremony-timebox-clock">VÀO LÚC 09:00</div> */}
+            <div className="ceremony-timebox-date">
+              <span className="timebox-dow">THỨ 2</span>
+              <span className="timebox-bar">|</span>
+              <strong className="timebox-day">19</strong>
+              <span className="timebox-bar">|</span>
+              <span className="timebox-month">THÁNG 10</span>
+            </div>
+            <span className="ceremony-timebox-year">2026</span>
+            <p className="ceremony-timebox-lunar">(TỨC NGÀY 10 THÁNG 09 NĂM BÍNH NGỌ)</p>
+          </div>
+        </div>
       </div>
-      <div className="venue-stage" style={{ '--venue-count': keys.length } as CSSProperties}>
-        {keys.map((key) => (
-          <VenuePanel key={key} venueKey={key} venue={wedding.locations[key]} onOpen={showVenue} />
-        ))}
+
+      {/* Cầu nối chuyển tiếp giữa Lễ Thành Hôn và Tiệc Cưới */}
+      <div className="venue-scene-divider" aria-hidden="true">
+        <span className="venue-divider-line" />
+        <span className="venue-divider-mark">❖ THÔNG TIN TIỆC CƯỚI ❖</span>
+        <span className="venue-divider-line" />
+      </div>
+
+      {/* Khối Thông Tin Tiệc Cưới & Địa Điểm (Ảnh 1) */}
+      <div className="venue-reception-block">
+        <div className="venue-scene__intro">
+          <h2 id="venues-title">
+            <em>Kính mời</em>
+            <span>dự tiệc cưới</span>
+            <span>chung vui.</span>
+          </h2>
+          <p className="venue-scene__subtext">
+            Trân trọng kính mời bạn cùng người thương đến dự bữa cơm thân mật, chung vui và nâng ly chúc phúc cùng gia đình chúng tôi.
+          </p>
+          <p className="venue-scene__subtext-honor">
+            Sự hiện diện của bạn là niềm vinh hạnh to lớn cho hai bên gia đình!
+          </p>
+          <div className="venue-scene__touch-guide">
+            {/* <span className="venue-scene__touch-badge">THIỆP MỜI</span> */}
+            <span>Chạm vào thiệp bên cạnh để xem thời gian, địa điểm và bản đồ chỉ đường.</span>
+          </div>
+        </div>
+        <div className="venue-stage" style={{ '--venue-count': keys.length } as CSSProperties}>
+          {keys.map((key) => (
+            <VenuePanel key={key} venueKey={key} venue={wedding.locations[key]} onOpen={showVenue} />
+          ))}
+        </div>
       </div>
       <div className="venue-scene__folio" aria-hidden="true">
         <span>TH</span><i /> <span>SM</span>

@@ -90,7 +90,10 @@ export function Gift({ side }: { side: WeddingSide }) {
       <div className="gift-scene__heading">
         <p className="scene-kicker">MỪNG HỶ</p>
         <h2 id="gift-title">Gửi trọn yêu thương.</h2>
-        <p>Sự hiện diện của bạn là món quà quý giá nhất. Nếu muốn gửi lời chúc và mừng hỷ từ xa, xin mời chạm vào phong bao dưới đây.</p>
+        <p>Sự hiện diện và lời chúc của bạn
+đã là món quà ý nghĩa nhất dành cho chúng mình.
+Nếu bạn muốn gửi thêm lời chúc mừng,
+chúng mình xin trân trọng đón nhận.</p>
       </div>
 
       <div className="gift-stage">

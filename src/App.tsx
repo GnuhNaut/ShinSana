@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
-import { cinematicImage, finaleImage, heroImage, introImage, wedding } from './config/wedding';
+import { cinematicImage, finaleImage, finaleMobileImage, heroImage, introImage, wedding } from './config/wedding';
 import { guestFromSearch } from './utils/guest';
 import { usePointerSurface } from './hooks/usePointerSurface';
 import { Gallery } from './components/Gallery';
@@ -271,13 +271,37 @@ function CinematicBreak() {
 function Finale() {
   return (
     <section className="scene finale-scene" aria-labelledby="finale-title">
-      <img src={finaleImage} loading="lazy" alt="Cặp đôi bước cùng nhau trong hành lang lễ cưới đỏ" />
-      <div className="finale-scene__shade" aria-hidden="true" />
-      <div className="finale-scene__copy">
+      <div className="finale-scene__photo-layer" aria-hidden="true">
+        <picture>
+          <source media="(max-width: 900px)" srcSet={finaleMobileImage} />
+          <img src={finaleImage} loading="lazy" alt="Tuấn Hùng & Sao Mai trong ngày cưới" className="finale-scene__photo" />
+        </picture>
+      </div>
+      <div className="finale-scene__atmosphere" aria-hidden="true" />
+      <div className="finale-scene__content">
         <span className="finale-scene__seal" aria-hidden="true">囍</span>
-        <p>TRÂN TRỌNG CẢM ƠN</p>
-        <h2 id="finale-title">{wedding.copy.finale}</h2>
-        <strong>{wedding.date}</strong>
+        <p id="finale-title" className="finale-scene__kicker">TRÂN TRỌNG CẢM ƠN</p>
+        <div className="finale-scene__letter">
+          <p>
+            Cảm ơn bạn đã đến và cùng chúng mình chia sẻ khoảnh khắc đặc biệt này.<br />
+            Mong rằng niềm hạnh phúc hôm nay sẽ lan tỏa đến bạn, để những ngày tháng phía trước luôn có thật nhiều bình an, ấm áp và niềm vui.
+          </p>
+          <p>
+            Chúc bạn luôn bình an, vui vẻ, gặp được những điều mình mong cầu và luôn có người đồng hành trên hành trình phía trước.
+          </p>
+          <p className="finale-scene__promise">
+            Hẹn gặp bạn trong ngày chúng mình viết tiếp câu chuyện tình yêu này.
+          </p>
+          <div className="finale-scene__signoff">
+            <span className="finale-scene__withlove">With love,</span>
+            <span className="finale-scene__couple">SM - TH</span>
+          </div>
+        </div>
+        <div className="finale-scene__date">
+          <span className="finale-scene__date-line" aria-hidden="true" />
+          <strong>{wedding.date}</strong>
+          <span className="finale-scene__date-line" aria-hidden="true" />
+        </div>
       </div>
     </section>
   );

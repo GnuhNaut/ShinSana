@@ -13,6 +13,20 @@ export type Venue = {
 
 export const wedding = {
   couple: { groom: 'Tuấn Hùng', bride: 'Sao Mai' },
+  parents: {
+    groom: {
+      father: 'Trương Văn Kiên',
+      mother: 'Nguyễn Thị Bình',
+      child: 'Trương Tuấn Hùng',
+      rank: 'Trưởng nam',
+    },
+    bride: {
+      father: 'Tô Hiến Lam',
+      mother: 'Nguyễn Thị Thu Nguyệt',
+      child: 'Nguyễn Sao Mai',
+      rank: 'Thứ nữ',
+    },
+  },
   date: '19 · 10 · 2026',
   lunarDate: '10 / 09 âm lịch',
   seo: {
@@ -60,3 +74,4 @@ export const heroImage = '/images/hero-ceremony.webp';
 export const introImage = '/images/bride-detail.webp';
 export const cinematicImage = '/images/bienhinh.webp';
 export const finaleImage = '/images/finale-corridor.png';
+export const finaleMobileImage = '/images/finale-corridor-mobile.webp';
