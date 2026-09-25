@@ -5418,7 +5418,7 @@ textarea:focus-visible,
     width: 22px;
     height: 1px;
     background: currentColor;
-    display: inline-block;
+    display: none;
   }
 
   .hero-scene__card-kicker {
