@@ -392,7 +392,7 @@ function WeddingInvitation() {
         <CinematicBreak />
         <Gallery />
         <Response guest={guest} side={side} />
-        <Gift side={side} />
+        {(side === 'groom' || side === 'both') && <Gift side={side} />}
         <Countdown />
         <Finale />
       </div>

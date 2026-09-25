@@ -149,9 +149,10 @@ export function VenueMapDialog({
   );
 }
 
-export function Venues({ side }: { side: WeddingSide }) {
-  const keys: VenueKey[] = side === 'both' ? ['groom', 'bride'] : [side];
-  const [selected, setSelected] = useState<VenueKey>('groom');
+export function Venues({ side }: { side?: WeddingSide }) {
+  // Luôn hiển thị đầy đủ cả Nhà Trai và Nhà Gái, không chia lọc nữa
+  const keys: VenueKey[] = ['groom', 'bride'];
+  const [selected, setSelected] = useState<VenueKey>(side === 'bride' ? 'bride' : 'groom');
   const [open, setOpen] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
 

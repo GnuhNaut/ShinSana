@@ -34,6 +34,11 @@ function RedEnvelope({
 }
 
 export function Gift({ side }: { side: WeddingSide }) {
+  // Chỉ hiển thị phần mừng cưới cho Nhà Trai ('groom') hoặc cả hai bên ('both')
+  if (side !== 'groom' && side !== 'both') {
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [downloadingQr, setDownloadingQr] = useState(false);
