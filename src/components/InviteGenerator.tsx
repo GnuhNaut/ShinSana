@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { WeddingSide } from '../config/wedding';
 import { ArrowIcon, CheckIcon } from './Icons';
 import { IMGBB_API_KEY } from '../config.js';
+import { extractAvatarId, resolveAvatarUrl } from '../utils/guest';
 import '../styles/generator.css';
 
 type SavedInvite = {
@@ -122,7 +123,7 @@ export function InviteGenerator() {
         const fastUrl = data.data.medium?.url || data.data.display_url || data.data.thumb?.url || data.data.url;
         setAvatar(fastUrl);
         setPreviewAvatar(fastUrl);
-        setUploadStatus('✓ Đã nén nhẹ & lưu vĩnh viễn (tải siêu tốc)!');
+        setUploadStatus('✓ Đã nén & tối ưu link chia sẻ Zalo siêu gọn (không bị chặn)!');
         setTimeout(() => setUploadStatus(null), 3500);
       } else {
         setUploadStatus(`⚠️ ${data.error?.message || 'Không thể tải ảnh lên ImgBB'}`);
@@ -161,7 +162,10 @@ export function InviteGenerator() {
     const params = new URLSearchParams();
     if (guest.trim()) params.set('guest', guest.trim());
     const finalAvatar = avatar.trim() || (previewAvatar.startsWith('http') ? previewAvatar : '');
-    if (finalAvatar) params.set('avatar', finalAvatar);
+    if (finalAvatar) {
+      const avatarId = extractAvatarId(finalAvatar);
+      if (avatarId) params.set('avatar', avatarId);
+    }
 
     const queryString = params.toString();
     const base = origin || (typeof window !== 'undefined' ? window.location.origin : '');
@@ -169,7 +173,7 @@ export function InviteGenerator() {
   };
 
   const currentLink = buildLink();
-  const effectiveAvatar = avatar.trim() || previewAvatar;
+  const effectiveAvatar = resolveAvatarUrl(avatar.trim()) || previewAvatar;
 
   const handleCopy = async (linkToCopy = currentLink) => {
     try {
@@ -376,14 +380,14 @@ export function InviteGenerator() {
             </label>
             <input
               id="gen-avatar-url"
-              type="url"
+              type="text"
               className="gen-input"
               value={avatar}
               onChange={(e) => {
                 setAvatar(e.target.value);
                 setPreviewAvatar('');
               }}
-              placeholder="Dán đường link ảnh tại đây (https://...)..."
+              placeholder="Dán đường link ảnh hoặc mã ID ảnh (VD: FLRy3JH8)..."
             />
 
             <div className="gen-upload-row">

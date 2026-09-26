@@ -50,6 +50,37 @@ function removeStored(key: string) {
   }
 }
 
+/**
+ * Rút gọn link ImgBB thành ID ảnh ngắn (VD: "FLRy3JH8")
+ * Giúp URL chia sẻ Zalo siêu gọn, không bị Zalo quét cảnh báo link lồng link (phishing/open-redirect)
+ */
+export function extractAvatarId(urlOrId: string): string {
+  if (!urlOrId) return '';
+  const trimmed = urlOrId.trim();
+  const ibbMatch = trimmed.match(/i\.ibb\.co\/([a-zA-Z0-9_-]+)/i);
+  if (ibbMatch) return ibbMatch[1];
+
+  const ibbShortMatch = trimmed.match(/ibb\.co\/([a-zA-Z0-9_-]+)/i);
+  if (ibbShortMatch) return ibbShortMatch[1];
+
+  return trimmed;
+}
+
+/**
+ * Tự động gắn thêm https://i.ibb.co/.../guest-avatar.jpg nếu URL chỉ truyền ID
+ */
+export function resolveAvatarUrl(raw: string): string {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) {
+    return trimmed;
+  }
+  if (trimmed.includes('/')) {
+    return `https://i.ibb.co/${trimmed.replace(/^\/+|\/+$/g, '')}`;
+  }
+  return `https://i.ibb.co/${trimmed}/guest-avatar.jpg`;
+}
+
 export function guestFromSearch(
   search = typeof window !== 'undefined' ? window.location.search : '',
   pathname = typeof window !== 'undefined' ? window.location.pathname : ''
@@ -60,11 +91,17 @@ export function guestFromSearch(
   const hasGuestInUrl = params.has('guest');
   const rawParamGuest = (params.get('guest') || '').replace(/[<>]/g, '').trim().replace(/\s+/g, ' ');
 
-  // 2. Kiểm tra tham số Ảnh Khách Mời từ URL (hỗ trợ các key: avatar, image, photo, img, pic)
+  // 2. Kiểm tra tham số Ảnh Khách Mời từ URL (hỗ trợ các key: avatar, image, photo, img, pic, aid)
   const hasAvatarInUrl =
-    params.has('avatar') || params.has('image') || params.has('photo') || params.has('img') || params.has('pic');
+    params.has('avatar') ||
+    params.has('aid') ||
+    params.has('image') ||
+    params.has('photo') ||
+    params.has('img') ||
+    params.has('pic');
   const rawParamAvatar = (
     params.get('avatar') ||
+    params.get('aid') ||
     params.get('image') ||
     params.get('photo') ||
     params.get('img') ||
@@ -103,12 +140,12 @@ export function guestFromSearch(
   const finalSide: WeddingSide = explicitSide || savedSide || 'both';
 
   // 7. Quyết định Ảnh khách mời (Avatar):
-  // - Nếu URL có param avatar/image mới -> Dùng avatar mới và lưu lại
+  // - Nếu URL có param avatar/image mới -> Dùng avatar mới và giải mã ID thành URL đầy đủ
   // - Nếu URL đổi guest khác mà không truyền avatar -> Xóa avatar cũ
   // - Nếu URL về root hoặc cùng guest -> Dùng avatar đã lưu từ Cookie/LocalStorage
-  let finalAvatar = savedAvatar;
+  let finalAvatar = savedAvatar ? resolveAvatarUrl(savedAvatar) : '';
   if (hasAvatarInUrl) {
-    finalAvatar = rawParamAvatar.slice(0, 2048);
+    finalAvatar = resolveAvatarUrl(rawParamAvatar.slice(0, 2048));
   } else if (hasGuestInUrl && rawParamGuest !== savedGuest) {
     finalAvatar = '';
   }
